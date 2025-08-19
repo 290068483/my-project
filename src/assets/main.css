@@ -1,0 +1,107 @@
+@import "tailwindcss";
+@import "base.css";
+
+:root {
+  /* 颜色变量 */
+  --color-primary: #6366f1; /* 主色调：紫色 */
+  --color-secondary: #4f46e5; /* 辅助色：深紫色 */
+  --color-accent: #f59e0b; /* 强调色：琥珀色 */
+  --color-neutral: #f3f4f6; /* 中性色：浅灰 */
+  --color-neutral-dark: #1f2937; /* 深色中性色 */
+  --color-neutral-light: #d3ceca; /* 浅色中性色 */
+  --color-brown: #825909; /* 棕色 */
+  --color-brown-dark: #1c496e; /* 深蓝色-按钮默认颜色 */
+
+  /* 字体 */
+  --font-sans: "Inter", system-ui, sans-serif;
+
+  /* 阴影 */
+  --box-shadow-card: 0 4px 6px -1px rgba(0, 0, 0, 0.1), 0 2px 4px -1px rgba(0, 0, 0, 0.06);
+  --box-shadow-card-hover: 0 10px 15px -3px rgba(0, 0, 0, 0.1), 0 4px 6px -2px rgba(0, 0, 0, 0.05);
+
+  /* 断点 - 使用标准移动优先断点 */
+  --breakpoint-sm: 640px;
+  --breakpoint-md: 768px;
+  --breakpoint-lg: 1024px;
+  --breakpoint-xl: 1280px;
+  --breakpoint-2xl: 1536px;
+  --breakpoint-3xl: 1920px;
+
+  /* 布局变量 */
+  --header-height: 80px;
+  --sidebar-width: 16rem;
+  --content-padding: 1.5rem;
+}
+
+/* 保留原有自定义样式 */
+#app {
+  margin: 0 auto;
+  padding: 2rem;
+  font-weight: normal;
+  flex: 1;
+}
+
+a,
+.green {
+  text-decoration: none;
+  color: hsla(160, 100%, 37%, 1);
+  transition: 0.4s;
+  padding: 3px;
+}
+
+@media (hover: hover) {
+  a:hover {
+    background-color: hsla(160, 100%, 37%, 0.2);
+  }
+}
+
+/* 基础响应式布局 - 移动优先 */
+body {
+  font-family: var(--font-sans);
+  color: var(--color-neutral-dark);
+  line-height: 1.5;
+}
+
+#app {
+  display: flex;
+  flex-direction: column;
+  min-height: 100vh;
+  padding: var(--content-padding);
+}
+
+/* 中等屏幕 - 平板设备 */
+@media (min-width: 768px) {
+  #app {
+    padding: calc(var(--content-padding) * 1.5);
+  }
+}
+
+/* 大屏幕 - 桌面设备 */
+@media (min-width: 1024px) {
+  #app {
+    padding: 0 2rem;
+  }
+}
+
+/* 超大屏幕 - 大型显示器 */
+@media (min-width: 1920px) {
+  #app {
+    padding: 0 4rem;
+  }
+}
+
+/* 超大屏幕 - 超宽显示器 */
+@media (min-width: 2556px) {
+  #app {
+    padding: 0 6rem;
+  }
+}
+
+/* 自定义背景颜色类 */
+.bg-brown {
+  background-color: var(--color-brown);
+}
+
+.bg-brown-dark {
+  background-color: var(--color-brown-dark);
+}

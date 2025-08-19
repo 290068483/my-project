@@ -1,0 +1,16 @@
+{
+  "files": [],
+  "references": [
+    {
+      "path": "./tsconfig.node.json",
+      "prepend": false
+    },
+    {
+      "path": "./tsconfig.node.json",
+      "prepend": true
+    },
+    {
+      "path": "./tsconfig.app.json"
+    }
+  ]
+}

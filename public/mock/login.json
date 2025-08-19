@@ -1,0 +1,17 @@
+{
+  "success": true,
+  "code": 200,
+  "message": "登录成功",
+  "data": {
+    "token": "eyJhbGciOiJIUzI1NiIsInR5cCI6IkpXVCJ9.eyJ1c2VySWQiOjEsInVzZXJuYW1lIjoidXNlcjEiLCJlbWFpbCI6InVzZXIxQGV4YW1wbGUuY29tIiwicm9sZSI6ImFkbWluIiwiaWF0IjoxNzE2NzM5MjAwLCJleHAiOjE3MTY3NDI4MDB9.SflKxwRJSMeKKF2QT4fwpMeJf36POk6yJV_adQssw5c",
+    "userInfo": {
+      "id": 1,
+      "username": "admin",
+      "nickname": "管理员",
+      "avatar": "/assets/logo.svg",
+      "role": "admin",
+      "permissions": ["dashboard", "users", "settings"]
+    },
+    "expiresIn": 3600
+  }
+}

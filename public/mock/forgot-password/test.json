@@ -1,0 +1,8 @@
+{
+  "success": true,
+  "code": 200,
+  "message": "重置密码链接已发送到您的手机或邮箱",
+  "data": {
+    "resetToken": "test_reset_token_123456"
+  }
+}

@@ -1,0 +1,7 @@
+/* @theme {
+  --color-brown: #825909;
+}
+
+.bg-brown {
+  background-color: theme('colors.brown');
+} */
