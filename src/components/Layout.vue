@@ -32,8 +32,9 @@ import Header from "@/components/header/Header.vue";
 import { RouterView } from "vue-router";
 import { ref, onMounted, nextTick, onUnmounted, watch } from "vue";
 const loading = ref(true);
-const mainRef = ref<HTMLDivElement>(null);
+const mainRef = ref<HTMLDivElement | null>(null);
 const headerRef = ref<InstanceType<typeof Header>>();
+const mainMarginTop = ref("0");
 
 // 骨架屏 loading 逻辑
 const skeletonScreen = ref(true);
@@ -72,8 +73,6 @@ onMounted(() => {
       nextTick(updateMainMarginTop);
     });
   });
-
-  const mainMarginTop = ref("0");
 
   // 更新main区域的margin-top
   const updateMainMarginTop = () => {

@@ -1,51 +1,20 @@
-<template name="CustomDoc">
+<template>
   <div
-    class="bg-white min-h-screen min-w-full overflow-x-hidden overflow-y-auto relative z-10"
-    :style="{ paddingTop: 'calc(var(--header-height, 80px) + 20px)' }"
+    name="CustomDoc"
+    class="bg-white min-h-screen min-w-full overflow-x-hidden overflow-y-auto relative z-10 mx-auto"
   >
-    <div class="mx-auto w-full px-4 sm:px-6 pb-12 max-w-7xl">
-      <!-- 页面标题 -->
-      <div class="border-b border-gray-200">
-        <div
-          class="flex flex-col sm:flex-row justify-between items-center py-4 px-4 sm:px-0 relative"
-        >
-          <h1
-            class="text-xl sm:text-2xl font-bold text-gray-800 z-10 relative w-full text-center px-2"
-          >
-            陆秦-重庆市万科科蓝岸三期
-          </h1>
-          <div
-            class="flex items-center text-white bg-blue-500 border-2 rounded-sm border-white z-10 relative mt-2 sm:mt-0 ml-auto px-3 whitespace-nowrap"
-          >
-            <button
-              class="text-white hover:text-blue-800 text-sm font-medium mr-1"
-            >
-              <i class="el-icon-folder-open mr-1"></i>进入客户文件夹
-            </button>
-          </div>
-        </div>
-      </div>
-
+    <div class="min-w-full px-4 sm:px-6 pb-12 mx-auto">
       <!-- 导航标签 -->
-      <div
-        class="border-b border-gray-200 bg-white px-4 sm:px-6 lg:px-4 py-2 overflow-x-auto max-w-7xl mx-auto w-full"
-      >
-        <el-tabs
-          v-model="activeTab"
-          type="border-card"
-          size="medium"
-          class="min-w-full"
-        >
-          <el-tab-pane label="首页" name="home"></el-tab-pane>
-          <el-tab-pane label="全部档案" name="files"></el-tab-pane>
-          <el-tab-pane label="订单详情" name="order"></el-tab-pane>
-          <el-tab-pane label="合同详情" name="contract"></el-tab-pane>
-          <el-tab-pane label="出货·日期" name="delivery"></el-tab-pane>
-        </el-tabs>
-      </div>
+      <Header
+        preset="custom"
+        :defaultActive="'custom-doc'"
+        :title="'陆秦-重庆市万科科蓝岸三期'"
+      />
 
       <!-- 主要内容区域 -->
-      <div class="p-4 sm:p-6 pt-4 pb-12 grid grid-cols-1 md:grid-cols-2 lg:grid-cols-3 gap-4 sm:gap-6">
+      <div
+        class="p-4 sm:p-6 pt-4 pb-12 grid grid-cols-1 lg:grid-cols-4 md:grid-cols-2 gap-4 sm:gap-6"
+      >
         <!-- 左侧表格：客户信息 -->
         <el-card
           class="border border-gray-200 rounded-md shadow-sm"
@@ -120,6 +89,7 @@
 <script setup lang="ts">
 // 页面结构，无交互实现
 import { ref, computed, onMounted, onUnmounted } from "vue";
+import Header from "@/views/components/header/Header.vue";
 
 // 假数据
 const activeTab = ref("files");
@@ -272,11 +242,6 @@ const dateData = computed(() => [
   .el-tab-pane {
     min-width: 120px;
     text-align: center;
-  }
-
-  /* 确保在大屏幕上内容不会被header遮挡 */
-  .bg-white {
-    padding-top: calc(var(--header-height, 80px) + 20px);
   }
 }
 </style>

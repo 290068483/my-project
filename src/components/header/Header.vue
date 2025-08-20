@@ -10,50 +10,50 @@
       >
         <button
           class="nav-item min-w-[10px] font-semibold mb-2 lg:px-4 sm:px-4 sm:py-2 text-xs sm:text-sm text-white border-b-2 transition-colors border-white bg-blue-500 rounded-t-sm whitespace-nowrap w-full text-center sm:text-left"
-          @click="handleNavClick('首页')"
+          @click="(event) => handleNavClick('首页', event)"
         >
           首页
         </button>
 
         <button
           class="nav-item lg:px-4 sm:px-4 text-xs sm:text-sm font-medium text-blue-100 bg-blue-500 transition-colors whitespace-nowrap w-full text-center sm:text-left"
-          @click="handleNavClick('任务进度')"
+          @click="(event) => handleNavClick('任务进度', event)"
         >
           任务进度
         </button>
         <button
           class="nav-item lg:px-2 text-sm font-medium text-blue-100 bg-blue-500 transition-colors whitespace-nowrap"
-          @click="handleNavClick('客户进度')"
+          @click="(event) => handleNavClick('客户进度', event)"
         >
           客户进度
         </button>
         <button
           class="nav-item lg:px-4 text-sm font-medium text-blue-100 bg-blue-500 transition-colors whitespace-nowrap"
-          @click="handleNavClick('出货')"
+          @click="(event) => handleNavClick('出货', event)"
         >
           出货
         </button>
         <button
           class="nav-item lg:px-4 text-[12px] text-sm font-medium text-blue-100 bg-blue-500 transition-colors whitespace-nowrap"
-          @click="handleNavClick('数据库')"
+          @click="(event) => handleNavClick('数据库', event)"
         >
           数据库
         </button>
         <button
           class="nav-item lg:px-4 text-sm font-medium text-blue-100 bg-purple-500 transition-colors whitespace-nowrap"
-          @click="handleNavClick('财务表')"
+          @click="(event) => handleNavClick('财务表', event)"
         >
           财务表
         </button>
         <button
           class="nav-item lg:px-4 text-sm font-medium text-blue-100 bg-purple-500 transition-colors whitespace-nowrap"
-          @click="handleNavClick('出勤管理')"
+          @click="(event) => handleNavClick('出勤管理', event)"
         >
           出勤管理
         </button>
         <button
           class="nav-item lg:px-4 text-sm font-medium text-blue-100 bg-purple-500 transition-colors whitespace-nowrap"
-          @click="handleNavClick('其它项目')"
+          @click="(event) => handleNavClick('其它项目', event)"
         >
           其它项目
         </button>
@@ -123,15 +123,17 @@ console.log("搜索");
 const activeNav = ref("首页");
 
 // 处理导航项点击
-const handleNavClick = (navItem: string) => {
+const handleNavClick = (navItem: string, event: MouseEvent) => {
   // 移除所有导航项的active类
   const navItems = document.querySelectorAll(".nav-item");
   navItems.forEach((item) => {
-    item.classList.remove("active");
+    (item as HTMLElement).classList.remove("active");
   });
 
   // 为当前点击的导航项添加active类
-  event?.currentTarget?.classList.add("active");
+  if (event?.currentTarget) {
+    (event.currentTarget as HTMLElement).classList.add("active");
+  }
 
   // 更新激活的导航项
   activeNav.value = navItem;

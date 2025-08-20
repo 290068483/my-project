@@ -10,7 +10,7 @@ interface EnvVariables {
   VITE_USE_MOCK: boolean;
   VITE_DEBUG: boolean;
   VITE_TIMEOUT: number;
-  VITE_ROUTER_MODE: 'hash' | 'history';
+  VITE_ROUTER_MODE: "hash" | "history";
 }
 
 // 从全局对象中获取环境变量
@@ -19,15 +19,15 @@ const env = import.meta.env as unknown as EnvVariables;
 // 导出环境变量工具函数
 export const getEnv = (): EnvVariables => {
   return {
-    VITE_APP_TITLE: env.VITE_APP_TITLE || '蓝桉管理系统',
-    VITE_API_BASE_URL: env.VITE_API_BASE_URL || 'http://localhost:3000',
-    VITE_WS_BASE_URL: env.VITE_WS_BASE_URL || 'ws://localhost:3000',
-    VITE_STATIC_BASE_URL: env.VITE_STATIC_BASE_URL || '/static',
+    VITE_APP_TITLE: env.VITE_APP_TITLE || "蓝桉管理系统",
+    VITE_API_BASE_URL: env.VITE_API_BASE_URL || "http://localhost:3000",
+    VITE_WS_BASE_URL: env.VITE_WS_BASE_URL || "ws://localhost:3000",
+    VITE_STATIC_BASE_URL: env.VITE_STATIC_BASE_URL || "/static",
     VITE_PORT: Number(env.VITE_PORT) || 5173,
-    VITE_USE_MOCK: env.VITE_USE_MOCK === 'true',
-    VITE_DEBUG: env.VITE_DEBUG === 'true',
+    VITE_USE_MOCK: env.VITE_USE_MOCK || false,
+    VITE_DEBUG: env.VITE_DEBUG || false,
     VITE_TIMEOUT: Number(env.VITE_TIMEOUT) || 30000,
-    VITE_ROUTER_MODE: (env.VITE_ROUTER_MODE as 'hash' | 'history') || 'hash'
+    VITE_ROUTER_MODE: (env.VITE_ROUTER_MODE as "hash" | "history") || "hash",
   };
 };
 
@@ -47,7 +47,7 @@ export const logger = {
   },
   error: (message: string, ...args: any[]) => {
     console.error(`[ERROR] ${message}`, ...args);
-  }
+  },
 };
 
 // 导出常用环境变量

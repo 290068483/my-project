@@ -44,7 +44,8 @@
 import { ref } from 'vue';
 // 导入Lodash函数
 import { debounce, throttle, sortBy, filter } from '@/utils/lodash';
-// Element Plus组件会被自动导入，无需手动import
+// 导入ElMessage
+import { ElMessage } from 'element-plus';
 
 // 测试数据
 const originalArray = ref([5, 2, 8, 1, 9, 3]);

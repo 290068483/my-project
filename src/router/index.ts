@@ -57,6 +57,68 @@ const routes: Array<RouteRecordRaw> = [
           requiresAuth: false,
         },
       },
+      {
+        path: "order-pd",
+        name: "PenddingOrder",
+        component: () => import("../views/custom-progress/PenddingOrder.vue"),
+        meta: {
+          requiresAuth: false,
+        },
+      },
+      // 待测量
+      {
+        path: "pending-measurement",
+        name: "PendingMeasurement",
+        component: () => import("../views/custom-progress/PendingMeasurement.vue"),
+        meta: {
+          requiresAuth: false,
+        },
+      },
+      // 待合同
+      {
+        path: "pending-contracts",
+        name: "PendingContracts",
+        component: () => import("../views/custom-progress/PendingContracts.vue"),
+        meta: {
+          requiresAuth: false,
+        },
+      },
+      // 待下单
+      {
+        path: "pending-orders",
+        name: "PendingOrders",
+        component: () => import("../views/custom-progress/PenddingOrder.vue"),
+        meta: {
+          requiresAuth: false,
+        },
+      },
+      // 待安装
+      {
+        path: "pending-installation",
+        name: "PendingInstallation",
+        component: () => import("../views/custom-progress/PendingInstallation.vue"),
+        meta: {
+          requiresAuth: false,
+        },
+      },
+      // 待收尾
+      {
+        path: "pending-finalization",
+        name: "PendingFinalization",
+        component: () => import("../views/custom-progress/PendingFinalization.vue"),
+        meta: {
+          requiresAuth: false,
+        },
+      },
+      // 待归档
+      {
+        path: "pending-archiving",
+        name: "PendingArchiving",
+        component: () => import("../views/custom-progress/PendingArchiving.vue"),
+        meta: {
+          requiresAuth: false,
+        },
+      },
     ],
   },
 

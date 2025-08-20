@@ -14,7 +14,7 @@ const http: AxiosInstance = axios.create({
 
 // 请求拦截器
 http.interceptors.request.use(
-  (config: AxiosRequestConfig) => {
+  (config) => {
     // 获取用户store
     const userStore = useUserStore()
     // 添加token到请求头

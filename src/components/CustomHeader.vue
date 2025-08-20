@@ -19,11 +19,11 @@
       :ellipsis="false"
     >
       <el-breadcrumb-item
-        :to="{ path: '/' }"
+        :to="{ path: item.path }"
         v-for="(item, index) in props.items"
         :key="index"
         :index="item.index"
-        class="!bg-[rgb(60,60,77)] !text-white py-1 px-4"
+        class="text-white py-1 px-4"
       >
         {{ item.title }}
       </el-breadcrumb-item>
@@ -38,7 +38,12 @@ import { ref, defineProps, defineEmits } from "vue";
 const props = defineProps({
   // 菜单项数组
   items: {
-    type: Array as () => Array<{ title: string; index: string }>,
+    type: Array as () => Array<{
+      title: string;
+      active: boolean;
+      path: string;
+      index: string;
+    }>,
     default: () => [],
   },
   // 默认激活的菜单项索引
@@ -100,8 +105,9 @@ const handleProfileClick = () => {
   height: 40px; /* 与原来按钮高度一致 */
   line-height: 40px; /* 与原来按钮高度一致 */
   font-size: 14px; /* 与原来按钮文字大小一致 */
-  color: #374151; /* text-gray-700 */
+  /* color: #374151;  */
   border-bottom: 2px solid transparent;
+
   margin-right: 0.5rem; /* space-x-6 大约对应 mr-1.5 */
   padding: 0 0.75rem; /* px-3 */
   border-radius: 0.375rem; /* rounded */
@@ -117,6 +123,6 @@ const handleProfileClick = () => {
 
 :deep(.el-menu--horizontal > .el-menu-item.is-active) {
   color: white; /* text-white */
-  background-color: #3b82f6; /* bg-blue-500 */
+  background-color: #3b82f6;
 }
 </style>
