@@ -10,12 +10,28 @@
 
     <!-- 表格区域 -->
     <div class="table-container" v-if="showTable">
-      <el-table :data="tableData" border style="width: 100%">
+      <el-table :data="filteredTableData" border style="width: 100%" class="custom-table">
         <el-table-column prop="id" label="ID" width="80" />
-        <el-table-column prop="time" label="时间" width="180" />
-        <el-table-column prop="user" label="用户名称" width="120" />
-        <el-table-column prop="status" label="状态" width="100" />
-        <el-table-column prop="description" label="描述" />
+        <el-table-column prop="cusTitle" label="时间" width="180">
+          <template #default="{ row }">
+            <span>{{ row.cusTitle }}</span>
+          </template>
+        </el-table-column>
+        <el-table-column prop="intention" label="用户名称" width="120">
+          <template #default="{ row }">
+            <span>{{ row.intention }}</span>
+          </template>
+        </el-table-column>
+        <el-table-column prop="status" label="状态" width="100">
+          <template #default="{ row }">
+            <span :class="row.style">{{ row.status }}</span>
+          </template>
+        </el-table-column>
+        <el-table-column prop="details" label="描述">
+          <template #default="{ row }">
+            <span>{{ row.details }}</span>
+          </template>
+        </el-table-column>
       </el-table>
     </div>
   </div>
@@ -23,7 +39,7 @@
 
 <script setup lang="ts">
 // 组件逻辑
-import { ref, onMounted } from "vue";
+import { ref, onMounted, computed } from "vue";
 import Header from "@/views/components/header/Header.vue";
 import MessageUtils from "@/utils/message";
 
@@ -42,29 +58,51 @@ const tableData = ref([
     id: "001",
     cusTitle: "2023-01-15 10:30",
     intention: "张三",
-    orderTime: "待处理",
-    amount: "客户订单待处理",
     status: "待处理",
     style: "text-red-500",
-    LastContactDate: "2023-01-15",
-    cusSource: "客户订单待处理",
-    saler: "张三",
     details: "客户订单待处理",
   },
   {
     id: "002",
-    cusTitle: "2023-01-15 10:30",
-    intention: "张三",
-    orderTime: "待处理",
-    amount: "客户订单待处理",
-    status: "待处理",
-    style: "text-red-500",
-    LastContactDate: "2023-01-15",
-    cusSource: "客户订单待处理",
-    saler: "张三",
-    details: "客户订单待处理",
+    cusTitle: "2023-01-16 14:20",
+    intention: "李四",
+    status: "处理中",
+    style: "text-yellow-500",
+    details: "客户订单处理中",
+  },
+  {
+    id: "003",
+    cusTitle: "2023-01-17 09:15",
+    intention: "王五",
+    status: "已完成",
+    style: "text-green-500",
+    details: "客户订单已完成",
   },
 ]);
+
+// 过滤后的表格数据
+const filteredTableData = computed(() => {
+  if (!searchValue.value.trim()) {
+    return tableData.value;
+  }
+
+  const searchVal = searchValue.value.toLowerCase();
+  
+  return tableData.value.filter(item => {
+    if (searchType.value === "id") {
+      return item.id.toLowerCase().includes(searchVal);
+    } else if (searchType.value === "user") {
+      return item.intention.toLowerCase().includes(searchVal);
+    } else {
+      return (
+        item.id.toLowerCase().includes(searchVal) ||
+        item.intention.toLowerCase().includes(searchVal) ||
+        item.status.toLowerCase().includes(searchVal) ||
+        item.details.toLowerCase().includes(searchVal)
+      );
+    }
+  });
+});
 
 // 搜索方法
 const handleSearch = (params: { type: string; value: string }) => {
@@ -80,12 +118,9 @@ const handleSearch = (params: { type: string; value: string }) => {
   // 显示表格
   showTable.value = true;
 
-  // 这里可以添加实际的搜索逻辑
-  console.log("搜索类型:", searchType.value);
-  console.log("搜索值:", searchValue.value);
-
   // 显示搜索成功消息
-  MessageUtils.success("搜索成功");
+  const resultCount = filteredTableData.value.length;
+  MessageUtils.success(`找到 ${resultCount} 条匹配记录`);
 };
 
 // 组件挂载时初始化数据
@@ -106,5 +141,42 @@ onMounted(() => {
 .table-container {
   margin: 20px 0;
   padding: 0 20px;
+}
+
+/* 自定义表格样式 */
+.custom-table {
+  border-radius: 8px;
+  overflow: hidden;
+  box-shadow: 0 2px 12px 0 rgba(0, 0, 0, 0.05);
+}
+
+.custom-table .el-table__header {
+  background-color: #f5f7fa;
+}
+
+.custom-table .el-table__header th {
+  background-color: #f5f7fa !important;
+  color: #333;
+  font-weight: bold;
+}
+
+.custom-table .el-table__body tr:hover {
+  background-color: #f5f7fa;
+}
+
+/* 状态标签样式 */
+.text-red-500 {
+  color: #f56c6c;
+  font-weight: bold;
+}
+
+.text-yellow-500 {
+  color: #e6a23c;
+  font-weight: bold;
+}
+
+.text-green-500 {
+  color: #67c23a;
+  font-weight: bold;
 }
 </style>

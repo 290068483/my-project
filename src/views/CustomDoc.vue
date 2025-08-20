@@ -24,16 +24,34 @@
             <div class="flex justify-between items-center">
               <span class="font-medium text-gray-800">客户信息</span>
               <button
+                v-if="!isEditing"
+                @click="startEditing"
                 class="text-blue-500 hover:text-blue-700 text-sm flex items-center"
               >
                 <i class="el-icon-edit-outline mr-1"></i>编辑
               </button>
+              <div v-else class="flex space-x-2">
+                <button
+                  @click="saveEditing"
+                  class="text-green-500 hover:text-green-700 text-sm flex items-center"
+                >
+                  <i class="el-icon-check mr-1"></i>保存
+                </button>
+                <button
+                  @click="cancelEditing"
+                  class="text-gray-500 hover:text-gray-700 text-sm flex items-center"
+                >
+                  <i class="el-icon-close mr-1"></i>取消
+                </button>
+              </div>
             </div>
           </template>
           <el-table
-            :data="customerData"
+            :data="isEditing ? editingData : customerData"
             style="width: 100%"
             class="custom-table"
+            border
+            :cell-style="{'padding': '10px 12px'}"
           >
             <el-table-column
               prop="label"
@@ -57,10 +75,26 @@
             <div class="flex justify-between items-center">
               <span class="font-medium text-gray-800">日期</span>
               <button
+                v-if="!isEditing"
+                @click="startEditing"
                 class="text-blue-500 hover:text-blue-700 text-sm flex items-center"
               >
                 <i class="el-icon-edit-outline mr-1"></i>编辑
               </button>
+              <div v-else class="flex space-x-2">
+                <button
+                  @click="saveEditing"
+                  class="text-green-500 hover:text-green-700 text-sm flex items-center"
+                >
+                  <i class="el-icon-check mr-1"></i>保存
+                </button>
+                <button
+                  @click="cancelEditing"
+                  class="text-gray-500 hover:text-gray-700 text-sm flex items-center"
+                >
+                  <i class="el-icon-close mr-1"></i>取消
+                </button>
+              </div>
             </div>
           </template>
           <el-table
@@ -92,35 +126,60 @@ import { ref, computed, onMounted, onUnmounted } from "vue";
 import Header from "@/views/components/header/Header.vue";
 
 // 假数据
-const activeTab = ref("files");
+// const activeTab = ref("files"); // 注释掉未使用的变量
 
-// 监听header高度变化
-const updateHeaderHeight = () => {
-  if (document.documentElement) {
-    const headerHeight = getComputedStyle(
-      document.documentElement
-    ).getPropertyValue("--header-height");
-    if (headerHeight) {
-      document.documentElement.style.setProperty(
-        "--header-height",
-        headerHeight
-      );
-    }
-  }
+// 定义数据类型接口
+interface TableDataItem {
+  label: string;
+  value: string;
+}
+
+// 编辑状态管理
+const isEditing = ref(false);
+const editingData = ref<TableDataItem[]>([]);
+
+// 开始编辑
+const startEditing = () => {
+  isEditing.value = true;
+  // 创建编辑数据副本
+  editingData.value = JSON.parse(JSON.stringify(customerData.value));
 };
 
-onMounted(() => {
-  // 初始化时更新header高度
-  updateHeaderHeight();
+// 保存编辑
+const saveEditing = () => {
+  // 这里可以添加保存逻辑，比如API调用
+  customerInfo.id = editingData.value[0].value;
+  customerInfo.name = editingData.value[1].value;
+  customerInfo.phone = editingData.value[2].value;
+  customerInfo.altPhone = editingData.value[3].value;
+  customerInfo.address = editingData.value[4].value;
+  customerInfo.property = editingData.value[5].value;
+  customerInfo.district = editingData.value[6].value;
+  customerInfo.houseNumber = editingData.value[7].value;
+  customerInfo.construction = editingData.value[8].value;
+  customerInfo.decorationManager = editingData.value[9].value;
+  customerInfo.wechat = editingData.value[10].value;
+  customerInfo.qq = editingData.value[11].value;
+  customerInfo.bankAccount = editingData.value[12].value;
+  customerInfo.doorPassword = editingData.value[13].value;
+  customerInfo.familyMembers = editingData.value[14].value;
+  customerInfo.age = editingData.value[15].value;
+  customerInfo.features = editingData.value[16].value;
+  customerInfo.preferences = editingData.value[17].value;
+  customerInfo.customer1 = editingData.value[18].value;
+  customerInfo.customer2 = editingData.value[19].value;
+  customerInfo.communityInfo = editingData.value[20].value;
 
-  // 监听窗口大小变化
-  window.addEventListener("resize", updateHeaderHeight);
-});
+  // 更新表格数据
+  // 由于customerData是computed属性，它会自动更新，不需要直接赋值
+  isEditing.value = false;
+};
 
-onUnmounted(() => {
-  // 组件卸载时移除事件监听器
-  window.removeEventListener("resize", updateHeaderHeight);
-});
+// 取消编辑
+const cancelEditing = () => {
+  isEditing.value = false;
+  editingData.value = [];
+};
 
 // 客户信息数据
 const customerInfo = {
@@ -180,11 +239,10 @@ const customerData = computed(() => [
   { label: "家庭成员", value: customerInfo.familyMembers },
   { label: "客户年龄", value: customerInfo.age },
   { label: "客户特征", value: customerInfo.features },
-  { label: "意见", value: customerInfo.preferences },
-  { label: "喜好特征", value: customerInfo.preferences },
-  { label: "子母客户1", value: customerInfo.customer1 },
-  { label: "子母客户2", value: customerInfo.customer2 },
-  { label: "小区情况", value: customerInfo.communityInfo },
+  { label: "装修偏好", value: customerInfo.preferences },
+  { label: "联系人1", value: customerInfo.customer1 },
+  { label: "联系人2", value: customerInfo.customer2 },
+  { label: "备注信息", value: customerInfo.communityInfo },
 ]);
 
 // 日期表格数据
@@ -200,48 +258,84 @@ const dateData = computed(() => [
   { label: "回访", value: dateInfo.revisitDate },
   { label: "结算", value: dateInfo.settlementDate },
 ]);
+
+// 组件挂载时初始化数据
+onMounted(() => {
+  // 可以在这里添加初始化逻辑
+  console.log("CustomDoc 组件已挂载");
+  
+  // 可以在这里获取数据或执行其他初始化操作
+});
 </script>
 
 <style scoped>
 /* 自定义样式 */
 .custom-table .el-table__cell {
   padding: 10px 12px !important;
-  border: 1px solid #dcdcdc !important;
+  border: 1px solid #e4e7ed !important;
 }
 
 .custom-table th.el-table__cell {
-  background-color: #f2f2f2 !important;
+  background-color: #f5f7fa !important;
   font-weight: bold !important;
-  border: 1px solid #dcdcdc !important;
+  color: #333;
 }
 
-.custom-table .el-table__header-wrapper,
+/* 卡片样式优化 */
+.el-card {
+  border-radius: 8px;
+  overflow: hidden;
+  box-shadow: 0 2px 12px 0 rgba(0, 0, 0, 0.05);
+  transition: all 0.3s ease;
+}
+
+.el-card:hover {
+  box-shadow: 0 4px 18px 0 rgba(0, 0, 0, 0.1);
+}
+
+.el-card .el-card__header {
+  padding: 12px 15px;
+  border-bottom: 1px solid #ebeef5;
+  background-color: #f5f7fa;
+}
+
+/* 按钮样式 */
+button {
+  background: none;
+  border: none;
+  cursor: pointer;
+  padding: 6px 10px;
+  border-radius: 4px;
+  transition: all 0.3s ease;
+  font-size: 14px;
+}
+
+button:hover {
+  background-color: rgba(64, 158, 255, 0.1);
+}
+
+/* 表格内容溢出处理 */
 .custom-table .el-table__body-wrapper {
-  border: 1px solid #dcdcdc;
+  overflow-x: hidden;
 }
 
-/* 响应式调整 */
-@media (max-width: 1024px) {
-  .el-tabs__nav {
-    flex-wrap: wrap;
+/* 响应式布局 */
+@media (max-width: 768px) {
+  .grid-cols-1.lg\:grid-cols-4.md\:grid-cols-2 {
+    grid-template-columns: 1fr;
   }
 }
 
-/* 大屏幕调整 */
-@media (min-width: 1025px) {
-  .el-tabs__nav {
-    justify-content: center;
-    flex-wrap: nowrap;
-    width: 100%;
-    padding: 0 10px;
-    overflow-x: auto;
-    -webkit-overflow-scrolling: touch;
-    height: 48px;
+@media (min-width: 769px) and (max-width: 1024px) {
+  .grid-cols-1.lg\:grid-cols-4.md\:grid-cols-2 {
+    grid-template-columns: 1fr 1fr;
   }
+}
 
-  .el-tab-pane {
-    min-width: 120px;
-    text-align: center;
-  }
+/* 编辑状态样式 */
+.editing-row .el-input__inner {
+  border-radius: 4px;
+  border: 1px solid #dcdfe6;
+  padding: 0 10px;
 }
 </style>
