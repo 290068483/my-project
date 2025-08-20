@@ -2,6 +2,20 @@
 
 这个模板可以帮助你开始使用Vue 3和Vite进行开发。
 
+## 仓库地址
+
+git clone https://github.com/290068483/my-project.git
+
+## 确保 Vite 已正确安装
+
+# 检查项目本地是否安装
+
+npm list vite
+
+# 如果未安装，执行安装命令
+
+npm install vite --save-dev
+
 ## 推荐的IDE设置
 
 [VSCode](https://code.visualstudio.com/) + [Volar](https://marketplace.visualstudio.com/items?itemName=Vue.volar)（并禁用Vetur）。

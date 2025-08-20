@@ -1,25 +1,29 @@
-import { fileURLToPath, URL } from 'node:url'
-import { loadEnv } from 'vite'
-import { defineConfig } from 'vite'
-import vue from '@vitejs/plugin-vue'
-import vueDevTools from 'vite-plugin-vue-devtools'
-import AutoImport from 'unplugin-auto-import/vite'
-import Components from 'unplugin-vue-components/vite'
-import { ElementPlusResolver } from 'unplugin-vue-components/resolvers'
+import { fileURLToPath, URL } from "node:url";
+import { loadEnv } from "vite";
+import { defineConfig } from "vite";
+import vue from "@vitejs/plugin-vue";
+import vueDevTools from "vite-plugin-vue-devtools";
+import AutoImport from "unplugin-auto-import/vite";
+import Components from "unplugin-vue-components/vite";
+import { ElementPlusResolver } from "unplugin-vue-components/resolvers";
 
 // https://vite.dev/config/
 export default defineConfig(({ mode }) => {
   // 加载对应环境的.env文件
-  const env = loadEnv(mode, process.cwd())
-  const isDev = mode === 'development'
-  const isProd = mode === 'production'
+  const env = loadEnv(mode, process.cwd());
+  const isDev = mode === "development";
+  const isProd = mode === "production";
 
   // 从环境变量获取日志级别，默认为'info'
-  const logLevel = env.VITE_LOG_LEVEL || 'info'
+  const logLevel = (env.VITE_LOG_LEVEL || "info") as
+    | "error"
+    | "warn"
+    | "info"
+    | "silent";
 
   return {
     // 基础配置
-    base: env.VITE_STATIC_BASE_URL || '/',
+    base: env.VITE_STATIC_BASE_URL || "/",
     mode,
     logLevel,
 
@@ -38,7 +42,7 @@ export default defineConfig(({ mode }) => {
 
     resolve: {
       alias: {
-        '@': fileURLToPath(new URL('./src', import.meta.url)),
+        "@": fileURLToPath(new URL("./src", import.meta.url)),
       },
     },
 
@@ -48,16 +52,16 @@ export default defineConfig(({ mode }) => {
       open: isDev,
       proxy: isDev
         ? {
-            '/api': {
-              target: env.VITE_API_BASE_URL || 'http://localhost:3000',
+            "/api": {
+              target: env.VITE_API_BASE_URL || "http://localhost:3000",
               changeOrigin: true,
-              rewrite: (path) => path.replace(/^\/api/, ''),
+              rewrite: (path) => path.replace(/^\/api/, ""),
             },
             // Mock服务配置
-            '/mock': {
-              target: 'http://localhost:' + (Number(env.VITE_PORT) || 5173),
+            "/mock": {
+              target: "http://localhost:" + (Number(env.VITE_PORT) || 5173),
               changeOrigin: true,
-              rewrite: (path) => path.replace(/^\/mock/, '/public/mock'),
+              rewrite: (path) => path.replace(/^\/mock/, "/public/mock"),
             },
           }
         : undefined,
@@ -74,15 +78,15 @@ export default defineConfig(({ mode }) => {
     build: {
       minify: isProd,
       sourcemap: !isProd,
-      outDir: 'dist',
+      outDir: "dist",
       rollupOptions: {
         output: {
           manualChunks: isProd
             ? {
-                vue: ['vue'],
-                'vue-router': ['vue-router'],
-                pinia: ['pinia'],
-                'element-plus': ['element-plus'],
+                vue: ["vue"],
+                "vue-router": ["vue-router"],
+                pinia: ["pinia"],
+                "element-plus": ["element-plus"],
               }
             : undefined,
         },
@@ -94,9 +98,9 @@ export default defineConfig(({ mode }) => {
     // 优化配置
     optimizeDeps: {
       // 预构建依赖
-      include: ['vue', 'vue-router', 'pinia'],
+      include: ["vue", "vue-router", "pinia"],
       // 开发环境启用缓存
-      cacheDir: isDev ? '.vite/cache' : undefined,
+      cacheDir: isDev ? ".vite/cache" : undefined,
     },
 
     // 删除以下CSS配置
@@ -109,5 +113,5 @@ export default defineConfig(({ mode }) => {
     //     ],
     //   },
     // },
-  }
-})
+  };
+});
