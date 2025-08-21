@@ -507,7 +507,6 @@ const eventList = ref([
 
 // 处理事件列表行点击
 const handleEventRowClick = (row: any) => {
-  console.log("点击了事件:", row.name);
   // 这里可以添加点击事件后的处理逻辑
   showTooltip("event", new MouseEvent("click"));
 };

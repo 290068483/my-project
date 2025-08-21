@@ -19,7 +19,7 @@ const routes: Array<RouteRecordRaw> = [
       {
         path: "custom-index",
         name: "CustomIndex",
-        component: () => import("../views/CustomIndex.vue"),
+        component: () => import("../views/task-progress/CustomIndex.vue"),
         meta: {
           requiresAuth: false,
         },
@@ -32,31 +32,36 @@ const routes: Array<RouteRecordRaw> = [
           requiresAuth: false,
         },
       },
+      // 任务进度
+
+      // 客户归档
       {
         path: "custom-doc",
-        name: "客户归档",
-        component: () => import("../views/CustomDoc.vue"),
+        name: "全部档案",
+        component: () => import("../views/task-progress/CustomDoc.vue"),
         meta: {
           requiresAuth: false,
         },
       },
-      // 添加新路由
+      // 客户进度
       {
         path: "custom-progress",
         name: "客户进度",
-        component: () => import("../views/CustomerProgress.vue"),
+        component: () => import("../views/task-progress/CustomerProgress.vue"),
         meta: {
           requiresAuth: false,
         },
       },
+      // 客户定单详情
       {
         path: "custom-dts",
         name: "客户定单详情",
-        component: () => import("../views/CustomOrderDts.vue"),
+        component: () => import("../views/task-progress/CustomOrderDts.vue"),
         meta: {
           requiresAuth: false,
         },
       },
+      // 客户定单
       {
         path: "order-pending",
         name: "客户定单",

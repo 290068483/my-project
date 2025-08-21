@@ -114,7 +114,7 @@ const shippingItems = [
 
 // 默认菜单数据（当没有传入items且preset为default或custom时使用）
 const defaultItems = [
-  { title: "首页", index: "home", active: true, path: "/home" },
+  { title: "首页", index: "home", active: true, path: "/" },
   { title: "全部档案", index: "custom-doc", path: "/custom-doc" },
   { title: "定单详情", index: "custom-dts", path: "/custom-dts" },
   { title: "合同详情", index: "contract-details", path: "/pending-contracts" },

@@ -18,12 +18,20 @@
           border
         >
           <el-descriptions-item label="客户名称">陆秦</el-descriptions-item>
-          <el-descriptions-item label="联系电话">1392640056</el-descriptions-item>
-          <el-descriptions-item label="项目地址">重庆市渝北区</el-descriptions-item>
-          <el-descriptions-item label="楼盘名称">龙渊滩古典家</el-descriptions-item>
-          <el-descriptions-item label="装修负责人">刘师傅（18649621102）</el-descriptions-item>
+          <el-descriptions-item label="联系电话"
+            >1392640056</el-descriptions-item
+          >
+          <el-descriptions-item label="项目地址"
+            >重庆市渝北区</el-descriptions-item
+          >
+          <el-descriptions-item label="楼盘名称"
+            >龙渊滩古典家</el-descriptions-item
+          >
+          <el-descriptions-item label="装修负责人"
+            >刘师傅（18649621102）</el-descriptions-item
+          >
         </el-descriptions>
-        
+
         <div class="rightBox">
           <div>
             <h1>订单编号：</h1>
@@ -69,7 +77,7 @@ const docTitle = "text-5xl text-center  min-w-[80%] font-bold text-gray-800";
   width: 50%;
   height: 100%;
   padding: 20px;
-  box-shadow: 
+  box-shadow:
     inset 1px 0 0 0 #3f3d3d,
     inset -1px 0 0 0 rgba(255, 255, 255, 0.1);
   position: relative;
@@ -89,7 +97,7 @@ const docTitle = "text-5xl text-center  min-w-[80%] font-bold text-gray-800";
     rgba(63, 61, 61, 0.7),
     rgba(63, 61, 61, 0.5)
   );
-  box-shadow: 
+  box-shadow:
     1px 0 2px rgba(0, 0, 0, 0.3),
     -1px 0 1px rgba(255, 255, 255, 0.1);
 }
@@ -143,7 +151,7 @@ const docTitle = "text-5xl text-center  min-w-[80%] font-bold text-gray-800";
   .cusContentBox {
     flex-direction: column;
   }
-  
+
   .descBox,
   .rightBox {
     width: 100%;

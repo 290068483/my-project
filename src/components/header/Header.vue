@@ -87,7 +87,7 @@ export interface UserInfo {
 const userStore = useUserStore();
 // component: () => import("@/views/home/Home.vue"),
 const navData = [
-  { key: "1", name: "任务进度", path: "/home" },
+  { key: "1", name: "首页", path: "/home" },
   { key: "2", name: "客户进度", path: "/custom-progress" },
   {
     key: "3",
@@ -134,7 +134,6 @@ type navData = {
 // 处理导航项点击
 const handleNavClick = (navItem: navData, event: MouseEvent) => {
   // 移除所有导航项的active类
-  console.log("navItem:", navItem);
   const navItems = document.querySelectorAll(".nav-item");
   navItems.forEach((item) => {
     (item as HTMLElement).classList.remove("active");
@@ -148,12 +147,7 @@ const handleNavClick = (navItem: navData, event: MouseEvent) => {
   // 更新激活的导航项
   activeNav.value = navItem.key;
   // 导航路由
-  console.log("navItem.path:", navItem.path);
   router.push({ path: navItem.path });
-  console.log(
-    "router.currentRoute.value.path:",
-    router.currentRoute.value.path
-  );
 };
 // 初始化导航项激活状态
 const initActiveNav = () => {

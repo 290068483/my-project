@@ -51,7 +51,7 @@
             style="width: 100%"
             class="custom-table"
             border
-            :cell-style="{'padding': '10px 12px'}"
+            :cell-style="{ padding: '10px 12px' }"
           >
             <el-table-column
               prop="label"
@@ -262,8 +262,6 @@ const dateData = computed(() => [
 // 组件挂载时初始化数据
 onMounted(() => {
   // 可以在这里添加初始化逻辑
-  console.log("CustomDoc 组件已挂载");
-  
   // 可以在这里获取数据或执行其他初始化操作
 });
 </script>

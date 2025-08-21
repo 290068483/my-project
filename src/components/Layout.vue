@@ -43,11 +43,9 @@ const skeletonScreen = ref(true);
 watch(
   () => loading.value,
   (newVal) => {
-    console.log("Loading status changed to:", newVal);
     if (!newVal) {
       // 移除骨架屏 - 设置为50秒后关闭
       setTimeout(() => {
-        console.log("Hiding skeleton screen after 50 seconds");
         skeletonScreen.value = false;
       }, 200);
     }
@@ -58,7 +56,6 @@ watch(
 onMounted(() => {
   setTimeout(() => {
     loading.value = false;
-    console.log("Data loading complete, showing content after 2 seconds");
   }, 200);
 
   // 组件挂载时和窗口大小变化时更新main区域的margin-top
