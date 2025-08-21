@@ -4,7 +4,7 @@
 
 ## 仓库地址
 
-git clone https://github.com/290068483/my-project.git
+git clone -b dev https://github.com/290068483/my-project.git
 
 ## 确保 Vite 已正确安装
 
