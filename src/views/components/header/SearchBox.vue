@@ -1,7 +1,11 @@
 <template>
   <div class="search-box" v-if="showSearch">
     <div class="search-options">
-      <el-radio-group v-model="searchType" size="small" class="search-type-group">
+      <el-radio-group
+        v-model="searchType"
+        size="small"
+        class="search-type-group"
+      >
         <el-radio-button label="id">ID</el-radio-button>
         <el-radio-button label="time">时间</el-radio-button>
         <el-radio-button label="user">用户名称</el-radio-button>
@@ -33,13 +37,13 @@ const props = defineProps({
   // 是否显示搜索框
   show: {
     type: Boolean,
-    default: false
+    default: false,
   },
   // 搜索类型
   type: {
-    type: String as () => "id" | "time" | "user",
-    default: "id"
-  }
+    type: String,
+    default: "id",
+  },
 });
 
 // 定义组件事件
@@ -55,14 +59,20 @@ const searchValue = ref("");
 const showSearch = ref(props.show);
 
 // 监听show属性变化
-watch(() => props.show, (newValue) => {
-  showSearch.value = newValue;
-});
+watch(
+  () => props.show,
+  (newValue) => {
+    showSearch.value = newValue;
+  }
+);
 
 // 监听type属性变化
-watch(() => props.type, (newValue) => {
-  searchType.value = newValue;
-});
+watch(
+  () => props.type,
+  (newValue) => {
+    searchType.value = newValue;
+  }
+);
 
 // 搜索方法
 const handleSearch = () => {
@@ -74,7 +84,7 @@ const handleSearch = () => {
   // 触发搜索事件
   emit("search", {
     type: searchType.value,
-    value: searchValue.value
+    value: searchValue.value,
   });
 
   // 显示搜索成功消息

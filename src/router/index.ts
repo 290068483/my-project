@@ -17,8 +17,8 @@ const routes: Array<RouteRecordRaw> = [
     redirect: "/Home",
     children: [
       {
-        path: "custom",
-        name: "custom",
+        path: "custom-index",
+        name: "CustomIndex",
         component: () => import("../views/CustomIndex.vue"),
         meta: {
           requiresAuth: false,
@@ -34,7 +34,7 @@ const routes: Array<RouteRecordRaw> = [
       },
       {
         path: "custom-doc",
-        name: "CustomDoc",
+        name: "客户归档",
         component: () => import("../views/CustomDoc.vue"),
         meta: {
           requiresAuth: false,
@@ -43,7 +43,7 @@ const routes: Array<RouteRecordRaw> = [
       // 添加新路由
       {
         path: "custom-p",
-        name: "CustomerProgress",
+        name: "客户进度",
         component: () => import("../views/CustomerProgress.vue"),
         meta: {
           requiresAuth: false,
@@ -51,7 +51,7 @@ const routes: Array<RouteRecordRaw> = [
       },
       {
         path: "custom-dts",
-        name: "Custom-dts",
+        name: "客户定单详情",
         component: () => import("../views/CustomOrderDts.vue"),
         meta: {
           requiresAuth: false,
@@ -59,8 +59,28 @@ const routes: Array<RouteRecordRaw> = [
       },
       {
         path: "order-pd",
-        name: "PenddingOrder",
+        name: "客户定单",
         component: () => import("../views/custom-progress/PenddingOrder.vue"),
+        meta: {
+          requiresAuth: false,
+        },
+      },
+      // 待预约
+      {
+        path: "pending-reservation",
+        name: "PendingReservation",
+        component: () =>
+          import("../views/custom-progress/PendingReservation.vue"),
+        meta: {
+          requiresAuth: false,
+        },
+      },
+      // 待预约
+      {
+        path: "pending-reservation",
+        name: "PendingReservation",
+        component: () =>
+          import("../views/custom-progress/PendingReservation.vue"),
         meta: {
           requiresAuth: false,
         },
@@ -69,7 +89,8 @@ const routes: Array<RouteRecordRaw> = [
       {
         path: "pending-measurement",
         name: "PendingMeasurement",
-        component: () => import("../views/custom-progress/PendingMeasurement.vue"),
+        component: () =>
+          import("../views/custom-progress/PendingMeasurement.vue"),
         meta: {
           requiresAuth: false,
         },
@@ -78,7 +99,8 @@ const routes: Array<RouteRecordRaw> = [
       {
         path: "pending-contracts",
         name: "PendingContracts",
-        component: () => import("../views/custom-progress/PendingContracts.vue"),
+        component: () =>
+          import("../views/custom-progress/PendingContracts.vue"),
         meta: {
           requiresAuth: false,
         },
@@ -96,25 +118,36 @@ const routes: Array<RouteRecordRaw> = [
       {
         path: "pending-installation",
         name: "PendingInstallation",
-        component: () => import("../views/custom-progress/PendingInstallation.vue"),
+        component: () =>
+          import("../views/custom-progress/PendingInstallation.vue"),
         meta: {
           requiresAuth: false,
         },
       },
-      // 待收尾
+      // 出货总览
       {
-        path: "pending-finalization",
-        name: "PendingFinalization",
-        component: () => import("../views/custom-progress/PendingFinalization.vue"),
+        path: "shipping-overview",
+        name: "ShippingOverview",
+        component: () =>
+          import("../views/shipping-issues/ShippingOverview.vue"),
         meta: {
           requiresAuth: false,
         },
       },
-      // 待归档
+      // 出货进度
       {
         path: "pending-archiving",
         name: "PendingArchiving",
-        component: () => import("../views/custom-progress/PendingArchiving.vue"),
+        component: () =>
+          import("../views/shipping-issues/ShippingOverview.vue"),
+        meta: {
+          requiresAuth: false,
+        },
+      }, // 出货明细
+      {
+        path: "shipping-details",
+        name: "ShippingDetails",
+        component: () => import("../views/shipping-issues/ShippingDetails.vue"),
         meta: {
           requiresAuth: false,
         },

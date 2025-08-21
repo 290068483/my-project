@@ -58,13 +58,37 @@ import SearchBox from "./SearchBox.vue";
 
 // 订单进度表菜单数据
 const orderProgressItems = [
-  { title: "待定单", index: "home", active: true, path: "/pending-orders" },
-  { title: "待测量", index: "all-archives", path: "/pending-measurement" },
-  { title: "待合同", index: "order-details", path: "/pending-contracts" },
-  { title: "待下单", index: "contract-details", path: "/pending-orders" },
-  { title: "待安装", index: "product-details", path: "/pending-installation" },
-  { title: "待收尾", index: "shipment", path: "/pending-finalization" },
-  { title: "待归档", index: "shipment", path: "/pending-archiving" },
+  // 待预约
+  {
+    title: "待预约",
+    index: "pending-orders",
+    active: true,
+    path: "/pending-orders",
+  },
+  {
+    title: "待定单",
+    index: "pending-reservation",
+    active: true,
+    path: "/pending-reservation",
+  },
+  {
+    title: "待测量",
+    index: "pending-measurement",
+    path: "/pending-measurement",
+  },
+  { title: "待合同", index: "pending-contracts", path: "/pending-contracts" },
+  { title: "待下单", index: "pending-orders", path: "/pending-orders" },
+  {
+    title: "待安装",
+    index: "pending-installation",
+    path: "/pending-installation",
+  },
+  {
+    title: "待收尾",
+    index: "pending-finalization",
+    path: "/pending-finalization",
+  },
+  { title: "待归档", index: "pending-archiving", path: "/pending-archiving" },
 ];
 
 // 默认标题
@@ -127,7 +151,7 @@ const props = defineProps({
   },
   // 搜索类型
   searchType: {
-    type: String as () => "id" | "time" | "user",
+    type: String,
     default: "id",
   },
 });
@@ -153,7 +177,8 @@ const computedItems = computed(() => {
 // 计算属性：根据预设类型自动填充标题
 const computedTitle = computed(() => {
   return (
-    props.title || (props.preset === "order-progress" ? orderProgressTitle : defaultTitle)
+    props.title ||
+    (props.preset === "order-progress" ? orderProgressTitle : defaultTitle)
   );
 });
 

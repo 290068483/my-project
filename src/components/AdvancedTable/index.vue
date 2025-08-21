@@ -1,15 +1,11 @@
 <template>
   <div class="advanced-table-container">
-    <!-- 搜索和分页区域 -->
-    <SearchAndPagination
-      v-model:page="currentPage"
-      v-model:size="pageSize"
-      v-model:searchType="currentSearchType"
-      v-model:searchValue="currentSearchValue"
-      :total="total"
-      :defaultSearchType="defaultSearchType"
+    <Header
+      preset="order-progress"
+      :show-search="true"
+      :search-type="'id'"
+      title-style="text-3xl text-center pl-0 w-full text-blue-600"
       @search="handleSearch"
-      @change="handleTableChange"
     />
 
     <!-- 表格区域 -->
@@ -26,7 +22,10 @@
     </div>
 
     <!-- 无数据提示 -->
-    <div v-if="!loading && tableData.length === 0" class="no-data text-center py-10 text-gray-500">
+    <div
+      v-if="!loading && tableData.length === 0"
+      class="no-data text-center py-10 text-gray-500"
+    >
       <div class="empty-icon mb-4">📋</div>
       <p>暂无数据</p>
       <p class="text-sm mt-2">请尝试使用搜索框查询</p>
@@ -35,55 +34,61 @@
 </template>
 
 <script setup lang="ts">
-import { ref, computed, watch } from 'vue';
-import SearchAndPagination from '../SearchAndPagination/index.vue';
-
+import { ref, computed, watch } from "vue";
+import Header from "@/views/components/header/Header.vue";
 // 定义组件属性
 const props = defineProps({
   // 表格数据
   data: {
     type: Array,
-    default: () => []
+    default: () => [],
   },
   // 总数据量
   total: {
     type: Number,
-    default: 0
+    default: 0,
   },
   // 当前页码
   page: {
     type: Number,
-    default: 1
+    default: 1,
   },
   // 每页条数
   size: {
     type: Number,
-    default: 10
+    default: 10,
   },
   // 搜索类型
   searchType: {
     type: String,
-    default: 'id'
+    default: "id",
   },
   // 搜索值
   searchValue: {
     type: String,
-    default: ''
+    default: "",
   },
   // 默认搜索类型
   defaultSearchType: {
     type: String,
-    default: 'id'
+    default: "id",
   },
   // 是否加载中
   loading: {
     type: Boolean,
-    default: false
-  }
+    default: false,
+  },
 });
 
 // 定义组件事件
-const emit = defineEmits(['update:page', 'update:size', 'update:searchType', 'update:searchValue', 'search', 'change']);
+const emit = defineEmits([
+  "update:page",
+  "update:size",
+  "update:searchType",
+  "update:searchValue",
+  "search",
+  "change",
+]);
 
 // 当前页码
 const currentPage = ref(props.page);
@@ -103,69 +108,91 @@ const tableData = computed(() => {
 });
 
 // 监听页码变化
-watch(() => props.page, (newVal) => {
-  if (newVal !== currentPage.value) {
-    currentPage.value = newVal;
+watch(
+  () => props.page,
+  (newVal) => {
+    if (newVal !== currentPage.value) {
+      currentPage.value = newVal;
+    }
   }
-});
+);
 
 // 监听每页条数变化
-watch(() => props.size, (newVal) => {
-  if (newVal !== pageSize.value) {
-    pageSize.value = newVal;
+watch(
+  () => props.size,
+  (newVal) => {
+    if (newVal !== pageSize.value) {
+      pageSize.value = newVal;
+    }
   }
-});
+);
 
 // 监听搜索类型变化
-watch(() => props.searchType, (newVal) => {
-  if (newVal !== currentSearchType.value) {
-    currentSearchType.value = newVal;
+watch(
+  () => props.searchType,
+  (newVal) => {
+    if (newVal !== currentSearchType.value) {
+      currentSearchType.value = newVal;
+    }
   }
-});
+);
 
 // 监听搜索值变化
-watch(() => props.searchValue, (newVal) => {
-  if (newVal !== currentSearchValue.value) {
-    currentSearchValue.value = newVal;
+watch(
+  () => props.searchValue,
+  (newVal) => {
+    if (newVal !== currentSearchValue.value) {
+      currentSearchValue.value = newVal;
+    }
   }
-});
+);
 
 // 监听内部页码变化
 watch(currentPage, (newVal) => {
   if (newVal !== props.page) {
-    emit('update:page', newVal);
+    emit("update:page", newVal);
   }
 });
 
 // 监听内部每页条数变化
 watch(pageSize, (newVal) => {
   if (newVal !== props.size) {
-    emit('update:size', newVal);
+    emit("update:size", newVal);
   }
 });
 
 // 监听内部搜索类型变化
 watch(currentSearchType, (newVal) => {
   if (newVal !== props.searchType) {
-    emit('update:searchType', newVal);
+    emit("update:searchType", newVal);
   }
 });
 
 // 监听内部搜索值变化
 watch(currentSearchValue, (newVal) => {
   if (newVal !== props.searchValue) {
-    emit('update:searchValue', newVal);
+    emit("update:searchValue", newVal);
   }
 });
 
 // 处理搜索
-const handleSearch = (params: { type: string; value: string; page: number; size: number }) => {
-  emit('search', params);
+const handleSearch = (params: {
+  type: string;
+  value: string;
+  page: number;
+  size: number;
+}) => {
+  emit("search", params);
 };
 
 // 处理表格变化
-const handleTableChange = (params: { page: number; size: number; searchType: string; searchValue: string }) => {
-  emit('change', params);
+const handleTableChange = (params: {
+  page: number;
+  size: number;
+  searchType: string;
+  searchValue: string;
+}) => {
+  emit("change", params);
 };
 </script>
 

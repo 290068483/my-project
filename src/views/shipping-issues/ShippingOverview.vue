@@ -1,5 +1,5 @@
 <template>
-  <div class="pendding-order">
+  <div class="shipping-overview">
     <Header
       preset="order-progress"
       :show-search="true"

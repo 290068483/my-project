@@ -208,7 +208,7 @@ watch(
   display: flex;
   flex-wrap: wrap;
   padding: 0 30px;
-  gap: 30px;
+  gap: 10px;
   margin-bottom: 20px;
   width: 100%;
   position: relative;

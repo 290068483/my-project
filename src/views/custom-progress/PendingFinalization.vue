@@ -30,16 +30,22 @@
           </template>
         </el-table-column>
         <el-table-column prop="style" label="关注风格" width="120" />
-        <el-table-column prop="LastContactDate" label="上次联系时间" width="150" />
+        <el-table-column
+          prop="LastContactDate"
+          label="上次联系时间"
+          width="150"
+        />
         <el-table-column prop="cusSource" label="客户来源" width="120" />
         <el-table-column prop="saler" label="业务员" width="100" />
         <el-table-column prop="details" label="详情">
           <template #default="scope">
-            <el-button type="text" @click="handleDetails(scope.row)">查看详情</el-button>
+            <el-button type="text" @click="handleDetails(scope.row)"
+              >查看详情</el-button
+            >
           </template>
         </el-table-column>
       </el-table>
-
+      <TableCount :stats="countData" />
       <!-- 分页 -->
       <div class="pagination-container mt-4 flex justify-end">
         <el-pagination
@@ -55,7 +61,10 @@
     </div>
 
     <!-- 无数据提示 -->
-    <div v-if="filteredTableData.length === 0" class="no-data text-center py-10 text-gray-500">
+    <div
+      v-if="filteredTableData.length === 0"
+      class="no-data text-center py-10 text-gray-500"
+    >
       <div class="empty-icon mb-4">📋</div>
       <p>暂无数据</p>
       <p class="text-sm mt-2">请尝试使用搜索框查询</p>
@@ -68,7 +77,7 @@
 import { ref, computed, onMounted } from "vue";
 import Header from "@/views/components/header/Header.vue";
 import MessageUtils from "@/utils/message";
-
+import TableCount from "../components/TableCount.vue";
 // 搜索类型
 const searchType = ref("id");
 
@@ -82,7 +91,49 @@ const loading = ref(false);
 const currentPage = ref(1);
 const pageSize = ref(10);
 const total = ref(0);
-
+// 给统计组件显示的数据
+const countData = ref([
+  {
+    index: "total",
+    value: 12,
+    label: "订单总数",
+  },
+  {
+    index: "totalAmount",
+    value: 1730.5,
+    label: "订单总金额",
+  },
+  {
+    index: "totalDeposit",
+    value: 346.3,
+    label: "订单总定金",
+  },
+  {
+    index: "avgDeposit",
+    value: 28.9,
+    label: "订单平均定金",
+  },
+  {
+    index: "totalUnitPrice",
+    value: 53205,
+    label: "订单总单价",
+  },
+  {
+    index: "avgUnitPrice",
+    value: 4434,
+    label: "订单平均单价",
+  },
+  {
+    index: "totalContract",
+    value: 1501.7,
+    label: "订单总合同款",
+  },
+  {
+    index: "avgContract",
+    value: 125.1,
+    label: "订单平均合同款",
+  },
+]);
 // 表格数据
 const tableColsData = ref([
   {
@@ -155,12 +206,12 @@ const tableColsData = ref([
 // 根据搜索条件过滤数据
 const filteredTableData = computed(() => {
   let result = tableColsData.value;
-  
+
   // 应用搜索过滤
   if (searchValue.value.trim()) {
     const searchVal = searchValue.value.toLowerCase();
-    
-    result = result.filter(item => {
+
+    result = result.filter((item) => {
       // 根据搜索类型进行过滤
       if (searchType.value === "id") {
         return item.id.toLowerCase().includes(searchVal);
@@ -174,14 +225,14 @@ const filteredTableData = computed(() => {
       return false;
     });
   }
-  
+
   // 应用分页
   const start = (currentPage.value - 1) * pageSize.value;
   const end = start + pageSize.value;
-  
+
   // 更新总数据量
   total.value = result.length;
-  
+
   return result.slice(start, end);
 });
 
@@ -218,7 +269,7 @@ const handleSearch = (params: { type: string; value: string }) => {
 
   // 显示加载状态
   loading.value = true;
-  
+
   // 模拟加载延迟
   setTimeout(() => {
     loading.value = false;

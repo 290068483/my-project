@@ -1,5 +1,7 @@
 <template name="AppHeader">
-  <div class="header-container bg-white border-b border-gray-200 shadow-sm sticky top-0 z-50">
+  <div
+    class="header-container bg-white border-b border-gray-200 shadow-sm sticky top-0 z-50"
+  >
     <!-- 顶部导航栏 -->
     <div
       class="nav-bar flex flex-col sm:flex-row items-center justify-between px-4 sm:px-6 py-2 bg-gradient-to-r shadow-md"
@@ -64,7 +66,11 @@
         class="right-section gap-1 flex flex-col sm:flex-row items-center flex-shrink-0 w-full sm:w-auto mt-2 sm:mt-0"
       >
         <div class="search-box relative w-full sm:w-64 sm:mr-2">
-          <el-input placeholder="请输入内容" class="w-64 h-10" v-model="inputSearch">
+          <el-input
+            placeholder="请输入内容"
+            class="w-64 h-10"
+            v-model="inputSearch"
+          >
             <template v-slot:prefix>
               <i class="el-input__icon el-icon-search"></i>
             </template>
@@ -104,6 +110,7 @@
 <script setup lang="ts">
 import { ref, onMounted, nextTick } from "vue";
 import { useUserStore } from "@/stores/user";
+import router from "@/router";
 
 export interface UserInfo {
   name?: string;
@@ -113,11 +120,44 @@ export interface UserInfo {
 }
 
 const userStore = useUserStore();
-const currentDate = ref("");
+// component: () => import("@/views/home/Home.vue"),
+let navData = [
+  {
+    name: "任务进度",
+    path: "/home",
+  },
+  {
+    name: "客户进度",
+    path: "/home",
+  },
+  {
+    name: "出货",
+    path: "/home",
+  },
+  {
+    name: "数据库",
+    path: "/home",
+  },
+  {
+    name: "财务表",
+    path: "/home",
+  },
+  {
+    name: "出勤管理",
+    path: "/home",
+  },
+  {
+    name: "财务管理",
+    path: "/home",
+  },
+  {
+    name: "财务管理",
+    path: "/home",
+  },
+];
 
 // 计算属性获取用户信息
 const inputSearch = ref("");
-console.log("搜索");
 
 // 当前激活的导航项
 const activeNav = ref("首页");
@@ -125,6 +165,7 @@ const activeNav = ref("首页");
 // 处理导航项点击
 const handleNavClick = (navItem: string, event: MouseEvent) => {
   // 移除所有导航项的active类
+  console.log("navItem:", navItem);
   const navItems = document.querySelectorAll(".nav-item");
   navItems.forEach((item) => {
     (item as HTMLElement).classList.remove("active");
@@ -137,6 +178,8 @@ const handleNavClick = (navItem: string, event: MouseEvent) => {
 
   // 更新激活的导航项
   activeNav.value = navItem;
+  // 导航路由
+  // router.push({ name: navItem });
 };
 // 初始化导航项激活状态
 const initActiveNav = () => {
@@ -158,21 +201,29 @@ onMounted(() => {
     initActiveNav();
   });
 
-  const now = new Date();
-  const year = now.getFullYear();
-  const month = now.getMonth() + 1;
-  const day = now.getDate();
-  const hour = now.getHours().toString().padStart(2, "0");
-  const minute = now.getMinutes().toString().padStart(2, "0");
+  // const now = new Date();
+  // const year = now.getFullYear();
+  // const month = now.getMonth() + 1;
+  // const day = now.getDate();
+  // const hour = now.getHours().toString().padStart(2, "0");
+  // const minute = now.getMinutes().toString().padStart(2, "0");
 
-  // 星期几
-  const weekdays = ["星期日", "星期一", "星期二", "星期三", "星期四", "星期五", "星期六"];
-  const weekday = weekdays[now.getDay()];
+  // // 星期几
+  // const weekdays = [
+  //   "星期日",
+  //   "星期一",
+  //   "星期二",
+  //   "星期三",
+  //   "星期四",
+  //   "星期五",
+  //   "星期六",
+  // ];
+  // const weekday = weekdays[now.getDay()];
 
-  // 农历日期（简化版）
-  const lunarDate = "五月初一"; // 实际应用中需要农历库
+  // // 农历日期（简化版）
+  // const lunarDate = "五月初一"; // 实际应用中需要农历库
 
-  currentDate.value = `${year}年${month}月${day}日 ${hour}:${minute} （农历${lunarDate}） ${weekday}`;
+  // currentDate.value = `${year}年${month}月${day}日 ${hour}:${minute} （农历${lunarDate}） ${weekday}`;
 });
 </script>
 
