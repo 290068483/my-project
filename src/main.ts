@@ -26,14 +26,14 @@ app.use(createPinia());
 app.use(router);
 
 // 配置Axios
-axios.defaults.baseURL = config.apiBaseUrl;
+axios.defaults.baseURL = config.baseUrl;
 axios.defaults.timeout = config.timeout;
 
 // 添加请求拦截器
 axios.interceptors.request.use(
   (config) => {
     // 从localStorage获取token
-    const token = localStorage.getItem(`${config.storagePrefix}token`);
+    const token = localStorage.getItem(`${config?.storagePrefix}token`);
     if (token) {
       config.headers.Authorization = `Bearer ${token}`;
     }

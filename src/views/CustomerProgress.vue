@@ -3,19 +3,12 @@
     class="min-h-screen min-w-full bg-gray-100 overflow-x-hidden overflow-y-auto"
   >
     <!-- 导航栏 -->
-    <CustomHeader
-      :items="[
-        { title: '首页', index: 'home' },
-        { title: '全部档案', index: 'all-archives' },
-        { title: '定单详情', index: 'order-details' },
-        { title: '合同详情', index: 'contract-details' },
-        { title: '产品详情', index: 'product-details' },
-        { title: '出货', index: 'shipment' },
-      ]"
-      :defaultActive="'order-details'"
-      :title="'陆泰-重庆市万科蓝岸三期'"
-      @select="handleMenuSelect"
-      @profile-click="handleProfileClick"
+
+    <Header
+      title="陆泰-重庆市万科蓝岸三期"
+      :show-search="true"
+      @search="handleSearch"
+      :active="true"
     />
     <div class="flex orderPanel items-center max-w-full">
       <div class="leftBox flex items-center">
@@ -396,7 +389,7 @@
 <script setup lang="ts">
 // 这里可以添加组件逻辑
 import { ref } from "vue";
-import CustomHeader from "@/components/CustomHeader.vue";
+import Header from "@/views/components/header/Header.vue";
 
 // 提示气泡状态
 const showProgressTooltip = ref(false);
@@ -549,7 +542,7 @@ const handleMenuSelect = (key: string) => {
 };
 
 // 处理客户档案按钮点击
-const handleProfileClick = () => {
+const handleSearch = () => {
   console.log("点击了进入客户档案");
   // 这里可以添加进入客户档案的处理逻辑
 };

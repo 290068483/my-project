@@ -42,7 +42,7 @@ const routes: Array<RouteRecordRaw> = [
       },
       // 添加新路由
       {
-        path: "custom-p",
+        path: "custom-progress",
         name: "客户进度",
         component: () => import("../views/CustomerProgress.vue"),
         meta: {
@@ -58,7 +58,7 @@ const routes: Array<RouteRecordRaw> = [
         },
       },
       {
-        path: "order-pd",
+        path: "order-pending",
         name: "客户定单",
         component: () => import("../views/custom-progress/PenddingOrder.vue"),
         meta: {
@@ -136,10 +136,9 @@ const routes: Array<RouteRecordRaw> = [
       },
       // 出货进度
       {
-        path: "pending-archiving",
-        name: "PendingArchiving",
-        component: () =>
-          import("../views/shipping-issues/ShippingOverview.vue"),
+        path: "issue-details",
+        name: "出貨問題明顯",
+        component: () => import("../views/shipping-issues/IssueDetails.vue"),
         meta: {
           requiresAuth: false,
         },

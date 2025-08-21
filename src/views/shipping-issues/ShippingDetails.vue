@@ -1,12 +1,17 @@
 <template>
   <div class="ShippingDetails"></div>
   <Header
-    title="发货详情"
-    preset="order-progress"
+    title="出货进度及问题汇总表"
+    preset="shipping"
     :show-search="true"
     title-style="text-3xl text-center pl-0 w-full text-blue-600"
     @search="handleSearch"
   />
+  <el-table :data="tableData" border style="width: 100%">
+    <el-table-column prop="date" label="Date" width="180" />
+    <el-table-column prop="name" label="Name" width="180" />
+    <el-table-column prop="address" label="Address" />
+  </el-table>
   <TableCount :stats="countData" />
 </template>
 
@@ -53,6 +58,29 @@ const countData = ref([
 const handleSearch = (val: string) => {
   console.log(val);
 };
+
+const tableData = ref([
+  {
+    date: "2016-05-02",
+    name: "王小虎",
+    address: "上海市普陀区金沙江路 1518 弄",
+  },
+  {
+    date: "2016-05-04",
+    name: "王小虎",
+    address: "上海市普陀区金沙江路 1517 弄",
+  },
+  {
+    date: "2016-05-01",
+    name: "王小虎",
+    address: "上海市普陀区金沙江路 1519 弄",
+  },
+  {
+    date: "2016-05-03",
+    name: "王小虎",
+    address: "上海市普陀区金沙江路 1516 弄",
+  },
+]);
 </script>
 
 <style scoped>

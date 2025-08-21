@@ -8,18 +8,13 @@ export {}
 /* prettier-ignore */
 declare module 'vue' {
   export interface GlobalComponents {
-    AdvancedTable: typeof import('./src/components/AdvancedTable/index.vue')['default']
     CustomerContent: typeof import('./src/components/CustomerContent.vue')['default']
     CustomHeader: typeof import('./src/components/CustomHeader.vue')['default']
-    DataTable: typeof import('./src/components/DataTable/index.vue')['default']
     ElBreadcrumb: typeof import('element-plus/es')['ElBreadcrumb']
     ElBreadcrumbItem: typeof import('element-plus/es')['ElBreadcrumbItem']
     ElButton: typeof import('element-plus/es')['ElButton']
     ElCard: typeof import('element-plus/es')['ElCard']
     ElCol: typeof import('element-plus/es')['ElCol']
-    ElDescriptions: typeof import('element-plus/es')['ElDescriptions']
-    ElDescriptionsItem: typeof import('element-plus/es')['ElDescriptionsItem']
-    ElementLodashTest: typeof import('./src/components/ElementLodashTest.vue')['default']
     ElEmpty: typeof import('element-plus/es')['ElEmpty']
     ElFormItem: typeof import('element-plus/es')['ElFormItem']
     ElInput: typeof import('element-plus/es')['ElInput']
@@ -31,18 +26,10 @@ declare module 'vue' {
     ElSkeleton: typeof import('element-plus/es')['ElSkeleton']
     ElTable: typeof import('element-plus/es')['ElTable']
     ElTableColumn: typeof import('element-plus/es')['ElTableColumn']
-    ElTabPane: typeof import('element-plus/es')['ElTabPane']
-    ElTabs: typeof import('element-plus/es')['ElTabs']
-    ElTag: typeof import('element-plus/es')['ElTag']
     Header: typeof import('./src/components/header/Header.vue')['default']
     Layout: typeof import('./src/components/Layout.vue')['default']
-    Pagination: typeof import('./src/components/Pagination/index.vue')['default']
     RouterLink: typeof import('vue-router')['RouterLink']
     RouterView: typeof import('vue-router')['RouterView']
-    SearchAndPagination: typeof import('./src/components/SearchAndPagination/index.vue')['default']
-    SearchBox: typeof import('./src/components/SearchBox/index.vue')['default']
-    SearchTable: typeof import('./src/components/SearchTable/index.vue')['default']
-    Sidebar: typeof import('./src/components/Sidebar.vue')['default']
   }
   export interface GlobalDirectives {
     vLoading: typeof import('element-plus/es')['ElLoadingDirective']

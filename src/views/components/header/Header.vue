@@ -54,8 +54,11 @@
 import { defineProps, defineEmits, computed } from "vue";
 import SearchBox from "./SearchBox.vue";
 
-// 预定义的header数据
+// 默认标题
+const defaultTitle = "陆泰-重庆市万科蓝岸三期";
 
+// 订单进度表标题
+const orderProgressTitle = "订单进度表";
 // 订单进度表菜单数据
 const orderProgressItems = [
   // 待预约
@@ -68,7 +71,6 @@ const orderProgressItems = [
   {
     title: "待定单",
     index: "pending-reservation",
-    active: true,
     path: "/pending-reservation",
   },
   {
@@ -90,24 +92,34 @@ const orderProgressItems = [
   },
   { title: "待归档", index: "pending-archiving", path: "/pending-archiving" },
 ];
-
-// 默认标题
-const defaultTitle = "陆泰-重庆市万科蓝岸三期";
-
-// 订单进度表标题
-const orderProgressTitle = "订单进度表";
-
-// 默认激活项
-const defaultActive = "home";
+// 出货header导航
+const shippingItems = [
+  {
+    title: "出货总览",
+    index: "ShippingOverview",
+    active: true,
+    path: "/shipping-overview",
+  },
+  {
+    title: "出货明细",
+    index: "ShippingDetails",
+    path: "/shipping-details",
+  },
+  {
+    title: "问题明细",
+    index: "IssueDetails",
+    path: "/issue-details",
+  },
+];
 
 // 默认菜单数据（当没有传入items且preset为default或custom时使用）
 const defaultItems = [
-  { title: "首页", index: "home", active: true, path: "/" },
+  { title: "首页", index: "home", active: true, path: "/home" },
   { title: "全部档案", index: "custom-doc", path: "/custom-doc" },
   { title: "定单详情", index: "custom-dts", path: "/custom-dts" },
-  { title: "合同详情", index: "contract-details", path: "/contract-details" },
-  { title: "产品详情", index: "custom-p", path: "/custom-p" },
-  { title: "出货", index: "shipment", path: "/shipment" },
+  { title: "合同详情", index: "contract-details", path: "/pending-contracts" },
+  { title: "产品详情", index: "custom-p", path: "/custom-progress" },
+  { title: "出货", index: "shipping", path: "/shipping-overview" },
 ];
 
 // 定义组件的属性
@@ -124,7 +136,7 @@ const props = defineProps({
   },
   // 预设类型
   preset: {
-    type: String as () => "default" | "order-progress" | "custom",
+    type: String as () => "default" | "order-progress" | "custom" | "shipping",
     default: "default",
     validator: (value: string) =>
       ["default", "order-progress", "custom"].includes(value),
@@ -132,7 +144,7 @@ const props = defineProps({
   // 默认激活的菜单项索引
   defaultActive: {
     type: String,
-    default: "",
+    default: "出货总览",
   },
   // 标题
   title: {
@@ -166,12 +178,17 @@ const computedItems = computed(() => {
   }
 
   // 如果没有传入items，则使用默认值
-  if (props.preset === "custom") {
-    return defaultItems;
+  if (props.preset === "custom") return defaultItems;
+  // 出货header导航
+  if (props.preset === "shipping") {
+    return shippingItems;
+  }
+  if (props.preset === "order-progress") {
+    return orderProgressItems;
   }
 
   // 根据预设类型返回默认数据
-  return props.preset === "order-progress" ? orderProgressItems : defaultItems;
+  return defaultItems;
 });
 
 // 计算属性：根据预设类型自动填充标题
@@ -184,7 +201,7 @@ const computedTitle = computed(() => {
 
 // 计算属性：根据预设类型自动填充默认激活项
 const computedDefaultActive = computed(() => {
-  return props.defaultActive || defaultActive;
+  return props.defaultActive;
 });
 
 // 处理搜索事件
@@ -195,6 +212,7 @@ const handleSearch = (params: { type: string; value: string }) => {
 // 处理菜单选择事件
 const handleSelect = (key: string) => {
   emit("select", key);
+  console.log("key:", key);
 };
 
 // 处理客户档案按钮点击

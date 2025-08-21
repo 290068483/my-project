@@ -8,35 +8,71 @@
           <span>用户登录</span>
         </div>
       </template>
-      <el-form ref="loginFormRef" :model="loginForm" :rules="loginRules" label-width="80px" class="login-form">
+      <el-form
+        ref="loginFormRef"
+        :model="loginForm"
+        :rules="loginRules"
+        label-width="80px"
+        class="login-form"
+      >
         <el-form-item label="用户名" prop="username">
-          <el-input v-model="loginForm.username" placeholder="请输入用户名" :disabled="isLoginDisabled"
-            @blur="validateUsername" />
+          <el-input
+            v-model="loginForm.username"
+            placeholder="请输入用户名"
+            :disabled="isLoginDisabled"
+            @blur="validateUsername"
+          />
         </el-form-item>
-        <el-form-item aria-disabled="!captchaEnabled" label="验证码" prop="captcha">
+        <el-form-item
+          aria-disabled="!captchaEnabled"
+          label="验证码"
+          prop="captcha"
+        >
           <el-row :gutter="10">
             <el-col :span="14">
-              <el-input v-model="loginForm.captcha" placeholder="请输入验证码" :disabled="!captchaEnabled" />
+              <el-input
+                v-model="loginForm.captcha"
+                placeholder="请输入验证码"
+                :disabled="!captchaEnabled"
+              />
             </el-col>
             <el-col :span="10">
               <!-- 验证码按钮禁用条件：登录禁用、验证码加载中或验证码未启用
                手机号验证为false 或
                 手机号验证为true 且 验证码未加载未完成 isCaptchaLoading:true
                 手机号验证为true 且 正在登录 isLoginDisabled:true-->
-              <el-button type="default" class="captcha-btn" @click="getCaptcha"
-                :disabled="!captchaEnabled && !isCaptchaLoading || (captchaEnabled && isLoginDisabled) || (captchaEnabled && isCaptchaLoading)"
-                :loading="isCaptchaLoading">
+              <el-button
+                type="default"
+                class="captcha-btn"
+                @click="getCaptcha"
+                :disabled="
+                  (!captchaEnabled && !isCaptchaLoading) ||
+                  (captchaEnabled && isLoginDisabled) ||
+                  (captchaEnabled && isCaptchaLoading)
+                "
+                :loading="isCaptchaLoading"
+              >
                 {{ captchaText }}
               </el-button>
             </el-col>
           </el-row>
         </el-form-item>
         <el-form-item label="密码" prop="password">
-          <el-input v-model="loginForm.password" type="password" placeholder="请输入密码" :disabled="isLoginDisabled" />
+          <el-input
+            v-model="loginForm.password"
+            type="password"
+            placeholder="请输入密码"
+            :disabled="isLoginDisabled"
+          />
         </el-form-item>
         <el-form-item>
-          <el-button type="primary" class="login-btn" @click="handleLogin" :loading="isLoading"
-            :disabled="!isFormValid || isLoading">
+          <el-button
+            type="primary"
+            class="login-btn"
+            @click="handleLogin"
+            :loading="isLoading"
+            :disabled="!isFormValid || isLoading"
+          >
             登录
           </el-button>
         </el-form-item>
@@ -47,17 +83,17 @@
 
 <script setup lang="ts">
 // 导入Vue相关API
-import { ref, reactive, onMounted, computed, watch, onUnmounted } from 'vue';
+import { ref, reactive, onMounted, watch, onUnmounted } from "vue";
 // 导入Element Plus组件和消息提示
-import { ElMessage, ElForm } from 'element-plus';
+import { ElMessage, ElForm } from "element-plus";
 // 导入路由相关API
-import { useRouter } from 'vue-router';
+import { useRouter } from "vue-router";
 // 导入用户Store
-import { useUserStore } from '@/stores/user';
+import { useUserStore } from "@/stores/user";
 // 导入HTTP请求工具
-import request from '@/utils/Http';
+import request from "@/utils/Http";
 // 导入防抖函数
-import { debounce } from '@/utils/debounce';
+import { debounce } from "@/utils/debounce";
 
 // 定义组件Props
 defineProps<{
@@ -77,9 +113,9 @@ const loginForm = reactive<{
   password: string;
   captcha: string;
 }>({
-  username: '',
-  password: '',
-  captcha: '',
+  username: "",
+  password: "",
+  captcha: "",
 });
 
 // 加载状态
@@ -99,12 +135,11 @@ const captchaEnabled = ref(false);
 // 验证码获取中状态
 const isCaptchaLoading = ref(false);
 // 验证码按钮文本
-const captchaText = ref('获取验证码');
+const captchaText = ref("获取验证码");
 // 验证码倒计时定时器
 const captchaInterval = ref<number | null>(null);
 // 验证码倒计时时长(秒)
 const captchaTimeout = ref<number>(60);
-
 
 /**
  * 检查是否需要显示验证码
@@ -134,7 +169,7 @@ const getCaptcha = async () => {
 
   try {
     // 模拟获取验证码接口
-    await new Promise(resolve => setTimeout(resolve, 500));
+    await new Promise((resolve) => setTimeout(resolve, 500));
     // 启动倒计时
     let countdown = captchaTimeout.value;
     isCaptchaLoading.value = true;
@@ -143,15 +178,15 @@ const getCaptcha = async () => {
       countdown--;
       if (countdown <= 0) {
         clearInterval(captchaInterval.value as number);
-        captchaText.value = '获取验证码';
+        captchaText.value = "获取验证码";
       } else {
         captchaText.value = `${countdown}秒后重新获取`;
       }
     }, 1000);
 
-    ElMessage.success('验证码发送成功');
+    ElMessage.success("验证码发送成功");
   } catch (e: any) {
-    ElMessage.error('获取验证码失败，请重试');
+    ElMessage.error("获取验证码失败，请重试");
   } finally {
     isCaptchaLoading.value = false;
   }
@@ -164,39 +199,39 @@ const loginRules = {
   username: [
     {
       required: true,
-      message: '请输入用户名',
-      trigger: ['blur', 'change'],
+      message: "请输入用户名",
+      trigger: ["blur", "change"],
     },
     {
       pattern: /^1[3-9]\d{9}$/,
-      message: '用户名必须是手机号',
-      trigger: ['blur', 'change'],
+      message: "用户名必须是手机号",
+      trigger: ["blur", "change"],
     },
   ],
   password: [
     {
       required: true,
-      message: '请输入密码',
-      trigger: ['blur', 'change'],
+      message: "请输入密码",
+      trigger: ["blur", "change"],
     },
     {
       min: 6,
       max: 20,
-      message: '密码长度必须在6-20个字符之间',
-      trigger: ['blur', 'change'],
+      message: "密码长度必须在6-20个字符之间",
+      trigger: ["blur", "change"],
     },
   ],
   captcha: [
     {
       required: showCaptcha.value,
-      message: '请输入验证码',
-      trigger: ['blur', 'change'],
+      message: "请输入验证码",
+      trigger: ["blur", "change"],
     },
     {
       min: 4,
       max: 6,
-      message: '验证码长度必须在4-6个字符之间',
-      trigger: ['blur', 'change'],
+      message: "验证码长度必须在4-6个字符之间",
+      trigger: ["blur", "change"],
     },
   ],
 };
@@ -204,9 +239,12 @@ const loginRules = {
 /**
  * 监听表单变化，验证表单是否有效
  */
-watch([() => loginForm.username, () => loginForm.password, () => loginForm.captcha], () => {
-  validateForm();
-});
+watch(
+  [() => loginForm.username, () => loginForm.password, () => loginForm.captcha],
+  () => {
+    validateForm();
+  }
+);
 
 /**
  * 验证表单是否有效
@@ -214,10 +252,10 @@ watch([() => loginForm.username, () => loginForm.password, () => loginForm.captc
  */
 const validateForm = async () => {
   try {
-    await loginFormRef.value?.validateField('username');
-    await loginFormRef.value?.validateField('password');
+    await loginFormRef.value?.validateField("username");
+    await loginFormRef.value?.validateField("password");
     if (showCaptcha.value) {
-      await loginFormRef.value?.validateField('captcha');
+      await loginFormRef.value?.validateField("captcha");
     }
     isFormValid.value = true;
   } catch {
@@ -239,21 +277,21 @@ const handleLogin = debounce(async () => {
 
     // 模拟验证码验证
     if (showCaptcha.value) {
-      if (loginForm.captcha.toLowerCase() !== '8888') {
+      if (loginForm.captcha.toLowerCase() !== "8888") {
         captchaCount.value++;
         if (captchaCount.value >= 3) {
-          ElMessage.error('验证码错误次数超过3次，请重新获取');
-          loginForm.captcha = '';
+          ElMessage.error("验证码错误次数超过3次，请重新获取");
+          loginForm.captcha = "";
           getCaptcha();
         } else {
-          ElMessage.error('验证码错误');
+          ElMessage.error("验证码错误");
         }
         return;
       }
     }
 
     // 调用登录接口
-    const response = await request.post('/mock/login', {
+    const response: any = await request.post("/mock/login", {
       username: loginForm.username,
       password: loginForm.password,
     });
@@ -269,7 +307,7 @@ const handleLogin = debounce(async () => {
         expiresIn,
       });
 
-      ElMessage.success('登录成功');
+      ElMessage.success("登录成功");
 
       // 重置计数
       loginCount.value = 0;
@@ -281,27 +319,27 @@ const handleLogin = debounce(async () => {
       if (redirect) {
         router.push(redirect as string);
       } else {
-        router.push('/');
+        router.push("/");
       }
     } else {
       // 登录失败
       loginCount.value++;
       checkShowCaptcha();
-      ElMessage.error(response.data.message || '登录失败');
+      ElMessage.error(response.data.message || "登录失败");
 
       // 超过3次失败，清空表单
       if (loginCount.value >= 3) {
-        loginForm.username = '';
-        loginForm.password = '';
-        loginForm.captcha = '';
+        loginForm.username = "";
+        loginForm.password = "";
+        loginForm.captcha = "";
       }
     }
   } catch (error: any) {
     // 表单验证失败或网络错误
-    if (error.name === 'ValidationError') {
+    if (error.name === "ValidationError") {
       // 表单验证错误已经通过rules提示
     } else {
-      ElMessage.error('登录失败，请重试');
+      ElMessage.error("登录失败，请重试");
     }
   } finally {
     isLoading.value = false;

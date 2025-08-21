@@ -1,7 +1,7 @@
 <template>
   <div class="shipping-overview">
     <Header
-      preset="order-progress"
+      preset="shipping"
       :show-search="true"
       :search-type="'id'"
       title-style="text-3xl text-center pl-0 w-full text-blue-600"
@@ -339,7 +339,10 @@ const filteredTableData = computed(() => {
     }
   });
 });
-
+// Nav click
+const handleClick = (index: string) => {
+  // activeIndex.value = index;
+};
 // 搜索方法
 const handleSearch = (params: { type: string; value: string }) => {
   if (!params.value.trim()) {

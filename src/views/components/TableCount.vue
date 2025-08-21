@@ -142,11 +142,19 @@ const formatAmount = (amount: number | string, unit?: "万" | "元"): string => 
  * 2. 对于每个统计项，提取标签和值
  * 3. 应用相应的格式化函数处理数据
  */
+
 const countData = computed(() => {
   if (!props.stats || props.stats.length === 0) return [];
 
   // 创建结果数组
-  const result = [];
+  const result: Array<customType> = [];
+
+  // 定义自定义类型
+  interface customType {
+    label: string;
+    value: string;
+    isNumber: boolean;
+  }
 
   // 遍历传入的统计数据
   props.stats.forEach((item) => {
@@ -164,7 +172,7 @@ const countData = computed(() => {
 
     result.push({
       label: item.label,
-      value: formattedValue,
+      value: formattedValue.toString(),
       isNumber,
     });
   });

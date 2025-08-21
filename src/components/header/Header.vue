@@ -10,55 +10,15 @@
       <div
         class="nav-menu flex space-x-1 gap-1 justify-start overflow-x-auto hide-scrollbar sm:space-x-4 lg:overflow-visible w-full sm:w-auto"
       >
-        <button
+        <el-button
+          v-for="n in navData"
+          :key="n.key"
+          :type="parseInt(n.key) > 5 ? 'danger' : 'primary'"
           class="nav-item min-w-[10px] font-semibold mb-2 lg:px-4 sm:px-4 sm:py-2 text-xs sm:text-sm text-white border-b-2 transition-colors border-white bg-blue-500 rounded-t-sm whitespace-nowrap w-full text-center sm:text-left"
-          @click="(event) => handleNavClick('首页', event)"
+          @click="(event) => handleNavClick(n, event)"
         >
-          首页
-        </button>
-
-        <button
-          class="nav-item lg:px-4 sm:px-4 text-xs sm:text-sm font-medium text-blue-100 bg-blue-500 transition-colors whitespace-nowrap w-full text-center sm:text-left"
-          @click="(event) => handleNavClick('任务进度', event)"
-        >
-          任务进度
-        </button>
-        <button
-          class="nav-item lg:px-2 text-sm font-medium text-blue-100 bg-blue-500 transition-colors whitespace-nowrap"
-          @click="(event) => handleNavClick('客户进度', event)"
-        >
-          客户进度
-        </button>
-        <button
-          class="nav-item lg:px-4 text-sm font-medium text-blue-100 bg-blue-500 transition-colors whitespace-nowrap"
-          @click="(event) => handleNavClick('出货', event)"
-        >
-          出货
-        </button>
-        <button
-          class="nav-item lg:px-4 text-[12px] text-sm font-medium text-blue-100 bg-blue-500 transition-colors whitespace-nowrap"
-          @click="(event) => handleNavClick('数据库', event)"
-        >
-          数据库
-        </button>
-        <button
-          class="nav-item lg:px-4 text-sm font-medium text-blue-100 bg-purple-500 transition-colors whitespace-nowrap"
-          @click="(event) => handleNavClick('财务表', event)"
-        >
-          财务表
-        </button>
-        <button
-          class="nav-item lg:px-4 text-sm font-medium text-blue-100 bg-purple-500 transition-colors whitespace-nowrap"
-          @click="(event) => handleNavClick('出勤管理', event)"
-        >
-          出勤管理
-        </button>
-        <button
-          class="nav-item lg:px-4 text-sm font-medium text-blue-100 bg-purple-500 transition-colors whitespace-nowrap"
-          @click="(event) => handleNavClick('其它项目', event)"
-        >
-          其它项目
-        </button>
+          {{ n.name }}
+        </el-button>
       </div>
 
       <!-- 右侧搜索和用户区域 -->
@@ -80,25 +40,30 @@
         <div
           class="user-menu flex flex-wrap text-center items-center gap-1 sm:space-x-3 cursor-pointer group text-xs sm:text-sm text-white w-full justify-center sm:justify-start h-10"
         >
-          <span
+          <el-button
+            type="warning"
             class="flex-1 text-[12px] transition-colors px-1 rounded-[2px] bg-brown h-full flex items-center justify-center"
-            >产品库</span
+            >产品库</el-button
           >
-          <span
+          <el-button
+            type="warning"
             class="flex-1 transition-colors px-1 rounded-[2px] bg-brown h-full flex items-center justify-center"
-            >图库</span
+            >图库</el-button
           >
-          <span
+          <el-button
+            type="warning"
             class="flex-1 transition-colors px-1 rounded-[2px] bg-brown h-full flex items-center justify-center"
-            >知识库</span
+            >知识库</el-button
           >
-          <span
+          <el-button
+            type="warning"
             class="flex-1 transition-colors px-1 rounded-[2px] bg-brown h-full flex items-center justify-center"
-            >制度</span
+            >制度</el-button
           >
-          <span
+          <el-button
+            type="warning"
             class="flex-1 transition-colors px-2 rounded-[2px] bg-brown h-full flex items-center justify-center"
-            >通讯录</span
+            >通讯录</el-button
           >
         </div>
       </div>
@@ -121,38 +86,38 @@ export interface UserInfo {
 
 const userStore = useUserStore();
 // component: () => import("@/views/home/Home.vue"),
-let navData = [
+const navData = [
+  { key: "1", name: "任务进度", path: "/home" },
+  { key: "2", name: "客户进度", path: "/custom-progress" },
   {
-    name: "任务进度",
-    path: "/home",
-  },
-  {
-    name: "客户进度",
-    path: "/home",
-  },
-  {
+    key: "3",
     name: "出货",
-    path: "/home",
+    path: "/shipping-overview",
   },
   {
+    key: "4",
     name: "数据库",
     path: "/home",
   },
   {
+    key: "5",
     name: "财务表",
     path: "/home",
   },
   {
+    key: "6",
     name: "出勤管理",
     path: "/home",
   },
   {
+    key: "8",
     name: "财务管理",
     path: "/home",
   },
   {
+    key: "9",
     name: "财务管理",
-    path: "/home",
+    path: "home",
   },
 ];
 
@@ -161,9 +126,13 @@ const inputSearch = ref("");
 
 // 当前激活的导航项
 const activeNav = ref("首页");
-
+type navData = {
+  key: string;
+  name: string;
+  path: string;
+};
 // 处理导航项点击
-const handleNavClick = (navItem: string, event: MouseEvent) => {
+const handleNavClick = (navItem: navData, event: MouseEvent) => {
   // 移除所有导航项的active类
   console.log("navItem:", navItem);
   const navItems = document.querySelectorAll(".nav-item");
@@ -177,9 +146,14 @@ const handleNavClick = (navItem: string, event: MouseEvent) => {
   }
 
   // 更新激活的导航项
-  activeNav.value = navItem;
+  activeNav.value = navItem.key;
   // 导航路由
-  // router.push({ name: navItem });
+  console.log("navItem.path:", navItem.path);
+  router.push({ path: navItem.path });
+  console.log(
+    "router.currentRoute.value.path:",
+    router.currentRoute.value.path
+  );
 };
 // 初始化导航项激活状态
 const initActiveNav = () => {
