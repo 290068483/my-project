@@ -88,7 +88,10 @@
           <span class="text-xs text-gray-500">详情</span>
         </div>
         <div class="overflow-y-auto max-h-[400px] pr-1">
-          <table class="min-w-full divide-y divide-gray-200">
+          <el-table
+            :data="progressList"
+            class="min-w-full divide-y divide-gray-200"
+          >
             <thead>
               <tr>
                 <th
@@ -222,7 +225,7 @@
                 </td>
               </tr>
             </tbody>
-          </table>
+          </el-table>
         </div>
         <!-- 提示气泡 -->
         <div

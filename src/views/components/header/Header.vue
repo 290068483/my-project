@@ -58,8 +58,8 @@ import SearchBox from "./SearchBox.vue";
 const defaultTitle = "陆泰-重庆市万科蓝岸三期";
 
 // 订单进度表标题
-const orderProgressTitle = "订单进度表";
-// 订单进度表菜单数据
+const orderProgressTitle = "客户进度表";
+// 客户进度表菜单数据
 const orderProgressItems = [
   // 待预约
   {
@@ -112,7 +112,7 @@ const shippingItems = [
   },
 ];
 
-// 默认菜单数据（当没有传入items且preset为default或custom时使用）
+// 客户详情header导航
 const defaultItems = [
   { title: "首页", index: "home", active: true, path: "/" },
   { title: "全部档案", index: "custom-doc", path: "/custom-doc" },

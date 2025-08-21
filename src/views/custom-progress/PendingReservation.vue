@@ -24,6 +24,8 @@
         class="custom-table"
         v-loading="isLoading"
         element-loading-text="加载中..."
+        @row-click="handleRowClick"
+        row-key="id"
       >
         <el-table-column prop="id" label="ID" width="80" />
         <el-table-column prop="cusTitle" label="时间" width="180">
@@ -82,6 +84,7 @@ import { ref, onMounted, computed } from "vue";
 import Header from "@/views/components/header/Header.vue";
 import MessageUtils from "@/utils/message";
 import TableCount from "../components/TableCount.vue";
+import router from "@/router";
 
 // 搜索类型选项
 // const searchTypes = [
@@ -89,6 +92,14 @@ import TableCount from "../components/TableCount.vue";
 //   { value: "user", label: "客户名称" },
 //   { value: "all", label: "全部内容" },
 // ];
+// 行点击事件
+const handleRowClick = (row: unknown) => {
+  // id把id路由到客户详情首页
+  router.push({ path: "custom-dts", params: { id: row?.id } });
+  console.log(row?.id);
+  // console.log(event);
+};
+
 // 给统计组件显示的数据
 const countData = ref([
   {

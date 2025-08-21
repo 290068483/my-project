@@ -80,16 +80,7 @@ const routes: Array<RouteRecordRaw> = [
           requiresAuth: false,
         },
       },
-      // 待预约
-      {
-        path: "pending-reservation",
-        name: "PendingReservation",
-        component: () =>
-          import("../views/custom-progress/PendingReservation.vue"),
-        meta: {
-          requiresAuth: false,
-        },
-      },
+
       // 待测量
       {
         path: "pending-measurement",

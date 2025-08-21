@@ -15,7 +15,7 @@
           :key="n.key"
           :type="parseInt(n.key) > 5 ? 'danger' : 'primary'"
           class="nav-item min-w-[10px] font-semibold mb-2 lg:px-4 sm:px-4 sm:py-2 text-xs sm:text-sm text-white border-b-2 transition-colors border-white bg-blue-500 rounded-t-sm whitespace-nowrap w-full text-center sm:text-left"
-          @click="(event) => handleNavClick(n, event)"
+          @click="(event: MouseEvent) => handleNavClick(n, event)"
         >
           {{ n.name }}
         </el-button>
@@ -88,7 +88,7 @@ const userStore = useUserStore();
 // component: () => import("@/views/home/Home.vue"),
 const navData = [
   { key: "1", name: "首页", path: "/home" },
-  { key: "2", name: "客户进度", path: "/custom-progress" },
+  { key: "2", name: "客户进度", path: "/pending-reservation" },
   {
     key: "3",
     name: "出货",
