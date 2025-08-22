@@ -1,8 +1,5 @@
-// 定义表格数据项接口
-interface TableItem {
-  cusTitle: string;
-  [key: string]: string | number | boolean | object; // 明确指定可能的属性类型
-}
+// 定义表格数据项接口 interface TableItem { cusTitle: string; [key: string]:
+string | number | boolean | object; // 明确指定可能的属性类型 }
 <template>
   <div class="pending-finalization">
     <Header
@@ -244,7 +241,7 @@ const filteredTableData = computed(() => {
 
   // 保存结果长度到临时变量，避免在计算属性中产生副作用
   const resultLength = result.length;
-  
+
   // 在nextTick中更新total，避免在计算属性中产生副作用
   nextTick(() => {
     total.value = resultLength;
@@ -264,10 +261,14 @@ const getStatusType = (status: string) => {
   return ""; // 默认类型
 };
 
-// 处理详情点击
+// 处理查看详情
 const handleDetails = (row: TableItem) => {
-  MessageUtils.success(`查看 ${row.cusTitle} 的详情`);
-  // 这里可以添加跳转到详情页的逻辑
+  console.log("查看收尾详情", row);
+  // 跳转到收尾详情页
+  router.push({
+    path: "/custom-index",
+    query: { id: row.id },
+  });
 };
 
 // 处理搜索

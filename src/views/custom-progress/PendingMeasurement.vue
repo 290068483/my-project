@@ -79,6 +79,9 @@ import { View } from "@element-plus/icons-vue";
 import Header from "@/views/components/header/Header.vue";
 import MessageUtils from "@/utils/message";
 import TableCount from "../components/TableCount.vue";
+import { useRouter } from "vue-router";
+
+const router = useRouter();
 
 // 搜索类型
 const searchType = ref("id");
@@ -252,7 +255,7 @@ const getStatusType = (status: string) => {
 };
 
 // 定义表格行数据类型
-interface TableRowData {
+interface TableItem {
   id: string;
   cusTitle: string;
   intention: string;
@@ -266,10 +269,14 @@ interface TableRowData {
   details: string;
 }
 
-// 处理详情点击
-const handleDetails = (row: TableRowData) => {
-  MessageUtils.success(`查看 ${row.cusTitle} 的详情`);
-  // 这里可以添加跳转到详情页的逻辑
+// 处理查看详情
+const handleDetails = (row: TableItem) => {
+  console.log("查看测量详情", row);
+  // 跳转到测量详情页
+  router.push({
+    path: "/custom-index",
+    query: { id: row.id },
+  });
 };
 
 // 处理表格变化

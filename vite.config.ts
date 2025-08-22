@@ -48,7 +48,8 @@ export default defineConfig(({ mode }) => {
 
     // 开发服务器配置
     server: {
-      port: Number(env.VITE_PORT) || 5173,
+      // port: Number(env.VITE_PORT) || 5173,
+      host: "0.0.0.0", // 允许外部访问
       open: isDev,
       proxy: isDev
         ? {

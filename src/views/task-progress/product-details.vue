@@ -3,7 +3,13 @@
     <!-- 头部 -->
     <Header />
     <div class="table-container">
-      <el-table :data="tableData" align="center" style="width: 100%">
+      <el-table 
+        :data="tableData" 
+        align="center" 
+        style="width: 100%"
+        v-loading="loading"
+        element-loading-text="加载中..."
+      >
         <el-table-column prop="id" label="id:" width="180" />
         <el-table-column prop="name" label="名称：" width="180" />
         <el-table-column prop="type1" label="规格1:" />
@@ -23,7 +29,9 @@
 
 // 引入组件
 import Header from "@/views/components/header/Header.vue";
-import { ref } from "vue";
+import { ref, onMounted } from "vue";
+
+const loading = ref(false);
 
 const tableData = ref([
   {
@@ -71,6 +79,15 @@ const tableData = ref([
     source: "采购",
   },
 ]);
+
+// 模拟加载数据
+onMounted(() => {
+  loading.value = true;
+  // 模拟异步加载数据
+  setTimeout(() => {
+    loading.value = false;
+  }, 800);
+});
 </script>
 
 <style scoped>

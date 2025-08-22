@@ -52,6 +52,8 @@
             class="custom-table"
             border
             :cell-style="{ padding: '10px 12px' }"
+            v-loading="loading"
+            element-loading-text="加载中..."
           >
             <el-table-column
               prop="label"
@@ -102,6 +104,8 @@
             border
             style="width: 100%"
             class="custom-table"
+            v-loading="loading"
+            element-loading-text="加载中..."
           >
             <el-table-column
               prop="label"
@@ -133,6 +137,9 @@ interface TableDataItem {
   label: string;
   value: string;
 }
+
+// 表格加载状态
+const loading = ref(false);
 
 // 编辑状态管理
 const isEditing = ref(false);
@@ -259,11 +266,30 @@ const dateData = computed(() => [
   { label: "结算", value: dateInfo.settlementDate },
 ]);
 
-// 组件挂载时初始化数据
+// 组件挂载时的处理
 onMounted(() => {
-  // 可以在这里添加初始化逻辑
-  // 可以在这里获取数据或执行其他初始化操作
+  // 模拟加载数据
+  loading.value = true;
+  setTimeout(() => {
+    loading.value = false;
+  }, 800);
+  
+  // 添加窗口滚动监听
+  window.addEventListener("scroll", handleScroll);
 });
+
+// 组件卸载时的处理
+onUnmounted(() => {
+  // 移除窗口滚动监听
+  window.removeEventListener("scroll", handleScroll);
+});
+
+// 处理滚动事件
+const handleScroll = () => {
+  // 可以在这里添加滚动事件处理逻辑
+  console.log("Scrolling...");
+};
+
 </script>
 
 <style scoped>

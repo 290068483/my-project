@@ -39,13 +39,7 @@
               :key="index"
               :name="item.index"
               :label="item.title"
-            >
-              <template #label>
-                <router-link :to="item.path" custom v-slot="{ navigate }">
-                  <span @click="navigate">{{ item.title }}</span>
-                </router-link>
-              </template>
-            </el-tab-pane>
+            />
           </el-tabs>
         </div>
 
@@ -63,7 +57,12 @@
 </template>
 
 <script setup lang="ts">
-import { defineProps, defineEmits, computed } from "vue";
+defineOptions({
+  name: "AppHeader",
+});
+
+import { defineProps, defineEmits, computed, ref, onMounted } from "vue";
+import { useRouter } from "vue-router";
 import SearchBox from "./SearchBox.vue";
 import { House, User } from "@element-plus/icons-vue";
 
@@ -77,25 +76,25 @@ const orderProgressItems = [
   // 待预约
   {
     title: "待预约",
-    index: "PendingReservation",
+    index: "pending-reservation",
     active: true,
     path: "/pending-reservation",
   },
   {
     title: "待定单",
-    index: "PendingOrders",
+    index: "pending-orders",
     path: "/pending-orders",
   },
   {
     title: "待测量",
-    index: "PendingMeasurement",
+    index: "pending-measurement",
     path: "/pending-measurement",
   },
-  { title: "待合同", index: "PendingContracts", path: "/pending-contracts" },
-  { title: "待下单", index: "PendingOrders", path: "/pending-orders" },
+  { title: "待合同", index: "pending-contracts", path: "/pending-contracts" },
+  { title: "待下单", index: "pending-orders", path: "/pending-orders" },
   {
     title: "待安装",
-    index: "PendingInstallation",
+    index: "pending-installation",
     path: "/pending-installation",
   },
   {
@@ -109,30 +108,30 @@ const orderProgressItems = [
 const shippingItems = [
   {
     title: "出货总览",
-    index: "ShippingOverview",
+    index: "shipping-overview",
     active: true,
     path: "/shipping-overview",
   },
   {
     title: "出货明细",
-    index: "ShippingDetails",
+    index: "shipping-details",
     path: "/shipping-details",
   },
   {
     title: "问题明细",
-    index: "IssueDetails",
-    path: "/issue-details",
+    index: "shipping-issues",  // 修改索引为shipping-issues保持一致性
+    path: "/shipping-issues",  // 修改路径为/shipping-issues保持一致性
   },
 ];
 
 // 客户详情header导航
 const defaultItems = [
-  { title: "客户首页", index: "home", active: true, path: "/Home" },
+  { title: "客户首页", index: "home", active: true, path: "/home" },
   { title: "全部档案", index: "custom-doc", path: "/custom-doc" },
-  { title: "定单详情", index: "custom-dts", path: "/order-pending" },
+  { title: "定单详情", index: "order-details", path: "/order-details" },
   { title: "合同详情", index: "contract-details", path: "/contract-details" },
-  { title: "产品详情", index: "custom-index", path: "/product-details" },
-  { title: "出货", index: "shipping", path: "/shipping-overview" },
+  { title: "产品详情", index: "product-details", path: "/product-details" },
+  { title: "出货", index: "shipping", path: "/shipping" },
 ];
 
 // 定义组件的属性
@@ -182,14 +181,10 @@ const props = defineProps({
 });
 
 // 定义组件的事件
-const emit = defineEmits(["select", "profile-click", "search"]);
+const emit = defineEmits(["select", "profile-click", "search", "tab-click"]);
 
 // 当前激活的标签页
-const activeTab = computed(() => {
-  // 找到当前激活的菜单项
-  const activeItem = computedItems.value.find((item) => item.active);
-  return activeItem ? activeItem.index : computedDefaultActive.value;
-});
+const activeTab = ref("");
 
 // 计算属性：根据预设类型自动填充数据
 const computedItems = computed(() => {
@@ -224,18 +219,59 @@ const computedDefaultActive = computed(() => {
   return props.defaultActive;
 });
 
+// 初始化激活标签页
+onMounted(() => {
+  // 找到当前激活的菜单项
+  const activeItem = computedItems.value.find((item) => item.active);
+  
+  // 如果有激活项，设置activeTab
+  if (activeItem) {
+    activeTab.value = activeItem.index;
+  } else {
+    // 否则使用默认激活项
+    const defaultItem = computedItems.value.find(
+      (item) => item.title === computedDefaultActive.value
+    );
+    activeTab.value = defaultItem ? defaultItem.index : computedItems.value[0]?.index;
+  }
+});
+
 // 处理搜索事件
 const handleSearch = (params: { type: string; value: string }) => {
   emit("search", params);
 };
 
 // 处理标签页点击事件
-const handleTabClick = (tab: any) => {
+const handleTabClick = (tab: { props: { name: string } }) => {
   const clickedItem = computedItems.value.find(
     (item) => item.index === tab.props.name
   );
+  
   if (clickedItem) {
+    // 更新激活的标签页
+    activeTab.value = clickedItem.index;
+    
+    // 发出select事件
     emit("select", clickedItem.index);
+    emit("tab-click", clickedItem);
+
+    console.log(
+      "当前点击的标签:",
+      clickedItem.title,
+      "路径:",
+      clickedItem.path || "无路由路径"
+    );
+
+    // 如果有路由路径，进行路由跳转
+    if (clickedItem.path) {
+      const router = useRouter();
+      if (router) {
+        router.push(clickedItem.path).catch((err) => {
+          // 处理路由跳转错误（如路由不存在）
+          console.warn("路由跳转失败:", err);
+        });
+      }
+    }
   }
 };
 

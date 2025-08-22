@@ -10,6 +10,8 @@
       header-align="center"
       highlight-current-row
       border
+      v-loading="loading"
+      :element-loading-text="loadingText"
     >
       <el-table-column align="center" prop="nameOfPayment" label="款项名称" />
       <el-table-column
@@ -46,7 +48,11 @@
 
 <script setup lang="ts">
 import Header from "@/views/components/header/Header.vue";
-import { ref } from "vue";
+import { ref, onMounted } from "vue";
+
+// 表格加载状态
+const loading = ref(false);
+const loadingText = ref("加载中...");
 
 // 给完成率配置颜色
 function formatterRate(row: number) {
@@ -58,6 +64,7 @@ function formatterRate(row: number) {
   console.log("row:", row);
   return color;
 }
+
 // 表格数据
 const tableData = ref([
   {
@@ -97,6 +104,15 @@ const tableData = ref([
     style: formatterRate(30),
   },
 ]);
+
+// 模拟加载数据
+onMounted(() => {
+  loading.value = true;
+  // 模拟异步加载数据
+  setTimeout(() => {
+    loading.value = false;
+  }, 800);
+});
 </script>
 
 <style scoped>

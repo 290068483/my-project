@@ -271,10 +271,14 @@ const getStatusType = (status: string) => {
   return ""; // 默认类型
 };
 
-// 处理详情点击
+// 处理查看详情
 const handleDetails = (row: ContractItem) => {
-  MessageUtils.success(`查看 ${row.cusTitle} 的详情`);
-  // 这里可以添加跳转到详情页的逻辑
+  console.log("查看合同详情", row);
+  // 跳转到合同详情页
+  router.push({
+    path: "/contract-details",
+    query: { id: row.id },
+  });
 };
 
 // 处理搜索

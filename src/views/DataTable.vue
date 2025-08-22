@@ -25,27 +25,33 @@
         </div>
       </div>
     </div>
-    <table class="min-w-full divide-y divide-gray-200">
-      <thead class="bg-gray-50">
-        <tr>
-          <th v-for="column in columns" :key="column.key"
-            class="px-4 py-2 text-left text-xs font-medium text-gray-500 uppercase tracking-wider cursor-pointer"
-            @click="sortBy(column.key)">
-            {{ column.title }}
+    <div class="table-wrapper" :class="{ 'loading': loading }">
+      <table class="min-w-full divide-y divide-gray-200">
+        <thead class="bg-gray-50">
+          <tr>
+            <th v-for="column in columns" :key="column.key"
+              class="px-4 py-2 text-left text-xs font-medium text-gray-500 uppercase tracking-wider cursor-pointer"
+              @click="sortBy(column.key)">
+              {{ column.title }}
 
-            <span v-if="sortKey === column.key" class="ml-1">{{ sortOrder === 'asc' ? '↑' : '↓' }}</span>
-          </th>
-        </tr>
-      </thead>
-      <tbody class="bg-white divide-y divide-gray-200">
-        <tr v-for="item in data" :key="item.id" class="hover:bg-gray-50 cursor-pointer" @click="handleRowClick(item)">
-          <td v-for="column in columns" :key="column.key"
-            class="px-4 py-2 whitespace-nowrap text-sm {{ column.class || 'text-gray-500' }}">
-            {{ item[column.key] }}
-          </td>
-        </tr>
-      </tbody>
-    </table>
+              <span v-if="sortKey === column.key" class="ml-1">{{ sortOrder === 'asc' ? '↑' : '↓' }}</span>
+            </th>
+          </tr>
+        </thead>
+        <tbody class="bg-white divide-y divide-gray-200">
+          <tr v-for="item in data" :key="item.id" class="hover:bg-gray-50 cursor-pointer" @click="handleRowClick(item)">
+            <td v-for="column in columns" :key="column.key"
+              class="px-4 py-2 whitespace-nowrap text-sm {{ column.class || 'text-gray-500' }}">
+              {{ item[column.key] }}
+            </td>
+          </tr>
+        </tbody>
+      </table>
+      <div v-if="loading" class="loading-overlay">
+        <div class="loading-spinner"></div>
+        <p class="loading-text">加载中...</p>
+      </div>
+    </div>
   </div>
 </template>
 
@@ -71,7 +77,8 @@ const props = defineProps({
   columns: { type: Array as () => TableColumn[], required: true },
   data: { type: Array as () => TableData[], required: true },
   totalItems: { type: Number, default: 0 },
-  itemsPerPage: { type: Number, default: 10 }
+  itemsPerPage: { type: Number, default: 10 },
+  loading: { type: Boolean, default: false }
 });
 
 // 定义事件
@@ -106,5 +113,46 @@ const handleRowClick = (item: TableRow) => {
 </script>
 
 <style scoped>
-/* 表格样式 */
+.table-wrapper {
+  position: relative;
+}
+
+.table-wrapper.loading {
+  opacity: 0.6;
+  pointer-events: none;
+}
+
+.loading-overlay {
+  position: absolute;
+  top: 0;
+  left: 0;
+  right: 0;
+  bottom: 0;
+  display: flex;
+  flex-direction: column;
+  justify-content: center;
+  align-items: center;
+  background-color: rgba(255, 255, 255, 0.8);
+  z-index: 10;
+}
+
+.loading-spinner {
+  width: 32px;
+  height: 32px;
+  border: 3px solid #f3f3f3;
+  border-top: 3px solid #409eff;
+  border-radius: 50%;
+  animation: spin 1s linear infinite;
+  margin-bottom: 10px;
+}
+
+@keyframes spin {
+  0% { transform: rotate(0deg); }
+  100% { transform: rotate(360deg); }
+}
+
+.loading-text {
+  color: #606266;
+  font-size: 14px;
+}
 </style>

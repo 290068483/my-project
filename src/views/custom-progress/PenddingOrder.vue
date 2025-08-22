@@ -30,6 +30,8 @@
         element-loading-text="正在加载订单数据..."
         element-loading-background="rgba(255, 255, 255, 0.8)"
         element-spinner="el-icon-loading"
+        @row-click="handleRowClick"
+        row-key="id"
       >
         <el-table-column prop="id" label="ID" width="80" />
         <el-table-column prop="cusTitle" label="时间" width="180">
@@ -96,49 +98,6 @@ import { Loading } from "@element-plus/icons-vue";
 //   { value: "user", label: "客户名称" },
 //   { value: "all", label: "全部内容" },
 // ];
-// 给统计组件显示的数据
-const countData = ref([
-  {
-    index: "total",
-    value: 12,
-    label: "订单总数",
-  },
-  {
-    index: "totalAmount",
-    value: 1730.5,
-    label: "订单总金额",
-  },
-  {
-    index: "totalDeposit",
-    value: 346.3,
-    label: "订单总定金",
-  },
-  {
-    index: "avgDeposit",
-    value: 28.9,
-    label: "订单平均定金",
-  },
-  {
-    index: "totalUnitPrice",
-    value: 53205,
-    label: "订单总单价",
-  },
-  {
-    index: "avgUnitPrice",
-    value: 4434,
-    label: "订单平均单价",
-  },
-  {
-    index: "totalContract",
-    value: 1501.7,
-    label: "订单总合同款",
-  },
-  {
-    index: "avgContract",
-    value: 125.1,
-    label: "订单平均合同款",
-  },
-]);
 
 // 搜索类型
 const searchType = ref("id");
@@ -465,7 +424,7 @@ const handleSizeChange = (val: number) => {
           ? paginatedData.value.reduce((sum, item) => sum + item.price, 0) /
             paginatedData.value.length
           : 0,
-      label: "订单平均单价",
+        label: "订单平均单价",
     },
     {
       index: "totalContract",
@@ -479,9 +438,9 @@ const handleSizeChange = (val: number) => {
           ? paginatedData.value.reduce((sum, item) => sum + item.contract, 0) /
             paginatedData.value.length
           : 0,
-      label: "订单平均合同款",
-    },
-  ]);
+        label: "订单平均合同款",
+      },
+    ]);
   isLoading.value = false;
 };
 
@@ -665,8 +624,60 @@ onMounted(() => {
         label: "订单平均合同款",
       },
     ]);
-  }, 800);
+  }, 1000);
 });
+
+// 行点击事件
+const handleRowClick = (row: TableItem) => {
+  // id把id路由到客户详情首页
+  router.push({ path: "/custom-index", query: { id: row.id } });
+  console.log(row.id);
+  // console.log(event);
+};
+
+// 给统计组件显示的数据
+const countData = ref([
+  {
+    index: "total",
+    value: 12,
+    label: "订单总数",
+  },
+  {
+    index: "totalAmount",
+    value: 1730.5,
+    label: "订单总金额",
+  },
+  {
+    index: "totalDeposit",
+    value: 346.3,
+    label: "订单总定金",
+  },
+  {
+    index: "avgDeposit",
+    value: 28.9,
+    label: "订单平均定金",
+  },
+  {
+    index: "totalUnitPrice",
+    value: 53205,
+    label: "订单总单价",
+  },
+  {
+    index: "avgUnitPrice",
+    value: 4434,
+    label: "订单平均单价",
+  },
+  {
+    index: "totalContract",
+    value: 1501.7,
+    label: "订单总合同款",
+  },
+  {
+    index: "avgContract",
+    value: 125.1,
+    label: "订单平均合同款",
+  },
+]);
 </script>
 
 <style scoped>

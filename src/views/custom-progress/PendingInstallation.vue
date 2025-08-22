@@ -254,10 +254,14 @@ const getStatusType = (status: string) => {
   return ""; // 默认类型
 };
 
-// 处理详情点击
+// 处理查看详情
 const handleDetails = (row: TableItem) => {
-  MessageUtils.success(`查看 ${row.cusTitle} 的详情`);
-  // 这里可以添加跳转到详情页的逻辑
+  console.log("查看安装详情", row);
+  // 跳转到安装详情页
+  router.push({
+    path: "/product-details",
+    query: { id: row.id },
+  });
 };
 
 // 处理搜索

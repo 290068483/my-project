@@ -132,7 +132,7 @@ interface TableItem {
 // 行点击事件
 const handleRowClick = (row: TableItem) => {
   // id把id路由到客户详情首页
-  router.push({ path: "custom-index", query: { id: row.id } });
+  router.push({ path: "/custom-index", query: { id: row.id } });
   console.log(row.id);
   // console.log(event);
 };

@@ -33,26 +33,9 @@ const routes: Array<RouteRecordRaw> = [
           requiresAuth: false,
         },
       },
-      // 测试
+
       {
-        path: "projectTimeline",
-        name: "projectTimeline",
-        component: () => import("../views/ProjectTimeline.vue"),
-        meta: {
-          requiresAuth: false,
-        },
-      },
-      // 美化版项目流程进度
-      {
-        path: "enhancedProjectTimeline",
-        name: "EnhancedProjectTimeline",
-        component: () => import("../views/EnhancedProjectTimeline.vue"),
-        meta: {
-          requiresAuth: false,
-        },
-      },
-      {
-        path: "Home",
+        path: "home",
         name: "Home",
         component: () => import("../views/HomeView.vue"),
         meta: {
@@ -167,7 +150,7 @@ const routes: Array<RouteRecordRaw> = [
       // 待合同
       {
         path: "pending-contracts",
-        name: "PendingContracts",
+        name: "pending-contracts",
         component: () =>
           import("../views/custom-progress/PendingContracts.vue"),
         meta: {
@@ -177,7 +160,7 @@ const routes: Array<RouteRecordRaw> = [
       // 待下单
       {
         path: "pending-orders",
-        name: "PendingOrders",
+        name: "pending-orders",
         component: () => import("../views/custom-progress/PenddingOrder.vue"),
         meta: {
           requiresAuth: false,
@@ -186,7 +169,7 @@ const routes: Array<RouteRecordRaw> = [
       // 待安装
       {
         path: "pending-installation",
-        name: "PendingInstallation",
+        name: "pending-installation",
         component: () =>
           import("../views/custom-progress/PendingInstallation.vue"),
         meta: {
@@ -196,7 +179,7 @@ const routes: Array<RouteRecordRaw> = [
       // 待收尾
       {
         path: "pending-finalization",
-        name: "PendingFinalization",
+        name: "pending-finalization",
         component: () =>
           import("../views/custom-progress/PendingFinalization.vue"),
         meta: {
@@ -206,7 +189,7 @@ const routes: Array<RouteRecordRaw> = [
       // 待归档
       {
         path: "pending-archiving",
-        name: "PendingArchiving",
+        name: "pending-archiving",
         component: () =>
           import("../views/custom-progress/PendingArchiving.vue"),
         meta: {
@@ -216,7 +199,7 @@ const routes: Array<RouteRecordRaw> = [
       // 出货总览
       {
         path: "shipping-overview",
-        name: "ShippingOverview",
+        name: "shipping-overview",
         component: () =>
           import("../views/shipping-issues/ShippingOverview.vue"),
         meta: {
@@ -226,7 +209,7 @@ const routes: Array<RouteRecordRaw> = [
       // 出货进度
       {
         path: "issue-details",
-        name: "出貨問題明顯",
+        name: "issue-details",
         component: () => import("../views/shipping-issues/IssueDetails.vue"),
         meta: {
           requiresAuth: false,
@@ -234,7 +217,7 @@ const routes: Array<RouteRecordRaw> = [
       }, // 出货明细
       {
         path: "shipping-details",
-        name: "ShippingDetails",
+        name: "shipping-details",
         component: () => import("../views/shipping-issues/ShippingDetails.vue"),
         meta: {
           requiresAuth: false,
