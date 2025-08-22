@@ -273,6 +273,7 @@ const handleDetails = (row: TableRowData) => {
 };
 
 // 处理表格变化
+// eslint-disable-next-line @typescript-eslint/no-unused-vars
 const handleTableChange = (params: {
   page: number;
   size: number;
@@ -284,6 +285,7 @@ const handleTableChange = (params: {
 };
 
 // 处理搜索
+// eslint-disable-next-line @typescript-eslint/no-unused-vars
 const handleSearch = (params: { type: string; value: string }) => {
   if (!params.value.trim()) {
     MessageUtils.warning("请输入搜索内容");

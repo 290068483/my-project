@@ -66,8 +66,8 @@ const tableRowClassName = ({
   row: User;
   rowIndex: number;
 }) => {
-  // eslint-disable-next-line @typescript-eslint/no-unused-vars
-  row;
+  // 禁用未使用变量的警告
+  void row;
   if (rowIndex === 1) {
     return "warning-row";
   } else if (rowIndex === 3) {

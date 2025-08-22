@@ -1,3 +1,8 @@
+// 定义表格数据项接口
+interface TableItem {
+  cusTitle: string;
+  [key: string]: string | number | boolean | object; // 明确指定可能的属性类型
+}
 <template>
   <div class="pending-finalization">
     <Header
@@ -74,10 +79,17 @@
 
 <script setup lang="ts">
 // 组件逻辑
-import { ref, computed, onMounted } from "vue";
+import { ref, computed, onMounted, nextTick } from "vue";
 import Header from "@/views/components/header/Header.vue";
 import MessageUtils from "@/utils/message";
 import TableCount from "../components/TableCount.vue";
+
+// 定义表格数据项接口
+interface TableItem {
+  cusTitle: string;
+  [key: string]: string | number | boolean | object; // 明确指定可能的属性类型
+}
+
 // 搜索类型
 const searchType = ref("id");
 
@@ -230,8 +242,13 @@ const filteredTableData = computed(() => {
   const start = (currentPage.value - 1) * pageSize.value;
   const end = start + pageSize.value;
 
-  // 更新总数据量
-  total.value = result.length;
+  // 保存结果长度到临时变量，避免在计算属性中产生副作用
+  const resultLength = result.length;
+  
+  // 在nextTick中更新total，避免在计算属性中产生副作用
+  nextTick(() => {
+    total.value = resultLength;
+  });
 
   return result.slice(start, end);
 });
@@ -248,7 +265,7 @@ const getStatusType = (status: string) => {
 };
 
 // 处理详情点击
-const handleDetails = (row: any) => {
+const handleDetails = (row: TableItem) => {
   MessageUtils.success(`查看 ${row.cusTitle} 的详情`);
   // 这里可以添加跳转到详情页的逻辑
 };

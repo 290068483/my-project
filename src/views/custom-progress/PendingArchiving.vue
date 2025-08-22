@@ -78,6 +78,13 @@ import { ref, computed, onMounted } from "vue";
 import Header from "@/views/components/header/Header.vue";
 import MessageUtils from "@/utils/message";
 import TableCount from "../components/TableCount.vue";
+
+// 定义表格数据项接口
+interface TableItem {
+  cusTitle: string;
+  [key: string]: string | number | boolean; // 明确指定可能的属性类型
+}
+
 // 搜索类型
 const searchType = ref("id");
 
@@ -245,7 +252,7 @@ const getStatusType = (status: string) => {
 };
 
 // 处理详情点击
-const handleDetails = (row: any) => {
+const handleDetails = (row: TableItem) => {
   MessageUtils.success(`查看 ${row.cusTitle} 的详情`);
   // 这里可以添加跳转到详情页的逻辑
 };

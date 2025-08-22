@@ -1,3 +1,9 @@
+// 定义表格数据项接口
+interface TableItem {
+  cusTitle: string;
+  [key: string]: any; // 允许其他属性
+}
+
 <template>
   <div class="pending-installation">
     <Header
@@ -249,7 +255,7 @@ const getStatusType = (status: string) => {
 };
 
 // 处理详情点击
-const handleDetails = (row: any) => {
+const handleDetails = (row: TableItem) => {
   MessageUtils.success(`查看 ${row.cusTitle} 的详情`);
   // 这里可以添加跳转到详情页的逻辑
 };

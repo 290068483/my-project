@@ -1,3 +1,18 @@
+// 定义表格数据项接口
+interface TableItem {
+  id: string;
+  cusTitle: string;
+  intention: string;
+  status: string;
+  style: string;
+  details: string;
+  amount: number;
+  deposit: number;
+  price: number;
+  contract: number;
+  [key: string]: string | number; // 允许其他属性
+}
+
 <template>
   <div class="pendding-reservation">
     <Header
@@ -93,6 +108,21 @@ import TableCount from "../components/TableCount.vue";
 import router from "@/router";
 import { Loading } from "@element-plus/icons-vue";
 
+// 定义表格数据项接口
+interface TableItem {
+  id: string;
+  cusTitle: string;
+  intention: string;
+  status: string;
+  style: string;
+  details: string;
+  amount: number;
+  deposit: number;
+  price: number;
+  contract: number;
+  [key: string]: string | number; // 允许其他属性
+}
+
 // 搜索类型选项
 // const searchTypes = [
 //   { value: "id", label: "订单ID" },
@@ -100,10 +130,10 @@ import { Loading } from "@element-plus/icons-vue";
 //   { value: "all", label: "全部内容" },
 // ];
 // 行点击事件
-const handleRowClick = (row: unknown) => {
+const handleRowClick = (row: TableItem) => {
   // id把id路由到客户详情首页
-  router.push({ path: "custom-index", params: { id: row?.id } });
-  console.log(row?.id);
+  router.push({ path: "custom-index", query: { id: row.id } });
+  console.log(row.id);
   // console.log(event);
 };
 
@@ -342,17 +372,17 @@ const filteredTableData = computed(() => {
 
   const searchVal = searchValue.value.toLowerCase();
 
-  return tableData.value.filter((item: any) => {
+  return tableData.value.filter((item: TableItem) => {
     if (searchType.value === "id") {
-      return item.id.toLowerCase().includes(searchVal);
+      return item.id?.toLowerCase().includes(searchVal);
     } else if (searchType.value === "user") {
-      return item.intention.toLowerCase().includes(searchVal);
+      return item.intention?.toLowerCase().includes(searchVal);
     } else {
       return (
-        item.id.toLowerCase().includes(searchVal) ||
-        item.intention.toLowerCase().includes(searchVal) ||
-        item.status.toLowerCase().includes(searchVal) ||
-        item.details.toLowerCase().includes(searchVal)
+        item.id?.toLowerCase().includes(searchVal) ||
+        item.intention?.toLowerCase().includes(searchVal) ||
+        item.status?.toLowerCase().includes(searchVal) ||
+        item.details?.toLowerCase().includes(searchVal)
       );
     }
   });
@@ -490,9 +520,9 @@ const handleSizeChange = (val: number) => {
           ? paginatedData.value.reduce((sum, item) => sum + item.contract, 0) /
             paginatedData.value.length
           : 0,
-      label: "订单平均合同款",
-    },
-  ]);
+        label: "订单平均合同款",
+      },
+    ]);
   isLoading.value = false;
 };
 
@@ -682,7 +712,7 @@ onMounted(() => {
 
 <style scoped>
 /* 组件样式 */
-.pendding-order {
+.pendding-reservation {
   padding: 0;
   margin: 0;
   width: 100%;
@@ -710,24 +740,27 @@ onMounted(() => {
   flex-direction: column;
   align-items: center;
   justify-content: center;
-  height: 200px;
-  color: #409eff;
+  position: absolute;
+  top: 0;
+  left: 0;
+  right: 0;
+  bottom: 0;
+  background-color: rgba(255, 255, 255, 0.9);
+  z-index: 1000;
 }
 
 .loading-overlay .el-icon {
   font-size: 24px;
   margin-bottom: 10px;
+  color: #409eff;
 }
 
-.loading-overlay span {
-  font-size: 14px;
-  margin-top: 5px;
-}
-
-/* 空数据样式 */
+/* 空数据提示样式 */
 .empty-data {
-  padding: 40px 0;
-  text-align: center;
+  flex: 1;
+  display: flex;
+  align-items: center;
+  justify-content: center;
   min-height: 200px;
   display: flex;
   justify-content: center;
@@ -758,49 +791,5 @@ onMounted(() => {
   background-color: #f5f7fa !important;
   color: #333;
   font-weight: bold;
-}
-
-.custom-table .el-table__body tr:hover {
-  background-color: #f5f7fa;
-}
-
-/* 状态标签样式 */
-.text-red-500 {
-  color: #f56c6c;
-  font-weight: bold;
-}
-
-.text-yellow-500 {
-  color: #e6a23c;
-  font-weight: bold;
-}
-
-.text-green-500 {
-  color: #67c23a;
-  font-weight: bold;
-}
-
-/* 响应式布局 */
-@media (max-width: 768px) {
-  .pendding-order {
-    padding: 10px;
-  }
-
-  .table-container {
-    padding: 0 10px;
-  }
-
-  .pagination-container {
-    justify-content: center;
-  }
-
-  .custom-table {
-    font-size: 14px;
-  }
-
-  .custom-table .el-table th,
-  .custom-table .el-table td {
-    padding: 8px;
-  }
 }
 </style>

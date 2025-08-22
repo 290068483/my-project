@@ -1,5 +1,5 @@
 <template>
-  <div class="data-table-container">
+  <div class="data-table">
     <div class="table-header flex justify-between items-center mb-4">
       <h3 class="text-sm font-semibold text-gray-700">{{ title }}</h3>
       <div class="flex items-center space-x-2">
@@ -52,22 +52,37 @@
 <script setup lang="ts">
 import { ref, computed } from 'vue';
 
-defineProps({
+// 定义列的接口
+interface TableColumn {
+  key: string;
+  title: string;
+  class?: string;
+}
+
+// 定义数据项的接口
+interface TableData {
+  id: string | number;
+  [key: string]: string | number | boolean | object;
+}
+
+// 定义组件属性
+const props = defineProps({
   title: { type: String, required: true },
-  columns: { type: Array, required: true },
-  data: { type: Array, required: true },
+  columns: { type: Array as () => TableColumn[], required: true },
+  data: { type: Array as () => TableData[], required: true },
   totalItems: { type: Number, default: 0 },
   itemsPerPage: { type: Number, default: 10 }
 });
 
-defineEmits(['rowClick']);
+// 定义事件
+const emit = defineEmits(['rowClick']);
 
 const currentPage = ref(1);
 const sortKey = ref('');
 const sortOrder = ref<'asc' | 'desc'>('asc');
 
 const totalPages = computed(() => {
-  return Math.ceil(Number(defineProps().totalItems) / Number(defineProps().itemsPerPage));
+  return Math.ceil(Number(props.totalItems) / Number(props.itemsPerPage));
 });
 
 const sortBy = (key: string) => {
@@ -80,8 +95,12 @@ const sortBy = (key: string) => {
   // 这里可以添加实际的排序逻辑
 };
 
-const handleRowClick = (item: any) => {
-  const emit = defineEmits(['rowClick']);
+interface TableRow {
+  id: string | number;
+  [key: string]: string | number | boolean | object;
+}
+
+const handleRowClick = (item: TableRow) => {
   emit('rowClick', item);
 };
 </script>
