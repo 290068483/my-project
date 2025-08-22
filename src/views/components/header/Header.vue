@@ -1,50 +1,62 @@
 <template>
-  <div class="custom-header mb-10 mt-10">
-    <!-- 标题和按钮区域 -->
-    <div class="titleBox mt-5 flex justify-between items-center px-6 mb-3">
-      <div class="flex-1 flex justify-center">
-        <h1 :class="titleStyle">
-          {{ computedTitle }}
-        </h1>
-      </div>
-      <el-button type="primary" class="text-white" @click="handleProfileClick"
-        >进入客户档案</el-button
-      >
-    </div>
+  <div class="custom-header">
+    <!-- 渐变背景装饰 -->
+    <div class="header-bg-gradient"></div>
 
-    <!-- 导航和搜索区域 -->
-    <div
-      class="nav-search-container flex justify-between items-center px-6 mb-3"
-    >
-      <!-- 面包屑导航区域 -->
-      <div class="nav-container flex-1 mr-4">
-        <el-breadcrumb
-          separator="/"
-          :default-active="computedDefaultActive"
-          class="el-menu-demo active:text-red active:bg-white"
-          mode="horizontal"
-          @select="handleSelect"
-          :ellipsis="false"
+    <!-- 内容区域 -->
+    <div class="header-content">
+      <!-- 标题和按钮区域 -->
+      <div class="title-section">
+        <div class="title-wrapper">
+          <div class="title-icon">
+            <el-icon><House /></el-icon>
+          </div>
+          <h1 :class="titleStyle">
+            {{ computedTitle }}
+          </h1>
+        </div>
+        <el-button
+          type="primary"
+          class="profile-btn"
+          @click="handleProfileClick"
+          :icon="User"
         >
-          <el-breadcrumb-item
-            :to="{ path: item.path }"
-            v-for="(item, index) in computedItems"
-            :key="index"
-            :index="item.index"
-            class="text-white py-1 px-4"
-          >
-            {{ item.title }}
-          </el-breadcrumb-item>
-        </el-breadcrumb>
+          <span>进入客户档案</span>
+        </el-button>
       </div>
 
-      <!-- 搜索区域 -->
-      <div class="search-container flex-1 ml-4">
-        <SearchBox
-          :show="showSearch"
-          :type="searchType"
-          @search="handleSearch"
-        />
+      <!-- 导航和搜索区域 -->
+      <div class="nav-search-section">
+        <!-- 标签页导航区域 -->
+        <div class="nav-wrapper">
+          <el-tabs
+            v-model="activeTab"
+            class="nav-tabs"
+            @tab-click="handleTabClick"
+          >
+            <el-tab-pane
+              v-for="(item, index) in computedItems"
+              :key="index"
+              :name="item.index"
+              :label="item.title"
+            >
+              <template #label>
+                <router-link :to="item.path" custom v-slot="{ navigate }">
+                  <span @click="navigate">{{ item.title }}</span>
+                </router-link>
+              </template>
+            </el-tab-pane>
+          </el-tabs>
+        </div>
+
+        <!-- 搜索区域 -->
+        <div class="search-wrapper">
+          <SearchBox
+            :show="showSearch"
+            :type="searchType"
+            @search="handleSearch"
+          />
+        </div>
       </div>
     </div>
   </div>
@@ -53,6 +65,7 @@
 <script setup lang="ts">
 import { defineProps, defineEmits, computed } from "vue";
 import SearchBox from "./SearchBox.vue";
+import { House, User } from "@element-plus/icons-vue";
 
 // 默认标题
 const defaultTitle = "陆泰-重庆市万科蓝岸三期";
@@ -64,25 +77,25 @@ const orderProgressItems = [
   // 待预约
   {
     title: "待预约",
-    index: "pending-orders",
+    index: "PendingReservation",
     active: true,
-    path: "/pending-orders",
-  },
-  {
-    title: "待定单",
-    index: "pending-reservation",
     path: "/pending-reservation",
   },
   {
+    title: "待定单",
+    index: "PendingOrders",
+    path: "/pending-orders",
+  },
+  {
     title: "待测量",
-    index: "pending-measurement",
+    index: "PendingMeasurement",
     path: "/pending-measurement",
   },
-  { title: "待合同", index: "pending-contracts", path: "/pending-contracts" },
-  { title: "待下单", index: "pending-orders", path: "/pending-orders" },
+  { title: "待合同", index: "PendingContracts", path: "/pending-contracts" },
+  { title: "待下单", index: "PendingOrders", path: "/pending-orders" },
   {
     title: "待安装",
-    index: "pending-installation",
+    index: "PendingInstallation",
     path: "/pending-installation",
   },
   {
@@ -114,11 +127,11 @@ const shippingItems = [
 
 // 客户详情header导航
 const defaultItems = [
-  { title: "首页", index: "home", active: true, path: "/" },
+  { title: "客户首页", index: "home", active: true, path: "/Home" },
   { title: "全部档案", index: "custom-doc", path: "/custom-doc" },
-  { title: "定单详情", index: "custom-dts", path: "/custom-dts" },
-  { title: "合同详情", index: "contract-details", path: "/pending-contracts" },
-  { title: "产品详情", index: "custom-p", path: "/custom-progress" },
+  { title: "定单详情", index: "custom-dts", path: "/order-pending" },
+  { title: "合同详情", index: "contract-details", path: "/contract-details" },
+  { title: "产品详情", index: "custom-index", path: "/product-details" },
   { title: "出货", index: "shipping", path: "/shipping-overview" },
 ];
 
@@ -139,7 +152,7 @@ const props = defineProps({
     type: String as () => "default" | "order-progress" | "custom" | "shipping",
     default: "default",
     validator: (value: string) =>
-      ["default", "order-progress", "custom"].includes(value),
+      ["default", "order-progress", "custom", "shipping"].includes(value),
   },
   // 默认激活的菜单项索引
   defaultActive: {
@@ -170,6 +183,13 @@ const props = defineProps({
 
 // 定义组件的事件
 const emit = defineEmits(["select", "profile-click", "search"]);
+
+// 当前激活的标签页
+const activeTab = computed(() => {
+  // 找到当前激活的菜单项
+  const activeItem = computedItems.value.find((item) => item.active);
+  return activeItem ? activeItem.index : computedDefaultActive.value;
+});
 
 // 计算属性：根据预设类型自动填充数据
 const computedItems = computed(() => {
@@ -209,10 +229,14 @@ const handleSearch = (params: { type: string; value: string }) => {
   emit("search", params);
 };
 
-// 处理菜单选择事件
-const handleSelect = (key: string) => {
-  emit("select", key);
-  console.log("key:", key);
+// 处理标签页点击事件
+const handleTabClick = (tab: any) => {
+  const clickedItem = computedItems.value.find(
+    (item) => item.index === tab.props.name
+  );
+  if (clickedItem) {
+    emit("select", clickedItem.index);
+  }
 };
 
 // 处理客户档案按钮点击
@@ -256,45 +280,152 @@ const handleProfileClick = () => {
 }
 .custom-header {
   width: 100%;
-  background-color: #f3f4f6; /* 灰色背景，与原来一致 */
-  padding: 0.75rem 1.5rem; /* py-3 px-6 */
+  position: relative;
+  border-radius: 12px;
+  overflow: hidden;
   box-shadow:
-    0 1px 3px 0 rgba(0, 0, 0, 0.1),
-    0 1px 2px 0 rgba(0, 0, 0, 0.06); /* shadow-sm */
-  margin-top: 2.5rem; /* mt-10 */
-  margin-bottom: 2.5rem; /* mb-10 */
+    0 4px 6px -1px rgba(0, 0, 0, 0.1),
+    0 2px 4px -1px rgba(0, 0, 0, 0.06);
+  margin-bottom: 2rem;
+  margin-top: 1.5rem;
 }
 
-.el-menu-demo {
-  border-bottom: none;
+.header-bg-gradient {
+  position: absolute;
+  top: 0;
+  left: 0;
+  right: 0;
+  bottom: 0;
+  background: linear-gradient(135deg, #e0f2fe 0%, #dbeafe 50%, #ede9fe 100%);
+  opacity: 0.95;
+  z-index: 0;
 }
 
-:deep(.el-menu--horizontal) {
-  border-bottom: none;
+.header-content {
+  position: relative;
+  z-index: 1;
+  padding: 1.5rem;
+  color: white;
 }
 
-:deep(.el-menu--horizontal > .el-menu-item) {
-  height: 40px; /* 与原来按钮高度一致 */
-  line-height: 40px; /* 与原来按钮高度一致 */
-  font-size: 14px; /* 与原来按钮文字大小一致 */
-  /* color: #374151;  */
-  border-bottom: 2px solid transparent;
-
-  margin-right: 0.5rem; /* space-x-6 大约对应 mr-1.5 */
-  padding: 0 0.75rem; /* px-3 */
-  border-radius: 0.375rem; /* rounded */
-  transition-property: color, background-color, border-color;
-  transition-timing-function: cubic-bezier(0.4, 0, 0.2, 1);
-  transition-duration: 150ms; /* transition-colors */
+.title-section {
+  display: flex;
+  justify-content: space-between;
+  align-items: center;
+  margin-bottom: 1.5rem;
+  flex-wrap: wrap;
 }
 
-:deep(.el-menu--horizontal > .el-menu-item:hover) {
-  background-color: #e5e7eb; /* hover:bg-gray-300 */
-  color: #374151;
+.title-wrapper {
+  display: flex;
+  align-items: center;
 }
 
-:deep(.el-menu--horizontal > .el-menu-item.is-active) {
-  color: white; /* text-white */
+.title-icon {
+  margin-right: 0.75rem;
+  font-size: 1.5rem;
+  color: rgba(255, 255, 255, 0.9);
+}
+
+.profile-btn {
+  background-color: rgba(255, 255, 255, 0.2);
+  border: 1px solid rgba(255, 255, 255, 0.3);
+  color: #1e40af; /* 使用深蓝色文字，提高对比度 */
+  font-weight: 600; /* 增加字体粗细 */
+  padding: 0.5rem 1rem;
+  border-radius: 8px;
+  transition: all 0.3s ease;
+  display: flex;
+  align-items: center;
+  gap: 0.5rem;
+  text-shadow: 0 0 2px rgba(255, 255, 255, 0.7); /* 添加文字阴影增强可读性 */
+}
+
+.profile-btn:hover {
+  background-color: rgba(255, 255, 255, 0.3);
+  transform: translateY(-2px);
+  box-shadow: 0 4px 6px -1px rgba(0, 0, 0, 0.1);
+  color: #1e3a8a; /* hover时使用更深的蓝色 */
+}
+
+.nav-search-section {
+  display: flex;
+  justify-content: space-between;
+  align-items: center;
+  flex-wrap: wrap;
+}
+
+.nav-wrapper {
+  flex: 1;
+  min-width: 250px;
+  margin-right: 1.5rem;
+}
+
+.search-wrapper {
+  flex: 1;
+  min-width: 300px;
+}
+
+/* 标签页导航样式 */
+.nav-tabs {
+  background-color: rgba(255, 255, 255, 0.7);
+  padding: 0.5rem 1rem;
+  border-radius: 8px;
+  backdrop-filter: blur(5px);
+  box-shadow: 0 2px 4px rgba(0, 0, 0, 0.05);
+}
+
+:deep(.el-tabs__nav-wrap::after) {
+  background-color: rgba(226, 232, 240, 0.7);
+}
+
+:deep(.el-tabs__item) {
+  color: #1e40af;
+  font-weight: 500;
+  padding: 0 1rem;
+  height: 40px;
+  line-height: 40px;
+  transition: all 0.3s ease;
+}
+
+:deep(.el-tabs__item:hover) {
+  color: #1d4ed8;
+}
+
+:deep(.el-tabs__item.is-active) {
+  color: #1e3a8a;
+  font-weight: 600;
+}
+
+:deep(.el-tabs__active-bar) {
   background-color: #3b82f6;
+  height: 3px;
+}
+
+/* 响应式调整 */
+@media (max-width: 768px) {
+  .custom-header {
+    border-radius: 0;
+  }
+
+  .nav-search-section {
+    flex-direction: column;
+  }
+
+  .nav-wrapper {
+    margin-right: 0;
+    margin-bottom: 1rem;
+    width: 100%;
+  }
+
+  .search-wrapper {
+    width: 100%;
+  }
+
+  .title-section {
+    flex-direction: column;
+    align-items: flex-start;
+    gap: 1rem;
+  }
 }
 </style>

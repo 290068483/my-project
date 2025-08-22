@@ -1,18 +1,19 @@
 <template>
-  <div class="ShippingDetails"></div>
-  <Header
-    title="出货进度及问题汇总表"
-    preset="shipping"
-    :show-search="true"
-    title-style="text-3xl text-center pl-0 w-full text-blue-600"
-    @search="handleSearch"
-  />
-  <el-table :data="tableData" border style="width: 100%">
-    <el-table-column prop="date" label="Date" width="180" />
-    <el-table-column prop="name" label="Name" width="180" />
-    <el-table-column prop="address" label="Address" />
-  </el-table>
-  <TableCount :stats="countData" />
+  <div class="shipping-page">
+    <Header
+      title="出货进度及问题汇总表"
+      preset="shipping"
+      :show-search="true"
+      title-style="text-3xl text-center pl-0 w-full text-blue-600"
+      @search="handleSearch"
+    />
+    <el-table :data="tableData" border style="width: 100%">
+      <el-table-column prop="date" label="Date" width="180" />
+      <el-table-column prop="name" label="Name" width="180" />
+      <el-table-column prop="address" label="Address" />
+    </el-table>
+    <TableCount :stats="countData" />
+  </div>
 </template>
 
 <script setup lang="ts">
@@ -50,13 +51,13 @@ const countData = ref([
   },
   {
     index: "avgContract",
-    value: 125.1,
+    value: 386.7,
     label: "订单平均合同款",
   },
 ]);
 
-const handleSearch = (val: string) => {
-  console.log(val);
+const handleSearch = (value: string) => {
+  console.log("搜索:", value);
 };
 
 const tableData = ref([
@@ -84,10 +85,20 @@ const tableData = ref([
 </script>
 
 <style scoped>
-/* 组件样式 */
 .ShippingDetails {
-  height: 100%;
-  margin: 0 auto;
-  text-align: center;
+  padding: 20px;
+}
+
+.shipping-page {
+  padding: 20px;
+  min-height: calc(100vh - 120px);
+}
+
+.shipping-page :deep(.el-table) {
+  margin-top: 20px;
+}
+
+.shipping-page :deep(.table-count) {
+  margin-top: 20px;
 }
 </style>

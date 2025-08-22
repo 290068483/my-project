@@ -1,5 +1,5 @@
 <template>
-  <div class="shipping-overview">
+  <div class="shipping-page">
     <Header
       preset="shipping"
       :show-search="true"
@@ -168,6 +168,16 @@ const paginatedData = computed(() => {
   return filteredTableData.value.slice(start, end);
 });
 
+// 定义表格数据项的接口
+interface TableItem {
+  id: string;
+  cusTitle: string;
+  intention: string;
+  status: string;
+  details: string;
+  style: string;
+}
+
 // 表格数据
 const tableData = ref([
   {
@@ -324,7 +334,7 @@ const filteredTableData = computed(() => {
 
   const searchVal = searchValue.value.toLowerCase();
 
-  return tableData.value.filter((item: any) => {
+  return tableData.value.filter((item: TableItem) => {
     if (searchType.value === "id") {
       return item.id.toLowerCase().includes(searchVal);
     } else if (searchType.value === "user") {
@@ -339,10 +349,6 @@ const filteredTableData = computed(() => {
     }
   });
 });
-// Nav click
-const handleClick = (index: string) => {
-  // activeIndex.value = index;
-};
 // 搜索方法
 const handleSearch = (params: { type: string; value: string }) => {
   if (!params.value.trim()) {
@@ -461,7 +467,7 @@ const handleSizeChange = (val: number) => {
           ? paginatedData.value.reduce((sum, item) => sum + item.price, 0) /
             paginatedData.value.length
           : 0,
-      label: "订单平均单价",
+        label: "订单平均单价",
     },
     {
       index: "totalContract",
@@ -475,9 +481,9 @@ const handleSizeChange = (val: number) => {
           ? paginatedData.value.reduce((sum, item) => sum + item.contract, 0) /
             paginatedData.value.length
           : 0,
-      label: "订单平均合同款",
-    },
-  ]);
+        label: "订单平均合同款",
+      },
+    ]);
   isLoading.value = false;
 };
 
@@ -666,88 +672,54 @@ onMounted(() => {
 </script>
 
 <style scoped>
-/* 组件样式 */
-.pendding-order {
-  padding: 0;
-  margin: 0;
-  width: 100%;
-  min-height: 100vh;
-  display: flex;
-  flex-direction: column;
-}
-
-/* 表格区域样式 */
-.table-container {
-  margin: 20px 0;
-  padding: 0 20px;
-  flex: 1;
-  display: flex;
-  flex-direction: column;
-}
-
-/* 加载状态样式 */
-.loading-container {
+.shipping-overview {
   padding: 20px;
 }
 
-/* 空数据样式 */
-.empty-data {
-  padding: 40px 0;
-  text-align: center;
-  min-height: 200px;
-  display: flex;
-  justify-content: center;
-  align-items: center;
+.shipping-page {
+  padding: 20px;
 }
 
-/* 分页样式 */
+.shipping-page :deep(.el-table) {
+  margin-top: 20px;
+}
+
+.loading-container {
+  padding: 20px 0;
+}
+
+.table-container {
+  margin-top: 20px;
+}
+
 .pagination-container {
   margin-top: 20px;
   display: flex;
-  justify-content: flex-end;
-  padding-bottom: 20px;
+  justify-content: center;
 }
 
-/* 自定义表格样式 */
-.custom-table {
-  border-radius: 8px;
-  overflow: hidden;
-  box-shadow: 0 2px 12px 0 rgba(0, 0, 0, 0.05);
-  margin-bottom: 20px;
+.status-processing {
+  color: #409eff;
 }
 
-.custom-table .el-table__header {
-  background-color: #f5f7fa;
-}
-
-.custom-table .el-table__header th {
-  background-color: #f5f7fa !important;
-  color: #333;
-  font-weight: bold;
-}
-
-.custom-table .el-table__body tr:hover {
-  background-color: #f5f7fa;
-}
-
-/* 状态标签样式 */
-.text-red-500 {
-  color: #f56c6c;
-  font-weight: bold;
-}
-
-.text-yellow-500 {
-  color: #e6a23c;
-  font-weight: bold;
-}
-
-.text-green-500 {
+.status-completed {
   color: #67c23a;
-  font-weight: bold;
 }
 
-/* 响应式布局 */
+.status-pending {
+  color: #e6a23c;
+}
+
+.status-cancelled {
+  color: #909399;
+}
+
+/* 响应式样式 */
 @media (max-width: 768px) {
+  .shipping-overview {
+    padding: 10px;
+  }
+
   .pendding-order {
     padding: 10px;
   }

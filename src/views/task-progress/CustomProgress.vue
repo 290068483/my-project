@@ -10,7 +10,7 @@
       @search="handleSearch"
       :active="true"
     />
-    <div class="flex orderPanel items-center max-w-full">
+    <div class="flex orderPanel items-center max-w-full default-word">
       <div class="leftBox flex items-center">
         <div class="leftCell flex flex-col">
           <div>

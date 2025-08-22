@@ -1,5 +1,5 @@
 <template>
-  <div class="component-name">
+  <div class="issue-details-page">
     <!-- Header -->
 
     <Header
@@ -66,6 +66,8 @@ const tableRowClassName = ({
   row: User;
   rowIndex: number;
 }) => {
+  // eslint-disable-next-line @typescript-eslint/no-unused-vars
+  row;
   if (rowIndex === 1) {
     return "warning-row";
   } else if (rowIndex === 3) {
@@ -100,5 +102,20 @@ const tableData: User[] = [
 </script>
 
 <style scoped>
-/* 组件样式 */
+.component-name {
+  padding: 20px;
+}
+
+.issue-details-page {
+  padding: 20px;
+  min-height: calc(100vh - 120px);
+}
+
+.issue-details-page :deep(.el-table) {
+  margin-top: 20px;
+}
+
+.issue-details-page :deep(.table-count) {
+  margin-top: 20px;
+}
 </style>

@@ -12,7 +12,11 @@
     <div class="table-container" v-if="showTable">
       <!-- 加载状态 -->
       <div v-if="isLoading" class="loading-container">
-        <el-skeleton :rows="5" animated />
+        <el-skeleton :rows="5" animated :loading="true" />
+        <div class="loading-overlay">
+          <el-icon class="is-loading"><Loading /></el-icon>
+          <span>正在加载预约数据...</span>
+        </div>
       </div>
 
       <!-- 表格区域 -->
@@ -23,7 +27,9 @@
         style="width: 100%"
         class="custom-table"
         v-loading="isLoading"
-        element-loading-text="加载中..."
+        element-loading-text="正在加载预约数据..."
+        element-loading-background="rgba(255, 255, 255, 0.8)"
+        element-spinner="el-icon-loading"
         @row-click="handleRowClick"
         row-key="id"
       >
@@ -85,6 +91,7 @@ import Header from "@/views/components/header/Header.vue";
 import MessageUtils from "@/utils/message";
 import TableCount from "../components/TableCount.vue";
 import router from "@/router";
+import { Loading } from "@element-plus/icons-vue";
 
 // 搜索类型选项
 // const searchTypes = [
@@ -95,7 +102,7 @@ import router from "@/router";
 // 行点击事件
 const handleRowClick = (row: unknown) => {
   // id把id路由到客户详情首页
-  router.push({ path: "custom-dts", params: { id: row?.id } });
+  router.push({ path: "custom-index", params: { id: row?.id } });
   console.log(row?.id);
   // console.log(event);
 };
@@ -696,6 +703,25 @@ onMounted(() => {
 /* 加载状态样式 */
 .loading-container {
   padding: 20px;
+}
+
+.loading-overlay {
+  display: flex;
+  flex-direction: column;
+  align-items: center;
+  justify-content: center;
+  height: 200px;
+  color: #409eff;
+}
+
+.loading-overlay .el-icon {
+  font-size: 24px;
+  margin-bottom: 10px;
+}
+
+.loading-overlay span {
+  font-size: 14px;
+  margin-top: 5px;
 }
 
 /* 空数据样式 */

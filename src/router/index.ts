@@ -24,6 +24,33 @@ const routes: Array<RouteRecordRaw> = [
           requiresAuth: false,
         },
       },
+      // 测试
+      {
+        path: "temp",
+        name: "temp",
+        component: () => import("../views/temp.vue"),
+        meta: {
+          requiresAuth: false,
+        },
+      },
+      // 测试
+      {
+        path: "projectTimeline",
+        name: "projectTimeline",
+        component: () => import("../views/ProjectTimeline.vue"),
+        meta: {
+          requiresAuth: false,
+        },
+      },
+      // 美化版项目流程进度
+      {
+        path: "enhancedProjectTimeline",
+        name: "EnhancedProjectTimeline",
+        component: () => import("../views/EnhancedProjectTimeline.vue"),
+        meta: {
+          requiresAuth: false,
+        },
+      },
       {
         path: "Home",
         name: "Home",
@@ -45,18 +72,64 @@ const routes: Array<RouteRecordRaw> = [
       },
       // 客户进度
       {
+        path: "custom-index",
+        name: "custom-index",
+        component: () => import("../views/task-progress/CustomIndex.vue"),
+        meta: {
+          requiresAuth: false,
+        },
+      },
+      // 客户详情进度
+      {
         path: "custom-progress",
-        name: "客户进度",
-        component: () => import("../views/task-progress/CustomerProgress.vue"),
+        name: "custom-progress",
+        component: () => import("../views/task-progress/CustomProgress.vue"),
         meta: {
           requiresAuth: false,
         },
       },
       // 客户定单详情
       {
-        path: "custom-dts",
-        name: "客户定单详情",
+        path: "custom-order-dts",
+        name: "custom-order-dts",
         component: () => import("../views/task-progress/CustomOrderDts.vue"),
+        meta: {
+          requiresAuth: false,
+        },
+      },
+      // 客户详情收支明细
+      {
+        path: "income-issues",
+        name: "income-issues",
+        component: () => import("../views/task-progress/income-Issues.vue"),
+        meta: {
+          requiresAuth: false,
+        },
+      },
+      // 客户详情-产品详情
+      {
+        path: "product-details",
+        name: "product-details",
+        component: () => import("../views/task-progress/product-details.vue"),
+        meta: {
+          requiresAuth: false,
+        },
+      },
+      // 合同详情
+      {
+        path: "contract-details",
+        name: "contract-details",
+        component: () => import("../views/task-progress/contract-details.vue"),
+        meta: {
+          requiresAuth: false,
+        },
+      },
+      // 客户详情出货问题
+      {
+        path: "shapping-issues-detail",
+        name: "shapping-issues-detail",
+        component: () =>
+          import("../views/task-progress/shapping-issues-detail.vue"),
         meta: {
           requiresAuth: false,
         },
@@ -64,7 +137,7 @@ const routes: Array<RouteRecordRaw> = [
       // 客户定单
       {
         path: "order-pending",
-        name: "客户定单",
+        name: "order-pending",
         component: () => import("../views/custom-progress/PenddingOrder.vue"),
         meta: {
           requiresAuth: false,
@@ -116,6 +189,26 @@ const routes: Array<RouteRecordRaw> = [
         name: "PendingInstallation",
         component: () =>
           import("../views/custom-progress/PendingInstallation.vue"),
+        meta: {
+          requiresAuth: false,
+        },
+      },
+      // 待收尾
+      {
+        path: "pending-finalization",
+        name: "PendingFinalization",
+        component: () =>
+          import("../views/custom-progress/PendingFinalization.vue"),
+        meta: {
+          requiresAuth: false,
+        },
+      },
+      // 待归档
+      {
+        path: "pending-archiving",
+        name: "PendingArchiving",
+        component: () =>
+          import("../views/custom-progress/PendingArchiving.vue"),
         meta: {
           requiresAuth: false,
         },

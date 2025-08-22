@@ -17,7 +17,7 @@
     </div>
     <main
       ref="mainRef"
-      class="flex-1 overflow-y-auto p-4 sm:p-6 transition-all duration-300"
+      class="flex-1 p-4 sm:p-6 transition-all duration-300"
       :style="{ marginTop: mainMarginTop }"
     >
       <RouterView />

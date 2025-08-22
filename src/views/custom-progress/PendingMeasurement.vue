@@ -5,33 +5,47 @@
       :show-search="true"
       title-style="text-3xl text-center pl-0 w-full text-blue-600"
     />
-    <el-table-column prop="id" label="ID" width="80" />
-    <el-table-column prop="cusTitle" label="客户名称" width="120" />
-    <el-table-column prop="intention" label="客户称呼" width="100" />
-    <el-table-column prop="orderTime" label="预计测量时间" width="150" />
-    <el-table-column prop="amount" label="意向度" width="100" />
-    <el-table-column prop="status" label="状态" width="100">
-      <template #default="scope">
-        <el-tag :type="getStatusType(scope.row.status)" effect="dark">
-          {{ scope.row.status }}
-        </el-tag>
-      </template>
-    </el-table-column>
-    <el-table-column prop="style" label="关注风格" width="120" />
-    <el-table-column prop="LastContactDate" label="上次联系时间" width="150" />
-    <el-table-column prop="cusSource" label="客户来源" width="120" />
-    <el-table-column prop="saler" label="业务员" width="100" />
-    <el-table-column prop="details" label="详情">
-      <template #default="scope">
-        <el-button
-          type="primary"
-          link
-          @click="handleDetails(scope.row)"
-          :icon="View"
-          >查看详情</el-button
-        >
-      </template>
-    </el-table-column>
+    <el-table
+      v-loading="loading"
+      :data="filteredTableData"
+      stripe
+      border
+      style="width: 100%"
+      class="mt-4"
+    >
+      <el-table-column prop="id" label="ID" width="80" />
+      <el-table-column prop="cusTitle" label="客户名称" width="120" />
+      <el-table-column prop="intention" label="客户称呼" width="100" />
+      <el-table-column prop="orderTime" label="预计测量时间" width="150" />
+      <el-table-column prop="amount" label="意向度" width="100" />
+      <el-table-column prop="status" label="状态" width="100">
+        <template #default="scope">
+          <el-tag :type="getStatusType(scope.row.status)" effect="dark">
+            {{ scope.row.status }}
+          </el-tag>
+        </template>
+      </el-table-column>
+      <el-table-column prop="style" label="关注风格" width="120" />
+      <el-table-column
+        prop="LastContactDate"
+        label="上次联系时间"
+        width="150"
+      />
+      <el-table-column prop="cusSource" label="客户来源" width="120" />
+      <el-table-column prop="saler" label="业务员" width="100" />
+      <el-table-column prop="details" label="详情">
+        <template #default="scope">
+          <el-button
+            type="primary"
+            link
+            @click="handleDetails(scope.row)"
+            :icon="View"
+            >查看详情</el-button
+          >
+        </template>
+      </el-table-column>
+    </el-table>
+
     <TableCount :stats="countData" />
     <!-- 分页 -->
     <div class="pagination-container mt-4 flex justify-end">
