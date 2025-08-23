@@ -76,13 +76,9 @@
 <script setup lang="ts">
 // 组件逻辑
 import { ref, computed, onMounted, nextTick } from "vue";
-import { useRouter } from "vue-router"; // 导入useRouter
 import Header from "@/views/components/header/Header.vue";
 import MessageUtils from "@/utils/message";
 import TableCount from "../components/TableCount.vue";
-
-// 获取路由实例
-const router = useRouter();
 
 // 定义表格数据项接口
 interface ContractItem {
@@ -281,7 +277,7 @@ const handleDetails = (row: ContractItem) => {
   // 跳转到合同详情页
   router.push({
     path: "/contract-details",
-    query: { id: String(row.id) },
+    query: { id: row.id },
   });
 };
 

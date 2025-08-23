@@ -2,6 +2,7 @@ import { createRouter, createWebHistory } from "vue-router";
 import type { RouteRecordRaw } from "vue-router";
 import HomeView from "@/views/HomeView.vue";
 import LoginView from "@/views/user/LoginView.vue";
+import ForgotPassword from "@/views/user/ForgotPassword.vue";
 import { useUserStore } from "@/stores/user";
 import { ElMessage } from "element-plus";
 import Layout from "@/components/Layout.vue";
@@ -24,16 +25,8 @@ const routes: Array<RouteRecordRaw> = [
           requiresAuth: false,
         },
       },
-      // 测试
-      {
-        path: "temp",
-        name: "temp",
-        component: () => import("../views/temp.vue"),
-        meta: {
-          requiresAuth: false,
-        },
-      },
 
+      // 首页
       {
         path: "home",
         name: "Home",
@@ -49,15 +42,6 @@ const routes: Array<RouteRecordRaw> = [
         path: "custom-doc",
         name: "全部档案",
         component: () => import("../views/task-progress/CustomDoc.vue"),
-        meta: {
-          requiresAuth: false,
-        },
-      },
-      // 客户进度
-      {
-        path: "custom-index",
-        name: "custom-index",
-        component: () => import("../views/task-progress/CustomIndex.vue"),
         meta: {
           requiresAuth: false,
         },
@@ -223,17 +207,18 @@ const routes: Array<RouteRecordRaw> = [
           requiresAuth: false,
         },
       },
+      // 用户信息页面
+      {
+        path: "user-info",
+        name: "UserInfo",
+        component: () => import("../views/user/user-info.vue"),
+        meta: {
+          requiresAuth: false,
+        },
+      },
     ],
   },
-
-  {
-    path: "/login",
-    name: "login",
-    component: LoginView,
-    meta: {
-      requiresAuth: false,
-    },
-  },
+  //注册
   {
     path: "/register",
     name: "register",
@@ -242,11 +227,20 @@ const routes: Array<RouteRecordRaw> = [
       requiresAuth: false,
     },
   },
-
+  // 登录
   {
-    path: "/static/login",
-    name: "staticLogin",
-    component: LoginView,
+    path: "/login",
+    name: "login-inner",
+    component: () => import("../views/user/LoginView.vue"),
+    meta: {
+      requiresAuth: false,
+    },
+  },
+  // 忘记密码
+  {
+    path: "/forgot-password",
+    name: "forgot-password",
+    component: () => import("../views/user/ForgotPassword.vue"),
     meta: {
       requiresAuth: false,
     },

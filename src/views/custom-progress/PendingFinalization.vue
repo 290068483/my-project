@@ -77,13 +77,9 @@ string | number | boolean | object; // 明确指定可能的属性类型 }
 <script setup lang="ts">
 // 组件逻辑
 import { ref, computed, onMounted, nextTick } from "vue";
-import { useRouter } from "vue-router"; // 导入useRouter
 import Header from "@/views/components/header/Header.vue";
 import MessageUtils from "@/utils/message";
 import TableCount from "../components/TableCount.vue";
-
-// 获取路由实例
-const router = useRouter();
 
 // 定义表格数据项接口
 interface TableItem {
@@ -271,7 +267,7 @@ const handleDetails = (row: TableItem) => {
   // 跳转到收尾详情页
   router.push({
     path: "/custom-index",
-    query: { id: String(row.id) }, // 将id转换为字符串类型
+    query: { id: row.id },
   });
 };
 

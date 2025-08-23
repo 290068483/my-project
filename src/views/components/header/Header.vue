@@ -62,9 +62,77 @@ defineOptions({
 });
 
 import { defineProps, defineEmits, computed, ref, onMounted } from "vue";
+import { useRouter } from "vue-router";
 import SearchBox from "./SearchBox.vue";
 import { House, User } from "@element-plus/icons-vue";
-import { useRouter } from "vue-router";
+
+// 默认标题
+const defaultTitle = "陆泰-重庆市万科蓝岸三期";
+
+// 订单进度表标题
+const orderProgressTitle = "客户进度表";
+// 客户进度表菜单数据
+const orderProgressItems = [
+  // 待预约
+  {
+    title: "待预约",
+    index: "pending-reservation",
+    active: true,
+    path: "/pending-reservation",
+  },
+  {
+    title: "待定单",
+    index: "pending-orders",
+    path: "/pending-orders",
+  },
+  {
+    title: "待测量",
+    index: "pending-measurement",
+    path: "/pending-measurement",
+  },
+  { title: "待合同", index: "pending-contracts", path: "/pending-contracts" },
+  { title: "待下单", index: "pending-orders", path: "/pending-orders" },
+  {
+    title: "待安装",
+    index: "pending-installation",
+    path: "/pending-installation",
+  },
+  {
+    title: "待收尾",
+    index: "pending-finalization",
+    path: "/pending-finalization",
+  },
+  { title: "待归档", index: "pending-archiving", path: "/pending-archiving" },
+];
+// 出货header导航
+const shippingItems = [
+  {
+    title: "出货总览",
+    index: "shipping-overview",
+    active: true,
+    path: "/shipping-overview",
+  },
+  {
+    title: "出货明细",
+    index: "shipping-details",
+    path: "/shipping-details",
+  },
+  {
+    title: "问题明细",
+    index: "shipping-issues",  // 修改索引为shipping-issues保持一致性
+    path: "/shipping-issues",  // 修改路径为/shipping-issues保持一致性
+  },
+];
+
+// 客户详情header导航
+const defaultItems = [
+  { title: "客户首页", index: "home", active: true, path: "/home" },
+  { title: "全部档案", index: "custom-doc", path: "/custom-doc" },
+  { title: "定单详情", index: "order-details", path: "/order-details" },
+  { title: "合同详情", index: "contract-details", path: "/contract-details" },
+  { title: "产品详情", index: "product-details", path: "/product-details" },
+  { title: "出货", index: "shipping", path: "/shipping" },
+];
 
 // 定义组件的属性
 const props = defineProps({
@@ -73,8 +141,8 @@ const props = defineProps({
     type: Array as () => Array<{
       title: string;
       index: string;
-      path?: string;
       active?: boolean;
+      path?: string;
     }>,
     default: () => [],
   },
@@ -98,7 +166,7 @@ const props = defineProps({
   // 标题样式
   titleStyle: {
     type: String,
-    default: "text-5xl text-center min-w-[80%] font-bold text-gray-800",
+    default: "text-5xl text-center  min-w-[80%] font-bold text-gray-800",
   },
   // 是否显示搜索框
   showSearch: {
@@ -115,9 +183,6 @@ const props = defineProps({
 // 定义组件的事件
 const emit = defineEmits(["select", "profile-click", "search", "tab-click"]);
 
-// 获取路由实例
-const router = useRouter();
-
 // 当前激活的标签页
 const activeTab = ref("");
 
@@ -128,127 +193,47 @@ const computedItems = computed(() => {
   }
 
   // 如果没有传入items，则使用默认值
-  if (props.preset === "custom") {
-    return [
-      { title: "客户首页", index: "home", path: "/home" },
-      { title: "全部档案", index: "custom-doc", path: "/custom-doc" },
-      { title: "定单详情", index: "order-details", path: "/custom-order-dts" },
-      {
-        title: "合同详情",
-        index: "contract-details",
-        path: "/contract-details",
-      },
-      { title: "产品详情", index: "product-details", path: "/product-details" },
-      { title: "出货", index: "shipping", path: "/shipping-overview" },
-    ];
-  }
-
+  if (props.preset === "custom") return defaultItems;
   // 出货header导航
-  const shippingItems = [
-    {
-      title: "出货总览",
-      index: "shipping-overview",
-      path: "/shipping-overview",
-    },
-    {
-      title: "出货明细",
-      index: "shipping-details",
-      path: "/shipping-details",
-    },
-    {
-      title: "问题明细",
-      index: "issue-details",
-      path: "/issue-details",
-    },
-  ];
-
   if (props.preset === "shipping") {
     return shippingItems;
   }
-
-  // 订单进度header导航
-  const orderProgressItems = [
-    {
-      title: "待预约",
-      index: "pending-reservation",
-      active: true,
-      path: "/pending-reservation",
-    },
-    {
-      title: "待定单",
-      index: "pending-orders",
-      path: "/pending-orders",
-    },
-    {
-      title: "待测量",
-      index: "pending-measurement",
-      path: "/pending-measurement",
-    },
-    { title: "待合同", index: "pending-contracts", path: "/pending-contracts" },
-    { title: "待下单", index: "pending-orders", path: "/pending-orders" },
-    {
-      title: "待安装",
-      index: "pending-installation",
-      path: "/pending-installation",
-    },
-    {
-      title: "待收尾",
-      index: "pending-finalization",
-      path: "/pending-finalization",
-    },
-    { title: "待归档", index: "pending-archiving", path: "/pending-archiving" },
-  ];
-
   if (props.preset === "order-progress") {
     return orderProgressItems;
   }
 
   // 根据预设类型返回默认数据
-  return [
-    { title: "客户首页", index: "home", path: "/home" },
-    { title: "全部档案", index: "custom-doc", path: "/custom-doc" },
-    { title: "定单详情", index: "order-details", path: "/custom-order-dts" },
-    { title: "合同详情", index: "contract-details", path: "/contract-details" },
-    { title: "产品详情", index: "product-details", path: "/product-details" },
-    { title: "出货", index: "shipping", path: "/shipping-overview" },
-  ];
+  return defaultItems;
 });
 
 // 计算属性：根据预设类型自动填充标题
 const computedTitle = computed(() => {
   return (
     props.title ||
-    (props.preset === "order-progress"
-      ? "客户进度表"
-      : "陆泰-重庆市万科蓝岸三期")
+    (props.preset === "order-progress" ? orderProgressTitle : defaultTitle)
   );
+});
+
+// 计算属性：根据预设类型自动填充默认激活项
+const computedDefaultActive = computed(() => {
+  return props.defaultActive;
 });
 
 // 初始化激活标签页
 onMounted(() => {
-  // 查找默认激活项
-  let defaultItem = null;
+  // 找到当前激活的菜单项
+  const activeItem = computedItems.value.find((item) => item.active);
   
-  // 首先查找带有active: true标记的项
-  defaultItem = computedItems.value.find((item) => 'active' in item && item.active);
-  
-  // 如果没有找到带active标记的项，则使用props.defaultActive
-  if (!defaultItem && props.defaultActive) {
-    defaultItem = computedItems.value.find((item) => item.index === props.defaultActive);
+  // 如果有激活项，设置activeTab
+  if (activeItem) {
+    activeTab.value = activeItem.index;
+  } else {
+    // 否则使用默认激活项
+    const defaultItem = computedItems.value.find(
+      (item) => item.title === computedDefaultActive.value
+    );
+    activeTab.value = defaultItem ? defaultItem.index : computedItems.value[0]?.index;
   }
-  
-  // 如果仍然没有找到，则使用第一个项
-  if (!defaultItem && computedItems.value.length > 0) {
-    defaultItem = computedItems.value[0];
-  }
-
-  // 设置activeTab的值
-  if (defaultItem) {
-    activeTab.value = defaultItem.index;
-  }
-
-  // 发出初始化事件
-  emit("select", activeTab.value);
 });
 
 // 处理搜索事件
@@ -261,13 +246,13 @@ const handleTabClick = (tab: { props: { name: string } }) => {
   const clickedItem = computedItems.value.find(
     (item) => item.index === tab.props.name
   );
-
+  
   if (clickedItem) {
     // 更新激活的标签页
     activeTab.value = clickedItem.index;
+    
     // 发出select事件
     emit("select", clickedItem.index);
-    // 发出tab-click事件
     emit("tab-click", clickedItem);
 
     console.log(
@@ -279,17 +264,14 @@ const handleTabClick = (tab: { props: { name: string } }) => {
 
     // 如果有路由路径，进行路由跳转
     if (clickedItem.path) {
-      router.push(clickedItem.path).then(() => {
-        console.log("路由跳转成功");
-      }).catch((err: Error) => {
-        // 处理路由跳转错误（如路由不存在）
-        console.warn("路由跳转失败:", err);
-      });
-    } else {
-      console.log("该标签页没有配置路径，不需要跳转");
+      const router = useRouter();
+      if (router) {
+        router.push(clickedItem.path).catch((err) => {
+          // 处理路由跳转错误（如路由不存在）
+          console.warn("路由跳转失败:", err);
+        });
+      }
     }
-  } else {
-    console.warn("未找到匹配的菜单项:", tab.props.name);
   }
 };
 
@@ -475,11 +457,11 @@ const handleProfileClick = () => {
   .search-wrapper {
     width: 100%;
   }
-}
 
-.title-section {
-  flex-direction: column;
-  align-items: flex-start;
-  gap: 1rem;
+  .title-section {
+    flex-direction: column;
+    align-items: flex-start;
+    gap: 1rem;
+  }
 }
 </style>

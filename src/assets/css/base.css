@@ -139,3 +139,6 @@ body {
   /* 背景色 */
   background-color: #fff;
 }
+a {
+  color: #999 !important;
+}
