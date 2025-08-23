@@ -1,12 +1,14 @@
 import axios, { type AxiosInstance, type AxiosRequestConfig, type AxiosResponse } from 'axios'
+import type { AppConfig } from '@/config/index'
 import { ElMessage } from 'element-plus'
 import { useUserStore } from '@/stores/user'
 import router from '@/router'
+import config from '@/config/index'
 
 // 创建axios实例
 const http: AxiosInstance = axios.create({
-  baseURL: import.meta.env.VITE_API_BASE_URL || '/api',
-  timeout: 5000,
+  baseURL: config.baseUrl,
+  timeout: config.timeout,
   headers: {
     'Content-Type': 'application/json',
   },
