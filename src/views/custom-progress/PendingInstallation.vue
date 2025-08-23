@@ -1,7 +1,8 @@
 // 定义表格数据项接口
 interface TableItem {
+  id: string;
   cusTitle: string;
-  [key: string]: any; // 允许其他属性
+  [key: string]: string | number | boolean | object; // 明确指定可能的属性类型
 }
 
 <template>
@@ -89,10 +90,14 @@ interface TableItem {
 
 <script setup lang="ts">
 // 组件逻辑
-import { ref, computed, onMounted } from "vue";
+import { ref, computed, onMounted, watch, watchEffect } from "vue";
+import { useRouter } from "vue-router";
 import Header from "@/views/components/header/Header.vue";
 import MessageUtils from "@/utils/message";
 import TableCount from "../components/TableCount.vue";
+
+// 获取路由实例
+const router = useRouter();
 
 // 搜索类型
 const searchType = ref("id");
@@ -233,15 +238,40 @@ const filteredTableData = computed(() => {
     });
   }
 
-  // 应用分页
+  // 返回未分页的原始过滤结果
+  return result;
+});
+
+// 计算当前页数据
+const paginatedData = computed(() => {
+  const result = filteredTableData.value;
   const start = (currentPage.value - 1) * pageSize.value;
   const end = start + pageSize.value;
-
-  // 更新总数据量
-  total.value = result.length;
-
+  
   return result.slice(start, end);
 });
+
+// 监听过滤数据变化和分页变化以更新总数据量
+watch(
+  () => filteredTableData.value.length,
+  (newLength) => {
+    total.value = newLength;
+  }
+);
+
+watch(
+  [currentPage, pageSize],
+  () => {
+    // 当前页数据量
+    const result = filteredTableData.value;
+    const start = (currentPage.value - 1) * pageSize.value;
+    const end = start + pageSize.value;
+    const currentPageData = result.slice(start, end);
+    
+    // 更新统计组件显示的数据
+    updateCountData(currentPageData);
+  }
+);
 
 // 获取状态对应的标签类型
 const getStatusType = (status: string) => {
@@ -260,7 +290,7 @@ const handleDetails = (row: TableItem) => {
   // 跳转到安装详情页
   router.push({
     path: "/product-details",
-    query: { id: row.id },
+    query: { id: String(row.id) },
   });
 };
 
@@ -305,10 +335,71 @@ onMounted(() => {
   loading.value = true;
   setTimeout(() => {
     loading.value = false;
-    // 设置初始总数据量
-    total.value = tableColsData.value.length;
   }, 800);
 });
+
+// 监听搜索参数变化
+watchEffect(() => {
+  // 更新总数据量
+  total.value = filteredTableData.value.length;
+  
+  // 如果不在第一页，自动跳转到第一页
+  if (currentPage.value !== 1) {
+    currentPage.value = 1;
+  }
+});
+
+// 统计数据更新函数
+const updateCountData = (data: TableItem[]) => {
+  // 这里需要根据实际业务逻辑来计算统计数据
+  // 这只是一个示例实现
+  let totalAmount = 0;
+  let totalDeposit = 0;
+  let totalContract = 0;
+  let totalUnitPrice = 0;
+  
+  data.forEach(item => {
+    // 假设金额相关的值在数据中是数字类型
+    if (typeof item.amount === 'number') {
+      totalAmount += item.amount;
+    }
+    if (typeof item.deposit === 'number') {
+      totalDeposit += item.deposit;
+    }
+    if (typeof item.contract === 'number') {
+      totalContract += item.contract;
+    }
+    if (typeof item.price === 'number') {
+      totalUnitPrice += item.price;
+    }
+  });
+  
+  // 更新统计数据
+  countData.value = countData.value.map(stat => {
+    switch (stat.index) {
+      case 'total':
+        return { ...stat, value: data.length };
+      case 'totalAmount':
+        return { ...stat, value: totalAmount };
+      case 'totalDeposit':
+        return { ...stat, value: totalDeposit };
+      case 'avgUnitPrice':
+        return { 
+          ...stat, 
+          value: data.length ? Math.round(totalUnitPrice / data.length) : 0 
+        };
+      case 'totalContract':
+        return { ...stat, value: totalContract };
+      case 'avgContract':
+        return { 
+          ...stat, 
+          value: data.length ? Math.round(totalContract / data.length) : 0 
+        };
+      default:
+        return stat;
+    }
+  });
+};
 </script>
 
 <style scoped>

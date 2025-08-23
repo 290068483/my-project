@@ -1,7 +1,7 @@
 import { createRouter, createWebHistory } from "vue-router";
 import type { RouteRecordRaw } from "vue-router";
 import HomeView from "@/views/HomeView.vue";
-import LoginView from "@/views/LoginView.vue";
+import LoginView from "@/views/user/LoginView.vue";
 import { useUserStore } from "@/stores/user";
 import { ElMessage } from "element-plus";
 import Layout from "@/components/Layout.vue";
@@ -230,6 +230,14 @@ const routes: Array<RouteRecordRaw> = [
     path: "/login",
     name: "login",
     component: LoginView,
+    meta: {
+      requiresAuth: false,
+    },
+  },
+  {
+    path: "/register",
+    name: "register",
+    component: () => import("../views/user/register.vue"),
     meta: {
       requiresAuth: false,
     },

@@ -75,12 +75,17 @@
 <script setup lang="ts">
 // 组件逻辑
 import { ref, computed, onMounted } from "vue";
+import { useRouter } from "vue-router"; // 导入useRouter
 import Header from "@/views/components/header/Header.vue";
 import MessageUtils from "@/utils/message";
 import TableCount from "../components/TableCount.vue";
 
+// 获取路由实例
+const router = useRouter();
+
 // 定义表格数据项接口
 interface TableItem {
+  id: string;
   cusTitle: string;
   [key: string]: string | number | boolean; // 明确指定可能的属性类型
 }
@@ -257,7 +262,7 @@ const handleDetails = (row: TableItem) => {
   // 跳转到归档详情页
   router.push({
     path: "/custom-doc",
-    query: { id: row.id },
+    query: { id: String(row.id) },
   });
 };
 
