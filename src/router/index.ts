@@ -203,7 +203,7 @@ const routes: Array<RouteRecordRaw> = [
       {
         path: "user-info",
         name: "UserInfo",
-        component: () => import("../views/user/user-info.vue"),
+        component: () => import("../views/user/UserInfo.vue"),
         meta: {
           requiresAuth: false,
         },
