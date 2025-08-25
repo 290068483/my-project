@@ -126,8 +126,7 @@ const formatAmount = (amount: number | string, unit?: "万" | "元"): string => 
   }
 
   // 如果提供了单位，则按指定单位处理
-  const processedAmount =
-    unit === "万" ? parseFloat(numAmount.toFixed(2)) : Math.round(numAmount);
+  const processedAmount = unit === "万" ? parseFloat(numAmount.toFixed(2)) : Math.round(numAmount);
 
   return `${processedAmount}${unit}`;
 };
@@ -162,8 +161,7 @@ const countData = computed(() => {
     if (!item.label) return; // 如果没有标签，跳过该项
 
     // 判断是否为数字类型
-    const isNumber =
-      typeof item.value === "number" || !isNaN(Number(item.value));
+    const isNumber = typeof item.value === "number" || !isNaN(Number(item.value));
 
     // 应用格式化函数
     const formattedValue = isNumber
@@ -191,10 +189,7 @@ defineOptions({
 
 // 添加组件事件
 const emit = defineEmits<{
-  (
-    e: "dataUpdated",
-    data: Array<{ label: string; value: string; isNumber: boolean }>
-  ): void;
+  (e: "dataUpdated", data: Array<{ label: string; value: string; isNumber: boolean }>): void;
 }>();
 
 /**
@@ -207,7 +202,7 @@ watch(
   () => {
     emit("dataUpdated", countData.value);
   },
-  { deep: true }
+  { deep: true },
 );
 </script>
 

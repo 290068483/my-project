@@ -5,8 +5,7 @@
       :show-search="true"
       :search-type="searchType"
       title-style="text-3xl text-center pl-0 w-full text-blue-600"
-      @search="handleSearch"
-    />
+      @search="handleSearch" />
 
     <!-- 表格区域 -->
     <div class="table-container">
@@ -15,8 +14,7 @@
         border
         style="width: 100%"
         v-loading="loading"
-        element-loading-text="加载中..."
-      >
+        element-loading-text="加载中...">
         <el-table-column prop="id" label="ID" width="80" />
         <el-table-column prop="cusTitle" label="客户名称" width="120" />
         <el-table-column prop="intention" label="客户称呼" width="100" />
@@ -30,18 +28,12 @@
           </template>
         </el-table-column>
         <el-table-column prop="style" label="关注风格" width="120" />
-        <el-table-column
-          prop="LastContactDate"
-          label="上次联系时间"
-          width="150"
-        />
+        <el-table-column prop="LastContactDate" label="上次联系时间" width="150" />
         <el-table-column prop="cusSource" label="客户来源" width="120" />
         <el-table-column prop="saler" label="业务员" width="100" />
         <el-table-column prop="details" label="详情">
           <template #default="scope">
-            <el-button type="text" @click="handleDetails(scope.row)"
-              >查看详情</el-button
-            >
+            <el-button type="text" @click="handleDetails(scope.row)">查看详情</el-button>
           </template>
         </el-table-column>
       </el-table>
@@ -56,16 +48,12 @@
           :total="total"
           layout="total, sizes, prev, pager, next, jumper"
           @size-change="handleSizeChange"
-          @current-change="handleCurrentChange"
-        />
+          @current-change="handleCurrentChange" />
       </div>
     </div>
 
     <!-- 无数据提示 -->
-    <div
-      v-if="filteredTableData.length === 0"
-      class="no-data text-center py-10 text-gray-500"
-    >
+    <div v-if="filteredTableData.length === 0" class="no-data text-center py-10 text-gray-500">
       <div class="empty-icon mb-4">📋</div>
       <p>暂无数据</p>
       <p class="text-sm mt-2">请尝试使用搜索框查询</p>
@@ -251,7 +239,7 @@ const filteredTableData = computed(() => {
 
   // 保存结果长度到临时变量，避免在计算属性中产生副作用
   const resultLength = result.length;
-  
+
   // 在nextTick中更新total，避免在计算属性中产生副作用
   nextTick(() => {
     total.value = resultLength;

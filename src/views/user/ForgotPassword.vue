@@ -5,24 +5,12 @@
         <h2>忘记密码</h2>
         <p>请输入您的邮箱地址，我们将发送重置密码的链接</p>
       </div>
-      
-      <el-form 
-        ref="formRef" 
-        :model="form" 
-        :rules="rules" 
-        class="forgot-password-form"
-        @submit.prevent="handleSubmit"
-      >
+
+      <el-form ref="formRef" :model="form" :rules="rules" class="forgot-password-form" @submit.prevent="handleSubmit">
         <el-form-item prop="email">
-          <el-input
-            v-model="form.email"
-            placeholder="请输入邮箱地址"
-            type="email"
-            size="large"
-            prefix-icon="Message"
-          />
+          <el-input v-model="form.email" placeholder="请输入邮箱地址" type="email" size="large" prefix-icon="Message" />
         </el-form-item>
-        
+
         <el-form-item>
           <el-button
             type="primary"
@@ -30,74 +18,71 @@
             class="submit-btn"
             :loading="loading"
             @click="handleSubmit"
-            native-type="submit"
-          >
+            native-type="submit">
             发送重置链接
           </el-button>
         </el-form-item>
       </el-form>
-      
+
       <div class="form-footer">
-        <el-button type="info" link @click="goToLogin">
-          返回登录
-        </el-button>
+        <el-button type="info" link @click="goToLogin"> 返回登录 </el-button>
       </div>
     </div>
   </div>
 </template>
 
 <script setup lang="ts">
-import { ref, reactive } from 'vue'
-import { useRouter } from 'vue-router'
-import { ElMessage, ElButton, ElInput, ElForm, ElFormItem } from 'element-plus'
-import type { FormInstance, FormRules } from 'element-plus'
+import { ref, reactive } from "vue";
+import { useRouter } from "vue-router";
+import { ElMessage, ElButton, ElInput, ElForm, ElFormItem } from "element-plus";
+import type { FormInstance, FormRules } from "element-plus";
 
-const router = useRouter()
-const formRef = ref<FormInstance>()
-const loading = ref(false)
+const router = useRouter();
+const formRef = ref<FormInstance>();
+const loading = ref(false);
 
 // 表单数据
 const form = reactive({
-  email: ''
-})
+  email: "",
+});
 
 // 表单验证规则
 const rules = reactive<FormRules>({
   email: [
-    { required: true, message: '请输入邮箱地址', trigger: 'blur' },
-    { type: 'email', message: '请输入正确的邮箱地址', trigger: 'blur' }
-  ]
-})
+    { required: true, message: "请输入邮箱地址", trigger: "blur" },
+    { type: "email", message: "请输入正确的邮箱地址", trigger: "blur" },
+  ],
+});
 
 // 处理表单提交
 const handleSubmit = async () => {
-  if (!formRef.value) return
-  
+  if (!formRef.value) return;
+
   await formRef.value.validate(async (valid) => {
     if (valid) {
-      loading.value = true
+      loading.value = true;
       try {
         // 模拟发送重置密码邮件
         // 实际项目中这里应该调用后端API发送重置密码邮件
-        await new Promise(resolve => setTimeout(resolve, 1000))
-        
-        ElMessage.success('重置密码链接已发送至您的邮箱，请注意查收')
+        await new Promise((resolve) => setTimeout(resolve, 1000));
+
+        ElMessage.success("重置密码链接已发送至您的邮箱，请注意查收");
         // 可以跳转到提示页面或者返回登录页
-        router.push('/login')
+        router.push("/login");
       } catch (error) {
-        console.error('发送重置密码邮件失败:', error)
-        ElMessage.error('发送失败，请稍后重试')
+        console.error("发送重置密码邮件失败:", error);
+        ElMessage.error("发送失败，请稍后重试");
       } finally {
-        loading.value = false
+        loading.value = false;
       }
     }
-  })
-}
+  });
+};
 
 // 返回登录页
 const goToLogin = () => {
-  router.push('/login')
-}
+  router.push("/login");
+};
 </script>
 
 <style scoped>

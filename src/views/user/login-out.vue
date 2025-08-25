@@ -5,17 +5,10 @@
 </template>
 
 <script setup lang="ts">
-import { useUserStore } from "@/stores/user";
-import { ElMessage } from "element-plus";
-import { useRouter } from "vue-router";
-
-const userStore = useUserStore();
-const router = useRouter();
+import { AuthUtils } from "@/utils/auth";
 
 const handleLoginOut = () => {
-  userStore.logout();
-  ElMessage.success("退出登录成功");
-  router.push({ name: "login" });
+  AuthUtils.logout();
 };
 </script>
 

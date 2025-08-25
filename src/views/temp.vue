@@ -31,33 +31,27 @@
       </template>
       <div class="overflow-x-auto pb-6">
         <div class="flex min-w-max space-x-6">
-          <div 
-            v-for="(step, index) in processSteps" 
-            :key="index" 
-            class="flex flex-col items-center flex-shrink-0 w-32"
-          >
+          <div v-for="(step, index) in processSteps" :key="index" class="flex flex-col items-center flex-shrink-0 w-32">
             <div class="relative mb-3">
-              <div 
+              <div
                 class="w-8 h-8 rounded-full flex items-center justify-center text-white shadow-md"
                 :class="{
                   'bg-green-500': step.status === 'completed',
                   'bg-blue-500': step.status === 'processing',
-                  'bg-gray-300': step.status === 'pending'
-                }"
-              >
+                  'bg-gray-300': step.status === 'pending',
+                }">
                 <el-icon :size="14">
                   <component :is="getStepIconComponent(step.status)" />
                 </el-icon>
               </div>
-              <div 
+              <div
                 v-if="index < processSteps.length - 1"
                 class="absolute top-1/2 right-0 transform translate-x-full h-0.5 w-6"
                 :class="{
                   'bg-green-500': step.status === 'completed',
                   'bg-blue-500': step.status === 'processing',
-                  'bg-gray-300': step.status === 'pending'
-                }"
-              ></div>
+                  'bg-gray-300': step.status === 'pending',
+                }"></div>
             </div>
             <div class="text-center">
               <h3 class="font-medium text-gray-800 text-sm">{{ step.name }}</h3>
@@ -91,18 +85,8 @@
             </div>
           </template>
 
-          <el-table
-            :data="tasks"
-            border
-            style="width: 100%"
-            :row-class-name="taskRowClass"
-            class="rounded-lg"
-          >
-            <el-table-column
-              prop="name"
-              label="任务名称"
-              min-width="150"
-            ></el-table-column>
+          <el-table :data="tasks" border style="width: 100%" :row-class-name="taskRowClass" class="rounded-lg">
+            <el-table-column prop="name" label="任务名称" min-width="150"></el-table-column>
             <el-table-column prop="step" label="所属阶段" min-width="120"></el-table-column>
             <el-table-column prop="deadline" label="截止日期" min-width="120"></el-table-column>
             <el-table-column prop="assignee" label="负责人" min-width="100"></el-table-column>
@@ -121,18 +105,10 @@
                     size="small"
                     @click="handleComplete(scope.row)"
                     :disabled="scope.row.status === '已完成'"
-                    round
-                  >
+                    round>
                     标记完成
                   </el-button>
-                  <el-button
-                    type="primary"
-                    size="small"
-                    @click="handleEdit(scope.row)"
-                    round
-                  >
-                    编辑
-                  </el-button>
+                  <el-button type="primary" size="small" @click="handleEdit(scope.row)" round> 编辑 </el-button>
                 </div>
               </template>
             </el-table-column>
@@ -146,19 +122,11 @@
 <script setup lang="ts">
 import { ref } from "vue";
 import { Check, Clock, Close, Plus, Help } from "@element-plus/icons-vue";
-import {
-  ElCard,
-  ElTag,
-  ElButton,
-  ElIcon,
-  ElTable,
-  ElTableColumn,
-  ElMessage,
-} from "element-plus";
+import { ElCard, ElTag, ElButton, ElIcon, ElTable, ElTableColumn, ElMessage } from "element-plus";
 
 // 定义组件名称
 defineOptions({
-  name: "ProjectProcess"
+  name: "ProjectProcess",
 });
 
 // 流程步骤数据

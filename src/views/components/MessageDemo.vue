@@ -40,36 +40,42 @@
     <div class="demo-section mb-6">
       <h3 class="mb-3">气泡确认框示例</h3>
       <el-space>
-        <el-button type="danger" v-popconfirm="{
-          title: '确认删除吗？',
-          confirmButtonText: '删除',
-          cancelButtonText: '取消',
-          type: 'warning',
-          onConfirm: () => handleDelete('项目1'),
-          onCancel: () => console.log('取消删除')
-        }">
+        <el-button
+          type="danger"
+          v-popconfirm="{
+            title: '确认删除吗？',
+            confirmButtonText: '删除',
+            cancelButtonText: '取消',
+            type: 'warning',
+            onConfirm: () => handleDelete('项目1'),
+            onCancel: () => console.log('取消删除'),
+          }">
           删除项目1
         </el-button>
 
-        <el-button type="danger" v-popconfirm="{
-          title: '确认删除吗？',
-          confirmButtonText: '删除',
-          cancelButtonText: '取消',
-          type: 'warning',
-          onConfirm: () => handleDelete('项目2'),
-          onCancel: () => console.log('取消删除')
-        }">
+        <el-button
+          type="danger"
+          v-popconfirm="{
+            title: '确认删除吗？',
+            confirmButtonText: '删除',
+            cancelButtonText: '取消',
+            type: 'warning',
+            onConfirm: () => handleDelete('项目2'),
+            onCancel: () => console.log('取消删除'),
+          }">
           删除项目2
         </el-button>
 
-        <el-button type="primary" v-popconfirm="{
-          title: '确认提交吗？',
-          confirmButtonText: '提交',
-          cancelButtonText: '取消',
-          type: 'info',
-          onConfirm: () => handleSubmit(),
-          onCancel: () => console.log('取消提交')
-        }">
+        <el-button
+          type="primary"
+          v-popconfirm="{
+            title: '确认提交吗？',
+            confirmButtonText: '提交',
+            cancelButtonText: '取消',
+            type: 'info',
+            onConfirm: () => handleSubmit(),
+            onCancel: () => console.log('取消提交'),
+          }">
           提交表单
         </el-button>
       </el-space>
@@ -78,72 +84,71 @@
 </template>
 
 <script setup lang="ts">
-import MessageUtils from '@/utils/message';
+import MessageUtils from "@/utils/message";
 
 // 显示成功消息
 const showSuccessMessage = () => {
-  MessageUtils.success('操作成功！');
+  MessageUtils.success("操作成功！");
 };
 
 // 显示警告消息
 const showWarningMessage = () => {
-  MessageUtils.warning('警告信息！');
+  MessageUtils.warning("警告信息！");
 };
 
 // 显示错误消息
 const showErrorMessage = () => {
-  MessageUtils.error('操作失败！');
+  MessageUtils.error("操作失败！");
 };
 
 // 显示信息消息
 const showInfoMessage = () => {
-  MessageUtils.info('这是一条信息提示。');
+  MessageUtils.info("这是一条信息提示。");
 };
 
 // 显示成功通知
 const showSuccessNotification = () => {
-  MessageUtils.notification('成功', '操作已成功完成！', 'success');
+  MessageUtils.notification("成功", "操作已成功完成！", "success");
 };
 
 // 显示警告通知
 const showWarningNotification = () => {
-  MessageUtils.notification('警告', '请注意检查您的输入！', 'warning');
+  MessageUtils.notification("警告", "请注意检查您的输入！", "warning");
 };
 
 // 显示错误通知
 const showErrorNotification = () => {
-  MessageUtils.notification('错误', '操作失败，请重试！', 'error');
+  MessageUtils.notification("错误", "操作失败，请重试！", "error");
 };
 
 // 显示信息通知
 const showInfoNotification = () => {
-  MessageUtils.notification('提示', '这是一条信息通知。', 'info');
+  MessageUtils.notification("提示", "这是一条信息通知。", "info");
 };
 
 // 显示确认对话框
 const showConfirmDialog = () => {
-  MessageUtils.confirm('您确定要执行此操作吗？')
+  MessageUtils.confirm("您确定要执行此操作吗？")
     .then(() => {
-      MessageUtils.success('您点击了确定按钮');
+      MessageUtils.success("您点击了确定按钮");
     })
     .catch(() => {
-      MessageUtils.info('您点击了取消按钮');
+      MessageUtils.info("您点击了取消按钮");
     });
 };
 
 // 显示提示对话框
 const showAlertDialog = () => {
-  MessageUtils.alert('这是一个重要的提示信息！', '重要提示')
-    .then(() => {
-      MessageUtils.success('您已确认提示');
-    });
+  MessageUtils.alert("这是一个重要的提示信息！", "重要提示").then(() => {
+    MessageUtils.success("您已确认提示");
+  });
 };
 
 // 显示输入对话框
 const showPromptDialog = () => {
-  MessageUtils.prompt('请输入您的姓名：', '输入信息', '', '确定', '取消', '请输入姓名', 'text', (value) => {
+  MessageUtils.prompt("请输入您的姓名：", "输入信息", "", "确定", "取消", "请输入姓名", "text", (value) => {
     if (!value) {
-      return '姓名不能为空';
+      return "姓名不能为空";
     }
     return true;
   })
@@ -151,7 +156,7 @@ const showPromptDialog = () => {
       MessageUtils.success(`您输入的姓名是：${value}`);
     })
     .catch(() => {
-      MessageUtils.info('您取消了输入');
+      MessageUtils.info("您取消了输入");
     });
 };
 
@@ -162,7 +167,7 @@ const handleDelete = (itemName: string) => {
 
 // 处理提交操作
 const handleSubmit = () => {
-  MessageUtils.success('表单已成功提交！');
+  MessageUtils.success("表单已成功提交！");
 };
 </script>
 

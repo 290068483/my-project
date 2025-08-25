@@ -1,11 +1,7 @@
 <template>
   <div class="search-box" v-if="showSearch">
     <div class="search-options">
-      <el-radio-group
-        v-model="searchType"
-        size="small"
-        class="search-type-group"
-      >
+      <el-radio-group v-model="searchType" size="small" class="search-type-group">
         <el-radio-button label="id">ID</el-radio-button>
         <el-radio-button label="time">时间</el-radio-button>
         <el-radio-button label="user">用户名称</el-radio-button>
@@ -17,8 +13,7 @@
           placeholder="请输入搜索内容"
           clearable
           @keyup.enter="handleSearch"
-          class="search-input"
-        >
+          class="search-input">
           <template #append>
             <el-button @click="handleSearch">搜索</el-button>
           </template>
@@ -63,7 +58,7 @@ watch(
   () => props.show,
   (newValue) => {
     showSearch.value = newValue;
-  }
+  },
 );
 
 // 监听type属性变化
@@ -71,7 +66,7 @@ watch(
   () => props.type,
   (newValue) => {
     searchType.value = newValue;
-  }
+  },
 );
 
 // 搜索方法

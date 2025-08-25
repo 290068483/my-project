@@ -19,15 +19,15 @@
 </template>
 
 <script setup lang="ts">
-import { ElMessage } from 'element-plus';
-import { ArrowDown, Download } from '@element-plus/icons-vue';
+import { ElMessage } from "element-plus";
+import { ArrowDown, Download } from "@element-plus/icons-vue";
 
 // 定义事件
-const emit = defineEmits(['download']);
+const emit = defineEmits(["download"]);
 
 // 下载功能
 const handleDownload = (type: string) => {
-  emit('download', type);
+  emit("download", type);
 };
 </script>
 

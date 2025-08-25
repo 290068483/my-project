@@ -11,13 +11,9 @@
         :rules="registerRules"
         ref="registerFormRef"
         label-width="80px"
-        class="register-form"
-      >
+        class="register-form">
         <el-form-item label="用户名" prop="username">
-          <el-input
-            v-model="registerForm.username"
-            placeholder="请输入手机号"
-          />
+          <el-input v-model="registerForm.username" placeholder="请输入手机号" />
         </el-form-item>
         <el-form-item label="昵称" prop="nickname">
           <el-input v-model="registerForm.nickname" placeholder="请输入昵称" />
@@ -32,31 +28,17 @@
         </el-form-item>
 
         <el-form-item label="密码" prop="password">
-          <el-input
-            v-model="registerForm.password"
-            type="password"
-            placeholder="请输入密码"
-          />
+          <el-input v-model="registerForm.password" type="password" placeholder="请输入密码" />
         </el-form-item>
 
         <el-form-item label="确认密码" prop="confirmPassword">
-          <el-input
-            v-model="registerForm.confirmPassword"
-            type="password"
-            placeholder="请再次输入密码"
-          />
+          <el-input v-model="registerForm.confirmPassword" type="password" placeholder="请再次输入密码" />
         </el-form-item>
 
         <el-form-item>
           <!-- 注册按钮居中 -->
           <div class="button-container">
-            <el-button
-              type="primary"
-              size="large"
-              class="register-btn"
-              @click="handleRegister"
-              :loading="loading"
-            >
+            <el-button type="primary" size="large" class="register-btn" @click="handleRegister" :loading="loading">
               注册
             </el-button>
           </div>
@@ -99,11 +81,7 @@ const registerForm = reactive<RegisterForm>({
   confirmPassword: "",
 });
 
-const validatePass = (
-  rule: unknown,
-  value: string,
-  callback: (error?: Error) => void
-) => {
+const validatePass = (rule: unknown, value: string, callback: (error?: Error) => void) => {
   if (value === "") {
     callback(new Error("请输入密码"));
   } else {
@@ -114,11 +92,7 @@ const validatePass = (
   }
 };
 
-const validatePass2 = (
-  rule: unknown,
-  value: string,
-  callback: (error?: Error) => void
-) => {
+const validatePass2 = (rule: unknown, value: string, callback: (error?: Error) => void) => {
   if (value === "") {
     callback(new Error("请再次输入密码"));
   } else if (value !== registerForm.password) {
@@ -144,9 +118,7 @@ const registerRules = reactive<FormRules>({
     },
   ],
   password: [{ required: true, validator: validatePass, trigger: "blur" }],
-  confirmPassword: [
-    { required: true, validator: validatePass2, trigger: "blur" },
-  ],
+  confirmPassword: [{ required: true, validator: validatePass2, trigger: "blur" }],
 });
 
 const handleRegister = async () => {

@@ -11,24 +11,11 @@
       highlight-current-row
       border
       v-loading="loading"
-      :element-loading-text="loadingText"
-    >
+      :element-loading-text="loadingText">
       <el-table-column align="center" prop="nameOfPayment" label="款项名称" />
-      <el-table-column
-        align="center"
-        prop="performanceRatio"
-        label="业绩占比"
-      />
-      <el-table-column
-        align="center"
-        prop="accountsReceivable"
-        label="应收支款"
-      />
-      <el-table-column
-        align="center"
-        prop="currentSettlement"
-        label="当前结算"
-      />
+      <el-table-column align="center" prop="performanceRatio" label="业绩占比" />
+      <el-table-column align="center" prop="accountsReceivable" label="应收支款" />
+      <el-table-column align="center" prop="currentSettlement" label="当前结算" />
 
       <el-table-column align="center" prop="completionRate" label="完成率">
         <!-- 单个单元格容器 -->
@@ -36,11 +23,7 @@
           <span :class="row.style">{{ row.completionRate }}</span>
         </template>
       </el-table-column>
-      <el-table-column
-        align="center"
-        prop="settlementEventNumber"
-        label="结算事件号"
-      />
+      <el-table-column align="center" prop="settlementEventNumber" label="结算事件号" />
     </el-table>
     <!-- <TableCount :stats="countData" /> -->
   </div>

@@ -1,12 +1,7 @@
 <template>
-  <div
-    class="layout home-container min-h-screen min-w-full bg-neutral flex flex-col font-sans"
-  >
+  <div class="layout home-container min-h-screen min-w-full bg-neutral flex flex-col font-sans">
     <Header ref="headerRef" />
-    <div
-      v-if="skeletonScreen"
-      class="skeleton-screen fixed inset-0 z-50 flex flex-col bg-white/90"
-    >
+    <div v-if="skeletonScreen" class="skeleton-screen fixed inset-0 z-50 flex flex-col bg-white/90">
       <div class="skeleton-header h-16 sm:h-32 bg-gray-100 animate-pulse"></div>
       <div class="skeleton-content flex-1 p-6 space-y-4">
         <div class="h-6 w-1/4 bg-gray-100 rounded animate-pulse"></div>
@@ -15,11 +10,7 @@
         <div class="h-40 w-full bg-gray-100 rounded animate-pulse"></div>
       </div>
     </div>
-    <main
-      ref="mainRef"
-      class="flex-1 p-4 sm:p-6 transition-all duration-300"
-      :style="{ marginTop: mainMarginTop }"
-    >
+    <main ref="mainRef" class="flex-1 p-4 sm:p-6 transition-all duration-300" :style="{ marginTop: mainMarginTop }">
       <RouterView />
     </main>
   </div>
@@ -49,7 +40,7 @@ watch(
         skeletonScreen.value = false;
       }, 200);
     }
-  }
+  },
 );
 
 // 模拟数据加载，2秒后设置loading为false
@@ -87,10 +78,7 @@ onMounted(() => {
       mainMarginTop.value = `${headerHeight + 1}px`;
 
       // 设置CSS变量，供子组件使用
-      document.documentElement.style.setProperty(
-        "--header-height",
-        `${headerHeight}px`
-      );
+      document.documentElement.style.setProperty("--header-height", `${headerHeight}px`);
 
       // 确保mainRef的样式被正确应用
       nextTick(() => {

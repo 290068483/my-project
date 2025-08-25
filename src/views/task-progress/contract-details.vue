@@ -5,15 +5,9 @@
       <div class="flex justify-between items-center">
         <div class="text-lg font-semibold">合同详情</div>
         <div class="flex gap-2">
-          <el-button type="primary" icon="Download" @click="handleDownload">
-            下载合同
-          </el-button>
-          <el-button type="success" icon="Edit" @click="handleEdit">
-            编辑合同
-          </el-button>
-          <el-button type="warning" icon="Print" @click="handlePrint">
-            打印合同
-          </el-button>
+          <el-button type="primary" icon="Download" @click="handleDownload"> 下载合同 </el-button>
+          <el-button type="success" icon="Edit" @click="handleEdit"> 编辑合同 </el-button>
+          <el-button type="warning" icon="Print" @click="handlePrint"> 打印合同 </el-button>
         </div>
       </div>
     </el-card>
@@ -76,15 +70,9 @@
       <!-- 合同正文 -->
       <div class="contract-body space-y-6">
         <section v-for="(clause, index) in contractInfo.clauses" :key="index">
-          <h2 class="text-lg font-semibold mb-2">
-            第 {{ index + 1 }} 条 {{ clause.title }}
-          </h2>
+          <h2 class="text-lg font-semibold mb-2">第 {{ index + 1 }} 条 {{ clause.title }}</h2>
           <div class="pl-6 text-indent-8 leading-relaxed">
-            <p
-              v-for="(para, pIndex) in clause.paragraphs"
-              :key="pIndex"
-              class="mb-4"
-            >
+            <p v-for="(para, pIndex) in clause.paragraphs" :key="pIndex" class="mb-4">
               {{ para }}
             </p>
           </div>
@@ -95,11 +83,7 @@
       <div class="mt-10">
         <h2 class="text-lg font-semibold mb-4">合同附件</h2>
         <el-table :data="contractInfo.attachments" border style="width: 100%">
-          <el-table-column
-            prop="name"
-            label="附件名称"
-            width="300"
-          ></el-table-column>
+          <el-table-column prop="name" label="附件名称" width="300"></el-table-column>
           <el-table-column prop="type" label="类型"></el-table-column>
           <el-table-column prop="size" label="大小"></el-table-column>
           <el-table-column label="操作">

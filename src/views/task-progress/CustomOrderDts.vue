@@ -1,35 +1,17 @@
 <template>
   <div class="custom-order-dts">
     <!-- header -->
-    <Header
-      preset="custom"
-      :defaultActive="'custom-dts'"
-      :title="'陆泰-重庆市万科蓝岸三期'"
-      :titleStyle="docTitle"
-    />
+    <Header preset="custom" :defaultActive="'custom-dts'" :title="'陆泰-重庆市万科蓝岸三期'" :titleStyle="docTitle" />
     <!-- 内容信息 -->
 
     <CustomerContent>
       <div class="cusContentBox flex gap-1 bg-[#bfd8ca]">
-        <el-descriptions
-          class="descBox"
-          title="九素-全屋定制订购单"
-          :column="1"
-          border
-        >
+        <el-descriptions class="descBox" title="九素-全屋定制订购单" :column="1" border>
           <el-descriptions-item label="客户名称">陆秦</el-descriptions-item>
-          <el-descriptions-item label="联系电话"
-            >1392640056</el-descriptions-item
-          >
-          <el-descriptions-item label="项目地址"
-            >重庆市渝北区</el-descriptions-item
-          >
-          <el-descriptions-item label="楼盘名称"
-            >龙渊滩古典家</el-descriptions-item
-          >
-          <el-descriptions-item label="装修负责人"
-            >刘师傅（18649621102）</el-descriptions-item
-          >
+          <el-descriptions-item label="联系电话">1392640056</el-descriptions-item>
+          <el-descriptions-item label="项目地址">重庆市渝北区</el-descriptions-item>
+          <el-descriptions-item label="楼盘名称">龙渊滩古典家</el-descriptions-item>
+          <el-descriptions-item label="装修负责人">刘师傅（18649621102）</el-descriptions-item>
         </el-descriptions>
 
         <div class="rightBox">
@@ -93,12 +75,7 @@ const docTitle = "text-5xl text-center  min-w-[80%] font-bold text-gray-800";
   right: 0;
   height: 100%;
   width: 1px;
-  background: linear-gradient(
-    to right,
-    rgba(191, 216, 202, 0.9),
-    rgba(191, 216, 202, 0.7),
-    rgba(191, 216, 202, 0.5)
-  );
+  background: linear-gradient(to right, rgba(191, 216, 202, 0.9), rgba(191, 216, 202, 0.7), rgba(191, 216, 202, 0.5));
   box-shadow:
     1px 0 2px rgba(0, 0, 0, 0.3),
     -1px 0 1px rgba(255, 255, 255, 0.1);

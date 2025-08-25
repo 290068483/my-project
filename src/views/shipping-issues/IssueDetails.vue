@@ -6,13 +6,8 @@
       title="出货问题详情"
       preset="shipping"
       :show-search="true"
-      title-style="text-3xl text-center pl-0 w-full text-blue-600"
-    />
-    <el-table
-      :data="tableData"
-      style="width: 100%"
-      :row-class-name="tableRowClassName"
-    >
+      title-style="text-3xl text-center pl-0 w-full text-blue-600" />
+    <el-table :data="tableData" style="width: 100%" :row-class-name="tableRowClassName">
       <el-table-column prop="date" label="Date" width="180" />
       <el-table-column prop="name" label="Name" width="180" />
       <el-table-column prop="address" label="Address" />
@@ -59,13 +54,7 @@ interface User {
   name: string;
   address: string;
 }
-const tableRowClassName = ({
-  row,
-  rowIndex,
-}: {
-  row: User;
-  rowIndex: number;
-}) => {
+const tableRowClassName = ({ row, rowIndex }: { row: User; rowIndex: number }) => {
   // 禁用未使用变量的警告
   void row;
   if (rowIndex === 1) {

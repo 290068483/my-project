@@ -1,46 +1,29 @@
 <template>
   <div
     name="CustomDoc"
-    class="bg-white min-h-screen min-w-full overflow-x-hidden overflow-y-auto relative z-10 mx-auto"
-  >
+    class="bg-white min-h-screen min-w-full overflow-x-hidden overflow-y-auto relative z-10 mx-auto">
     <div class="min-w-full px-4 sm:px-6 pb-12 mx-auto">
       <!-- 导航标签 -->
-      <Header
-        preset="custom"
-        :defaultActive="'custom-doc'"
-        :title="'陆秦-重庆市万科科蓝岸三期'"
-      />
+      <Header preset="custom" :defaultActive="'custom-doc'" :title="'陆秦-重庆市万科科蓝岸三期'" />
 
       <!-- 主要内容区域 -->
-      <div
-        class="p-4 sm:p-6 pt-4 pb-12 grid grid-cols-1 lg:grid-cols-4 md:grid-cols-2 gap-4 sm:gap-6"
-      >
+      <div class="p-4 sm:p-6 pt-4 pb-12 grid grid-cols-1 lg:grid-cols-4 md:grid-cols-2 gap-4 sm:gap-6">
         <!-- 左侧表格：客户信息 -->
-        <el-card
-          class="border border-gray-200 rounded-md shadow-sm"
-          header-class="bg-gray-50 border-b border-gray-200"
-        >
+        <el-card class="border border-gray-200 rounded-md shadow-sm" header-class="bg-gray-50 border-b border-gray-200">
           <template>
             <div class="flex justify-between items-center">
               <span class="font-medium text-gray-800">客户信息</span>
               <button
                 v-if="!isEditing"
                 @click="startEditing"
-                class="text-blue-500 hover:text-blue-700 text-sm flex items-center"
-              >
+                class="text-blue-500 hover:text-blue-700 text-sm flex items-center">
                 <i class="el-icon-edit-outline mr-1"></i>编辑
               </button>
               <div v-else class="flex space-x-2">
-                <button
-                  @click="saveEditing"
-                  class="text-green-500 hover:text-green-700 text-sm flex items-center"
-                >
+                <button @click="saveEditing" class="text-green-500 hover:text-green-700 text-sm flex items-center">
                   <i class="el-icon-check mr-1"></i>保存
                 </button>
-                <button
-                  @click="cancelEditing"
-                  class="text-gray-500 hover:text-gray-700 text-sm flex items-center"
-                >
+                <button @click="cancelEditing" class="text-gray-500 hover:text-gray-700 text-sm flex items-center">
                   <i class="el-icon-close mr-1"></i>取消
                 </button>
               </div>
@@ -53,47 +36,28 @@
             border
             :cell-style="{ padding: '10px 12px' }"
             v-loading="loading"
-            element-loading-text="加载中..."
-          >
-            <el-table-column
-              prop="label"
-              label="项目"
-              width="100"
-            ></el-table-column>
-            <el-table-column
-              prop="value"
-              label="内容"
-              width="200"
-            ></el-table-column>
+            element-loading-text="加载中...">
+            <el-table-column prop="label" label="项目" width="100"></el-table-column>
+            <el-table-column prop="value" label="内容" width="200"></el-table-column>
           </el-table>
         </el-card>
 
         <!-- 右侧表格：日期 -->
-        <el-card
-          class="border border-gray-200 rounded-md shadow-sm"
-          header-class="bg-gray-50 border-b border-gray-200"
-        >
+        <el-card class="border border-gray-200 rounded-md shadow-sm" header-class="bg-gray-50 border-b border-gray-200">
           <template>
             <div class="flex justify-between items-center">
               <span class="font-medium text-gray-800">日期</span>
               <button
                 v-if="!isEditing"
                 @click="startEditing"
-                class="text-blue-500 hover:text-blue-700 text-sm flex items-center"
-              >
+                class="text-blue-500 hover:text-blue-700 text-sm flex items-center">
                 <i class="el-icon-edit-outline mr-1"></i>编辑
               </button>
               <div v-else class="flex space-x-2">
-                <button
-                  @click="saveEditing"
-                  class="text-green-500 hover:text-green-700 text-sm flex items-center"
-                >
+                <button @click="saveEditing" class="text-green-500 hover:text-green-700 text-sm flex items-center">
                   <i class="el-icon-check mr-1"></i>保存
                 </button>
-                <button
-                  @click="cancelEditing"
-                  class="text-gray-500 hover:text-gray-700 text-sm flex items-center"
-                >
+                <button @click="cancelEditing" class="text-gray-500 hover:text-gray-700 text-sm flex items-center">
                   <i class="el-icon-close mr-1"></i>取消
                 </button>
               </div>
@@ -105,18 +69,9 @@
             style="width: 100%"
             class="custom-table"
             v-loading="loading"
-            element-loading-text="加载中..."
-          >
-            <el-table-column
-              prop="label"
-              label="项目"
-              width="100"
-            ></el-table-column>
-            <el-table-column
-              prop="value"
-              label="内容"
-              width="200"
-            ></el-table-column>
+            element-loading-text="加载中...">
+            <el-table-column prop="label" label="项目" width="100"></el-table-column>
+            <el-table-column prop="value" label="内容" width="200"></el-table-column>
           </el-table>
         </el-card>
       </div>
@@ -273,7 +228,7 @@ onMounted(() => {
   setTimeout(() => {
     loading.value = false;
   }, 800);
-  
+
   // 添加窗口滚动监听
   window.addEventListener("scroll", handleScroll);
 });
@@ -289,7 +244,6 @@ const handleScroll = () => {
   // 可以在这里添加滚动事件处理逻辑
   console.log("Scrolling...");
 };
-
 </script>
 
 <style scoped>

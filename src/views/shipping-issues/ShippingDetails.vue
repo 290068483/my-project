@@ -5,8 +5,7 @@
       preset="shipping"
       :show-search="true"
       title-style="text-3xl text-center pl-0 w-full text-blue-600"
-      @search="handleSearch"
-    />
+      @search="handleSearch" />
     <el-table :data="tableData" border style="width: 100%">
       <el-table-column prop="date" label="Date" width="180" />
       <el-table-column prop="name" label="Name" width="180" />

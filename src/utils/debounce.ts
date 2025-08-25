@@ -2,7 +2,7 @@
 function debounce<T extends (...args: any[]) => any>(fn: T, delay: number = 300): T {
   let timer: number | null = null;
 
-  return function(this: any, ...args: any[]) {
+  return function (this: any, ...args: any[]) {
     if (timer) clearTimeout(timer);
     timer = window.setTimeout(() => {
       fn.apply(this, args);
@@ -15,7 +15,7 @@ function throttle<T extends (...args: any[]) => any>(fn: T, interval: number = 3
   let lastTime = 0;
   let timer: number | null = null;
 
-  return function(this: any, ...args: any[]) {
+  return function (this: any, ...args: any[]) {
     const nowTime = Date.now();
     const remaining = interval - (nowTime - lastTime);
 

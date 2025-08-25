@@ -15,12 +15,7 @@
             {{ computedTitle }}
           </h1>
         </div>
-        <el-button
-          type="primary"
-          class="profile-btn"
-          @click="handleProfileClick"
-          :icon="User"
-        >
+        <el-button type="primary" class="profile-btn" @click="handleProfileClick" :icon="User">
           <span>进入客户档案</span>
         </el-button>
       </div>
@@ -29,27 +24,14 @@
       <div class="nav-search-section">
         <!-- 标签页导航区域 -->
         <div class="nav-wrapper">
-          <el-tabs
-            v-model="activeTab"
-            class="nav-tabs"
-            @tab-click="handleTabClick"
-          >
-            <el-tab-pane
-              v-for="(item, index) in computedItems"
-              :key="index"
-              :name="item.index"
-              :label="item.title"
-            />
+          <el-tabs v-model="activeTab" class="nav-tabs" @tab-click="handleTabClick">
+            <el-tab-pane v-for="(item, index) in computedItems" :key="index" :name="item.index" :label="item.title" />
           </el-tabs>
         </div>
 
         <!-- 搜索区域 -->
         <div class="search-wrapper">
-          <SearchBox
-            :show="showSearch"
-            :type="searchType"
-            @search="handleSearch"
-          />
+          <SearchBox :show="showSearch" :type="searchType" @search="handleSearch" />
         </div>
       </div>
     </div>
@@ -119,8 +101,8 @@ const shippingItems = [
   },
   {
     title: "问题明细",
-    index: "shipping-issues",  // 修改索引为shipping-issues保持一致性
-    path: "/shipping-issues",  // 修改路径为/shipping-issues保持一致性
+    index: "shipping-issues", // 修改索引为shipping-issues保持一致性
+    path: "/shipping-issues", // 修改路径为/shipping-issues保持一致性
   },
 ];
 
@@ -150,8 +132,7 @@ const props = defineProps({
   preset: {
     type: String as () => "default" | "order-progress" | "custom" | "shipping",
     default: "default",
-    validator: (value: string) =>
-      ["default", "order-progress", "custom", "shipping"].includes(value),
+    validator: (value: string) => ["default", "order-progress", "custom", "shipping"].includes(value),
   },
   // 默认激活的菜单项索引
   defaultActive: {
@@ -208,10 +189,7 @@ const computedItems = computed(() => {
 
 // 计算属性：根据预设类型自动填充标题
 const computedTitle = computed(() => {
-  return (
-    props.title ||
-    (props.preset === "order-progress" ? orderProgressTitle : defaultTitle)
-  );
+  return props.title || (props.preset === "order-progress" ? orderProgressTitle : defaultTitle);
 });
 
 // 计算属性：根据预设类型自动填充默认激活项
@@ -223,15 +201,13 @@ const computedDefaultActive = computed(() => {
 onMounted(() => {
   // 找到当前激活的菜单项
   const activeItem = computedItems.value.find((item) => item.active);
-  
+
   // 如果有激活项，设置activeTab
   if (activeItem) {
     activeTab.value = activeItem.index;
   } else {
     // 否则使用默认激活项
-    const defaultItem = computedItems.value.find(
-      (item) => item.title === computedDefaultActive.value
-    );
+    const defaultItem = computedItems.value.find((item) => item.title === computedDefaultActive.value);
     activeTab.value = defaultItem ? defaultItem.index : computedItems.value[0]?.index;
   }
 });
@@ -243,24 +219,17 @@ const handleSearch = (params: { type: string; value: string }) => {
 
 // 处理标签页点击事件
 const handleTabClick = (tab: { props: { name: string } }) => {
-  const clickedItem = computedItems.value.find(
-    (item) => item.index === tab.props.name
-  );
-  
+  const clickedItem = computedItems.value.find((item) => item.index === tab.props.name);
+
   if (clickedItem) {
     // 更新激活的标签页
     activeTab.value = clickedItem.index;
-    
+
     // 发出select事件
     emit("select", clickedItem.index);
     emit("tab-click", clickedItem);
 
-    console.log(
-      "当前点击的标签:",
-      clickedItem.title,
-      "路径:",
-      clickedItem.path || "无路由路径"
-    );
+    console.log("当前点击的标签:", clickedItem.title, "路径:", clickedItem.path || "无路由路径");
 
     // 如果有路由路径，进行路由跳转
     if (clickedItem.path) {

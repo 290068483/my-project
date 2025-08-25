@@ -1,18 +1,7 @@
 <template>
   <div class="pending-measurement" name="PendingMeasurement">
-    <Header
-      preset="order-progress"
-      :show-search="true"
-      title-style="text-3xl text-center pl-0 w-full text-blue-600"
-    />
-    <el-table
-      v-loading="loading"
-      :data="filteredTableData"
-      stripe
-      border
-      style="width: 100%"
-      class="mt-4"
-    >
+    <Header preset="order-progress" :show-search="true" title-style="text-3xl text-center pl-0 w-full text-blue-600" />
+    <el-table v-loading="loading" :data="filteredTableData" stripe border style="width: 100%" class="mt-4">
       <el-table-column prop="id" label="ID" width="80" />
       <el-table-column prop="cusTitle" label="客户名称" width="120" />
       <el-table-column prop="intention" label="客户称呼" width="100" />
@@ -26,22 +15,12 @@
         </template>
       </el-table-column>
       <el-table-column prop="style" label="关注风格" width="120" />
-      <el-table-column
-        prop="LastContactDate"
-        label="上次联系时间"
-        width="150"
-      />
+      <el-table-column prop="LastContactDate" label="上次联系时间" width="150" />
       <el-table-column prop="cusSource" label="客户来源" width="120" />
       <el-table-column prop="saler" label="业务员" width="100" />
       <el-table-column prop="details" label="详情">
         <template #default="scope">
-          <el-button
-            type="primary"
-            link
-            @click="handleDetails(scope.row)"
-            :icon="View"
-            >查看详情</el-button
-          >
+          <el-button type="primary" link @click="handleDetails(scope.row)" :icon="View">查看详情</el-button>
         </template>
       </el-table-column>
     </el-table>
@@ -56,15 +35,11 @@
         :total="total"
         layout="total, sizes, prev, pager, next, jumper"
         @size-change="handleSizeChange"
-        @current-change="handleCurrentChange"
-      />
+        @current-change="handleCurrentChange" />
     </div>
 
     <!-- 无数据提示 -->
-    <div
-      v-if="filteredTableData.length === 0"
-      class="no-data text-center py-10 text-gray-500"
-    >
+    <div v-if="filteredTableData.length === 0" class="no-data text-center py-10 text-gray-500">
       <div class="empty-icon mb-4">📋</div>
       <p>暂无数据</p>
       <p class="text-sm mt-2">请尝试使用搜索框查询</p>
@@ -240,7 +215,7 @@ watch(
   () => filteredTableData.value.length,
   (newLength) => {
     total.value = newLength;
-  }
+  },
 );
 
 // 获取状态对应的标签类型
@@ -281,12 +256,7 @@ const handleDetails = (row: TableItem) => {
 
 // 处理表格变化
 // eslint-disable-next-line @typescript-eslint/no-unused-vars
-const handleTableChange = (params: {
-  page: number;
-  size: number;
-  searchType: string;
-  searchValue: string;
-}) => {
+const handleTableChange = (params: { page: number; size: number; searchType: string; searchValue: string }) => {
   // 这里可以添加处理变化的逻辑
   console.log("表格变化:", params);
 };

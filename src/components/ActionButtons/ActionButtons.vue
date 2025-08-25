@@ -37,55 +37,55 @@
 </template>
 
 <script setup lang="ts">
-import { ref } from 'vue';
-import { ElMessage } from 'element-plus';
-import { ArrowDown, Download, Printer, Refresh } from '@element-plus/icons-vue';
+import { ref } from "vue";
+import { ElMessage } from "element-plus";
+import { ArrowDown, Download, Printer, Refresh } from "@element-plus/icons-vue";
 
 // 定义组件属性
 const props = defineProps({
   // 是否显示刷新按钮
   showRefresh: {
     type: Boolean,
-    default: true
+    default: true,
   },
   // 是否显示导出按钮
   showExport: {
     type: Boolean,
-    default: true
+    default: true,
   },
   // 是否显示打印按钮
   showPrint: {
     type: Boolean,
-    default: true
+    default: true,
   },
   // 加载状态
   loading: {
     type: Boolean,
-    default: false
+    default: false,
   },
   // 打印样式内容
   printStyle: {
     type: String,
-    default: ''
-  }
+    default: "",
+  },
 });
 
 // 定义事件
-const emit = defineEmits(['refresh', 'export', 'print']);
+const emit = defineEmits(["refresh", "export", "print"]);
 
 // 刷新数据
 const handleRefresh = () => {
-  emit('refresh');
+  emit("refresh");
 };
 
 // 导出数据
 const handleExport = (type: string) => {
-  emit('export', type);
+  emit("export", type);
 };
 
 // 打印页面
 const handlePrint = () => {
-  emit('print');
+  emit("print");
 };
 </script>
 

@@ -1,17 +1,6 @@
-// 定义表格数据项接口
-interface TableItem {
-  id: string;
-  cusTitle: string;
-  intention: string;
-  status: string;
-  style: string;
-  details: string;
-  amount: number;
-  deposit: number;
-  price: number;
-  contract: number;
-  [key: string]: string | number; // 允许其他属性
-}
+// 定义表格数据项接口 interface TableItem { id: string; cusTitle: string; intention: string; status: string; style:
+string; details: string; amount: number; deposit: number; price: number; contract: number; [key: string]: string |
+number; // 允许其他属性 }
 
 <template>
   <div class="pendding-reservation">
@@ -20,8 +9,7 @@ interface TableItem {
       :show-search="true"
       :search-type="'id'"
       title-style="text-3xl text-center pl-0 w-full text-blue-600"
-      @search="handleSearch"
-    />
+      @search="handleSearch" />
 
     <!-- 表格区域 -->
     <div class="table-container" v-if="showTable">
@@ -46,8 +34,7 @@ interface TableItem {
         element-loading-background="rgba(255, 255, 255, 0.8)"
         element-spinner="el-icon-loading"
         @row-click="handleRowClick"
-        row-key="id"
-      >
+        row-key="id">
         <el-table-column prop="id" label="ID" width="80" />
         <el-table-column prop="cusTitle" label="时间" width="180">
           <template #default="{ row }">
@@ -72,19 +59,13 @@ interface TableItem {
       </el-table>
 
       <!-- 空数据提示 -->
-      <div
-        v-if="!isLoading && filteredTableData.length === 0"
-        class="empty-data"
-      >
+      <div v-if="!isLoading && filteredTableData.length === 0" class="empty-data">
         <el-empty description="暂无数据" />
       </div>
       <!-- footer 表格数据统计 -->
       <TableCount :stats="countData" />
       <!-- 分页 -->
-      <div
-        v-if="!isLoading && filteredTableData.length > 0"
-        class="pagination-container"
-      >
+      <div v-if="!isLoading && filteredTableData.length > 0" class="pagination-container">
         <el-pagination
           @size-change="handleSizeChange"
           @current-change="handleCurrentChange"
@@ -92,8 +73,7 @@ interface TableItem {
           :page-sizes="[10, 20, 50, 100]"
           :page-size="pageSize"
           layout="total, sizes, prev, pager, next, jumper"
-          :total="filteredTableData.length"
-        />
+          :total="filteredTableData.length" />
       </div>
     </div>
   </div>
@@ -425,8 +405,7 @@ const handleSearch = (params: { type: string; value: string }) => {
         index: "avgDeposit",
         value:
           paginatedData.value.length > 0
-            ? paginatedData.value.reduce((sum, item) => sum + item.deposit, 0) /
-              paginatedData.value.length
+            ? paginatedData.value.reduce((sum, item) => sum + item.deposit, 0) / paginatedData.value.length
             : 0,
         label: "订单平均定金",
       },
@@ -439,27 +418,20 @@ const handleSearch = (params: { type: string; value: string }) => {
         index: "avgUnitPrice",
         value:
           paginatedData.value.length > 0
-            ? paginatedData.value.reduce((sum, item) => sum + item.price, 0) /
-              paginatedData.value.length
+            ? paginatedData.value.reduce((sum, item) => sum + item.price, 0) / paginatedData.value.length
             : 0,
         label: "订单平均单价",
       },
       {
         index: "totalContract",
-        value: paginatedData.value.reduce(
-          (sum, item) => sum + item.contract,
-          0
-        ),
+        value: paginatedData.value.reduce((sum, item) => sum + item.contract, 0),
         label: "订单总合同款",
       },
       {
         index: "avgContract",
         value:
           paginatedData.value.length > 0
-            ? paginatedData.value.reduce(
-                (sum, item) => sum + item.contract,
-                0
-              ) / paginatedData.value.length
+            ? paginatedData.value.reduce((sum, item) => sum + item.contract, 0) / paginatedData.value.length
             : 0,
         label: "订单平均合同款",
       },
@@ -489,8 +461,7 @@ const handleSizeChange = (val: number) => {
       index: "avgDeposit",
       value:
         paginatedData.value.length > 0
-          ? paginatedData.value.reduce((sum, item) => sum + item.deposit, 0) /
-            paginatedData.value.length
+          ? paginatedData.value.reduce((sum, item) => sum + item.deposit, 0) / paginatedData.value.length
           : 0,
       label: "订单平均定金",
     },
@@ -503,8 +474,7 @@ const handleSizeChange = (val: number) => {
       index: "avgUnitPrice",
       value:
         paginatedData.value.length > 0
-          ? paginatedData.value.reduce((sum, item) => sum + item.price, 0) /
-            paginatedData.value.length
+          ? paginatedData.value.reduce((sum, item) => sum + item.price, 0) / paginatedData.value.length
           : 0,
       label: "订单平均单价",
     },
@@ -517,12 +487,11 @@ const handleSizeChange = (val: number) => {
       index: "avgContract",
       value:
         paginatedData.value.length > 0
-          ? paginatedData.value.reduce((sum, item) => sum + item.contract, 0) /
-            paginatedData.value.length
+          ? paginatedData.value.reduce((sum, item) => sum + item.contract, 0) / paginatedData.value.length
           : 0,
-        label: "订单平均合同款",
-      },
-    ]);
+      label: "订单平均合同款",
+    },
+  ]);
   isLoading.value = false;
 };
 
@@ -550,8 +519,7 @@ const handleCurrentChange = (val: number) => {
         index: "avgDeposit",
         value:
           paginatedData.value.length > 0
-            ? paginatedData.value.reduce((sum, item) => sum + item.deposit, 0) /
-              paginatedData.value.length
+            ? paginatedData.value.reduce((sum, item) => sum + item.deposit, 0) / paginatedData.value.length
             : 0,
         label: "订单平均定金",
       },
@@ -564,27 +532,20 @@ const handleCurrentChange = (val: number) => {
         index: "avgUnitPrice",
         value:
           paginatedData.value.length > 0
-            ? paginatedData.value.reduce((sum, item) => sum + item.price, 0) /
-              paginatedData.value.length
+            ? paginatedData.value.reduce((sum, item) => sum + item.price, 0) / paginatedData.value.length
             : 0,
         label: "订单平均单价",
       },
       {
         index: "totalContract",
-        value: paginatedData.value.reduce(
-          (sum, item) => sum + item.contract,
-          0
-        ),
+        value: paginatedData.value.reduce((sum, item) => sum + item.contract, 0),
         label: "订单总合同款",
       },
       {
         index: "avgContract",
         value:
           paginatedData.value.length > 0
-            ? paginatedData.value.reduce(
-                (sum, item) => sum + item.contract,
-                0
-              ) / paginatedData.value.length
+            ? paginatedData.value.reduce((sum, item) => sum + item.contract, 0) / paginatedData.value.length
             : 0,
         label: "订单平均合同款",
       },
@@ -608,37 +569,14 @@ const handleTableCountUpdate = (data: StatItem[]) => {
   if (data && data.length > 0) {
     // 根据实际需求解析数据
     tableStatistics.value = {
-      total:
-        parseInt(String(data.find((item) => item.index === "total")?.value)) ||
-        0,
-      totalAmount:
-        parseFloat(
-          String(data.find((item) => item.index === "totalAmount")?.value)
-        ) || 0,
-      totalDeposit:
-        parseFloat(
-          String(data.find((item) => item.index === "totalDeposit")?.value)
-        ) || 0,
-      avgDeposit:
-        parseFloat(
-          String(data.find((item) => item.index === "avgDeposit")?.value)
-        ) || 0,
-      totalUnitPrice:
-        parseFloat(
-          String(data.find((item) => item.index === "totalUnitPrice")?.value)
-        ) || 0,
-      avgUnitPrice:
-        parseFloat(
-          String(data.find((item) => item.index === "avgUnitPrice")?.value)
-        ) || 0,
-      totalContract:
-        parseFloat(
-          String(data.find((item) => item.index === "totalContract")?.value)
-        ) || 0,
-      avgContract:
-        parseFloat(
-          String(data.find((item) => item.index === "avgContract")?.value)
-        ) || 0,
+      total: parseInt(String(data.find((item) => item.index === "total")?.value)) || 0,
+      totalAmount: parseFloat(String(data.find((item) => item.index === "totalAmount")?.value)) || 0,
+      totalDeposit: parseFloat(String(data.find((item) => item.index === "totalDeposit")?.value)) || 0,
+      avgDeposit: parseFloat(String(data.find((item) => item.index === "avgDeposit")?.value)) || 0,
+      totalUnitPrice: parseFloat(String(data.find((item) => item.index === "totalUnitPrice")?.value)) || 0,
+      avgUnitPrice: parseFloat(String(data.find((item) => item.index === "avgUnitPrice")?.value)) || 0,
+      totalContract: parseFloat(String(data.find((item) => item.index === "totalContract")?.value)) || 0,
+      avgContract: parseFloat(String(data.find((item) => item.index === "avgContract")?.value)) || 0,
     };
 
     // 更新countData的值
@@ -672,8 +610,7 @@ onMounted(() => {
         index: "avgDeposit",
         value:
           tableData.value.length > 0
-            ? tableData.value.reduce((sum, item) => sum + item.deposit, 0) /
-              tableData.value.length
+            ? tableData.value.reduce((sum, item) => sum + item.deposit, 0) / tableData.value.length
             : 0,
         label: "订单平均定金",
       },
@@ -686,8 +623,7 @@ onMounted(() => {
         index: "avgUnitPrice",
         value:
           tableData.value.length > 0
-            ? tableData.value.reduce((sum, item) => sum + item.price, 0) /
-              tableData.value.length
+            ? tableData.value.reduce((sum, item) => sum + item.price, 0) / tableData.value.length
             : 0,
         label: "订单平均单价",
       },
@@ -700,8 +636,7 @@ onMounted(() => {
         index: "avgContract",
         value:
           tableData.value.length > 0
-            ? tableData.value.reduce((sum, item) => sum + item.contract, 0) /
-              tableData.value.length
+            ? tableData.value.reduce((sum, item) => sum + item.contract, 0) / tableData.value.length
             : 0,
         label: "订单平均合同款",
       },

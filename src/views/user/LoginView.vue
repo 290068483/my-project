@@ -9,36 +9,28 @@
           <span class="header-text">蓝岸管理系统</span>
         </div>
       </template>
-      <el-form
-        ref="loginFormRef"
-        :model="loginForm"
-        :rules="loginRules"
-        label-width="80px"
-        class="login-form"
-      >
+      <el-form ref="loginFormRef" :model="loginForm" :rules="loginRules" label-width="80px" class="login-form">
         <el-form-item label="用户名" prop="username" class="password-form-item">
           <el-input
             v-model="loginForm.username"
             placeholder="请输入用户名"
             :disabled="isLoginDisabled"
             size="small"
-            @blur="validateUsername"
-          />
+            @blur="validateUsername" />
         </el-form-item>
         <el-form-item
+          v-if="showCaptcha"
           aria-disabled="!captchaEnabled"
           label="验证码"
           prop="captcha"
-          class="password-form-item"
-        >
+          class="password-form-item">
           <el-row :gutter="8" class="captcha-container">
             <el-col :span="14">
               <el-input
                 v-model="loginForm.captcha"
                 placeholder="请输入验证码"
                 :disabled="!captchaEnabled || !showCaptcha"
-                size="small"
-              />
+                size="small" />
             </el-col>
             <el-col :span="10">
               <!-- 验证码按钮禁用条件：登录禁用、验证码加载中或验证码未启用 -->
@@ -48,8 +40,7 @@
                 size="small"
                 @click="getCaptcha"
                 :disabled="isCaptchaButtonDisabled"
-                :loading="isCaptchaLoading"
-              >
+                :loading="isCaptchaLoading">
                 {{ captchaText }}
               </el-button>
             </el-col>
@@ -61,8 +52,7 @@
             type="password"
             placeholder="请输入密码"
             :disabled="isLoginDisabled"
-            size="small"
-          />
+            size="small" />
         </el-form-item>
         <div class="form-footer">
           <el-button
@@ -71,18 +61,13 @@
             class="login-btn"
             :loading="loading"
             @click="handleLogin"
-            native-type="submit"
-          >
+            native-type="submit">
             登录
           </el-button>
 
           <div class="additional-links">
-            <el-button type="info" link @click="goToRegister">
-              前往注册
-            </el-button>
-            <el-button type="info" link @click="goToForgotPassword">
-              忘记密码?
-            </el-button>
+            <el-button type="info" link @click="goToRegister"> 前往注册 </el-button>
+            <el-button type="info" link @click="goToForgotPassword"> 忘记密码? </el-button>
           </div>
         </div>
       </el-form>
@@ -167,17 +152,8 @@ const captchaLogs = ref<string[]>([]);
  * 计算验证码按钮是否应该禁用
  */
 const isCaptchaButtonDisabled = computed(() => {
-  // 如果未启用验证码，且不在加载状态，则禁用
-  if (!captchaEnabled.value && !isCaptchaLoading.value) return true;
-
-  // 如果正在加载验证码，则禁用
-  if (isCaptchaLoading.value) return true;
-
-  // 如果登录被禁用，则禁用
-  if (isLoginDisabled.value) return true;
-
-  // 其他情况不禁用
-  return false;
+  // 组合条件判断，减少重复代码
+  return (!captchaEnabled.value && !isCaptchaLoading.value) || isCaptchaLoading.value || isLoginDisabled.value;
 });
 
 /**
@@ -210,7 +186,7 @@ watch(
   () => loginForm.username,
   () => {
     validateUsername();
-  }
+  },
 );
 
 /**
@@ -362,12 +338,9 @@ const loginRules = {
 /**
  * 监听表单变化，验证表单是否有效
  */
-watch(
-  [() => loginForm.username, () => loginForm.password, () => loginForm.captcha],
-  () => {
-    validateForm();
-  }
-);
+watch([() => loginForm.username, () => loginForm.password, () => loginForm.captcha], () => {
+  validateForm();
+});
 
 /**
  * 验证表单是否有效
@@ -400,12 +373,10 @@ const handleLogin = debounce(async () => {
     isLoginDisabled.value = true;
 
     // 模拟验证码验证
-    if (showCaptcha.value) {
-      // 在实际应用中，应该由后端验证验证码
-      if (loginForm.captcha.trim() === "") {
-        ElMessage.error("请输入验证码");
-        return;
-      }
+    if (showCaptcha.value && loginForm.captcha.trim() === "") {
+      // 合并验证码检查逻辑
+      ElMessage.error("请输入验证码");
+      return;
     }
 
     // 调用登录接口
@@ -425,11 +396,7 @@ const handleLogin = debounce(async () => {
     ) {
       const responseData = response.data;
       if ("success" in responseData && responseData.success) {
-        if (
-          "data" in responseData &&
-          responseData.data &&
-          typeof responseData.data === "object"
-        ) {
+        if ("data" in responseData && responseData.data && typeof responseData.data === "object") {
           const { token, userInfo, expiresIn } = responseData.data as {
             token: string;
             userInfo: unknown;
@@ -463,9 +430,7 @@ const handleLogin = debounce(async () => {
         loginCount.value++;
         checkShowCaptcha();
         const message =
-          "message" in responseData && typeof responseData.message === "string"
-            ? responseData.message
-            : "登录失败";
+          "message" in responseData && typeof responseData.message === "string" ? responseData.message : "登录失败";
         ElMessage.error(message);
 
         // 超过3次失败，清空表单

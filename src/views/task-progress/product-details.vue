@@ -3,13 +3,12 @@
     <!-- 头部 -->
     <Header />
     <div class="table-container">
-      <el-table 
-        :data="tableData" 
-        align="center" 
+      <el-table
+        :data="tableData"
+        align="center"
         style="width: 100%"
         v-loading="loading"
-        element-loading-text="加载中..."
-      >
+        element-loading-text="加载中...">
         <el-table-column prop="id" label="id:" width="180" />
         <el-table-column prop="name" label="名称：" width="180" />
         <el-table-column prop="type1" label="规格1:" />

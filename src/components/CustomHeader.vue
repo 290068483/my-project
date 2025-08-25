@@ -1,14 +1,10 @@
 <template>
   <div class="custom-header mb-10 mt-10">
     <div class="titleBox mt-5 flex align-center justify-between px-6 mb-3">
-      <h1
-        class="text-2xl text-center pl-[20%] min-w-[80%] font-bold text-gray-800"
-      >
+      <h1 class="text-2xl text-center pl-[20%] min-w-[80%] font-bold text-gray-800">
         {{ title }}
       </h1>
-      <el-button type="primary" class="text-white" @click="handleProfileClick"
-        >进入客户档案</el-button
-      >
+      <el-button type="primary" class="text-white" @click="handleProfileClick">进入客户档案</el-button>
     </div>
     <el-breadcrumb
       separator="/"
@@ -16,15 +12,13 @@
       class="el-menu-demo active:text-red active:bg-white"
       mode="horizontal"
       @select="handleSelect"
-      :ellipsis="false"
-    >
+      :ellipsis="false">
       <el-breadcrumb-item
         :to="{ path: item.path }"
         v-for="(item, index) in props.items"
         :key="index"
         :index="item.index"
-        class="text-white py-1 px-4"
-      >
+        class="text-white py-1 px-4">
         {{ item.title }}
       </el-breadcrumb-item>
     </el-breadcrumb>
@@ -62,9 +56,7 @@ const props = defineProps({
 const emit = defineEmits(["select", "profile-click"]);
 
 // 当前激活的菜单项
-const activeIndex = ref(
-  props.defaultActive || (props.items.length > 0 ? props.items[0].index : "")
-);
+const activeIndex = ref(props.defaultActive || (props.items.length > 0 ? props.items[0].index : ""));
 
 // 处理菜单选择事件
 const handleSelect = (key: string) => {

@@ -1,17 +1,13 @@
 <template name="AppHeader">
-  <div
-    class="header-container bg-white border-b border-gray-200 shadow-sm sticky top-0 z-50"
-  >
+  <div class="header-container bg-white border-b border-gray-200 shadow-sm sticky top-0 z-50">
     <!-- 顶部导航栏 -->
     <div
-      class="nav-bar flex flex-col sm:flex-row items-center justify-between px-4 sm:px-6 py-2 bg-gradient-to-r shadow-md"
-    >
+      class="nav-bar flex flex-col sm:flex-row items-center justify-between px-4 sm:px-6 py-2 bg-gradient-to-r shadow-md">
       <!-- 头部导航菜单 -->
       <div
         class="nav-menu flex space-x-1 gap-1 justify-start overflow-x-auto hide-scrollbar sm:space-x-4 lg:overflow-visible w-full sm:w-auto"
         role="navigation"
-        aria-label="主导航"
-      >
+        aria-label="主导航">
         <el-button
           v-for="n in navData"
           :key="n.key"
@@ -39,23 +35,15 @@
             { active: activeNav === n.key },
           ]"
           :aria-current="activeNav === n.key ? 'page' : undefined"
-          @click="() => handleNavClick(n)"
-        >
+          @click="() => handleNavClick(n)">
           {{ n.name }}
         </el-button>
       </div>
 
       <!-- 右侧搜索和用户区域 -->
-      <div
-        class="right-section flex items-center flex-shrink-0 w-full sm:w-auto mt-2 sm:mt-0"
-      >
+      <div class="right-section flex items-center flex-shrink-0 w-full sm:w-auto mt-2 sm:mt-0">
         <div class="search-box relative w-full sm:w-64 mr-4">
-          <el-input
-            placeholder="请输入内容"
-            class="h-10"
-            v-model="inputSearch"
-            @keyup.enter="handleSearch"
-          >
+          <el-input placeholder="请输入内容" class="h-10" v-model="inputSearch" @keyup.enter="handleSearch">
             <template v-slot:prefix>
               <i class="el-input__icon el-icon-search"></i>
             </template>
@@ -100,17 +88,9 @@
             <div class="flex items-center cursor-pointer">
               <el-avatar
                 :size="40"
-                :src="
-                  userInfo?.avatar ||
-                  'https://cube.elemecdn.com/0/88/03b0d39583f48206768a7534e55bcpng.png'
-                "
+                :src="userInfo?.avatar || 'https://cube.elemecdn.com/0/88/03b0d39583f48206768a7534e55bcpng.png'"
                 class="border-2 border-blue-200"
-                :alt="
-                  userInfo?.name
-                    ? userInfo.name + '的头像'
-                    : '用户头像'
-                "
-              ></el-avatar>
+                :alt="userInfo?.name ? userInfo.name + '的头像' : '用户头像'"></el-avatar>
               <div class="ml-3 hidden lg:block">
                 <div class="text-sm font-medium text-gray-800">
                   {{ userInfo?.name || "未登录" }}
@@ -125,20 +105,12 @@
             </div>
             <template #dropdown>
               <el-dropdown-menu>
-                <el-dropdown-item @click="goToUserInfo"
-                  >个人中心</el-dropdown-item
-                >
+                <el-dropdown-item @click="goToUserInfo">个人中心</el-dropdown-item>
                 <!-- 横线 -->
                 <el-divider />
-                <el-dropdown-item @click="updatePwd" data-test="update-pwd"
-                  >修改密码</el-dropdown-item
-                >
+                <el-dropdown-item @click="updatePwd" data-test="update-pwd">修改密码</el-dropdown-item>
                 <el-divider></el-divider>
-                <el-dropdown-item
-                  type="danger"
-                  @click="handleLogout"
-                  data-test="logout-button"
-                >
+                <el-dropdown-item type="danger" @click="handleLogout" data-test="logout-button">
                   退出登录
                 </el-dropdown-item>
               </el-dropdown-menu>
@@ -152,53 +124,22 @@
   <div class="clearfix"></div>
 
   <!-- 修改密码对话框 -->
-  <el-dialog
-    v-model="pwdDialogVisible"
-    title="修改密码"
-    width="500px"
-    :before-close="handlePwdDialogClose"
-  >
-    <el-form
-      ref="pwdFormRef"
-      :model="pwdForm"
-      :rules="pwdFormRules"
-      label-width="100px"
-    >
+  <el-dialog v-model="pwdDialogVisible" title="修改密码" width="500px" :before-close="handlePwdDialogClose">
+    <el-form ref="pwdFormRef" :model="pwdForm" :rules="pwdFormRules" label-width="100px">
       <el-form-item label="旧密码" prop="oldPassword">
-        <el-input
-          v-model="pwdForm.oldPassword"
-          type="password"
-          show-password
-          placeholder="请输入旧密码"
-        />
+        <el-input v-model="pwdForm.oldPassword" type="password" show-password placeholder="请输入旧密码" />
       </el-form-item>
       <el-form-item label="新密码" prop="newPassword">
-        <el-input
-          v-model="pwdForm.newPassword"
-          type="password"
-          show-password
-          placeholder="请输入新密码"
-        />
+        <el-input v-model="pwdForm.newPassword" type="password" show-password placeholder="请输入新密码" />
       </el-form-item>
       <el-form-item label="确认新密码" prop="confirmPassword">
-        <el-input
-          v-model="pwdForm.confirmPassword"
-          type="password"
-          show-password
-          placeholder="请再次输入新密码"
-        />
+        <el-input v-model="pwdForm.confirmPassword" type="password" show-password placeholder="请再次输入新密码" />
       </el-form-item>
     </el-form>
     <template #footer>
       <span class="dialog-footer">
         <el-button @click="pwdDialogVisible = false">取消</el-button>
-        <el-button
-          type="primary"
-          @click="submitPwdForm"
-          :loading="pwdFormLoading"
-        >
-          确认修改
-        </el-button>
+        <el-button type="primary" @click="submitPwdForm" :loading="pwdFormLoading"> 确认修改 </el-button>
       </span>
     </template>
   </el-dialog>
@@ -212,6 +153,7 @@ import { ArrowDown } from "@element-plus/icons-vue";
 import { ElMessage, ElMessageBox } from "element-plus";
 import type { FormInstance, FormRules } from "element-plus";
 import LoginOut from "@/views/user/login-out.vue";
+import { AuthUtils } from "@/utils/auth";
 
 export interface UserInfo {
   name?: string;
@@ -251,11 +193,7 @@ const pwdFormRules: FormRules = {
   confirmPassword: [
     { required: true, message: "请再次输入新密码", trigger: "blur" },
     {
-      validator: (
-        rule: unknown,
-        value: string,
-        callback: (error?: Error) => void
-      ) => {
+      validator: (rule: unknown, value: string, callback: (error?: Error) => void) => {
         if (value === "") {
           callback(new Error("请再次输入新密码"));
         } else if (value !== pwdForm.newPassword) {
@@ -398,8 +336,7 @@ const handlePwdDialogClose = (done: () => void) => {
 
 const handleLogout = () => {
   // 退出登录逻辑
-  userStore.logout();
-  router.push("/login");
+  AuthUtils.logout();
 };
 
 // 设置当前日期

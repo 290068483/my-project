@@ -1,14 +1,11 @@
 <template>
-  <div class="component-CustomIndex ">
+  <div class="component-CustomIndex">
     <el-tabs v-model="activeName" @tab-click="handleClick">
       <el-tab-pane label="首页" class="" name="first">
         <!-- 日期信息 -->
         <el-card class="box-card">
           <div v-for="o in 4" :key="o" class="text item">
-            {{ '列表内容 ' + o }}
-
-
-
+            {{ "列表内容 " + o }}
           </div>
         </el-card>
       </el-tab-pane>
@@ -21,20 +18,20 @@
 </template>
 
 <script setup lang="ts">
-import { ref, onMounted } from 'vue'
+import { ref, onMounted } from "vue";
 
-const activeName = ref('first')
+const activeName = ref("first");
 
 const handleClick = (tab: { name: string }) => {
-  console.log(tab)
-  activeName.value = tab.name as string
+  console.log(tab);
+  activeName.value = tab.name as string;
   // 给点击的tab添加类名 activeName 移除其他没点击的activeName
 
-  const tabRefs = ref<HTMLElement[]>([])
+  const tabRefs = ref<HTMLElement[]>([]);
 
   onMounted(() => {
-    tabRefs.value = Array.from(document.querySelectorAll('.el-tabs__item'))
-  })
+    tabRefs.value = Array.from(document.querySelectorAll(".el-tabs__item"));
+  });
 
   tabRefs.value.forEach((item) => {
     if (item) {
@@ -43,8 +40,8 @@ const handleClick = (tab: { name: string }) => {
       //   item.classList.add('activeName')
       // }
     }
-  })
-}
+  });
+};
 </script>
 
 <style scoped>

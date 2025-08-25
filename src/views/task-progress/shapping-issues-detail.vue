@@ -7,9 +7,7 @@
     <div class="customer-info">
       <div class="info-item"><span class="label">客户姓名：</span>陆秦</div>
       <div class="info-item"><span class="label">电话：</span>13800000000</div>
-      <div class="info-item">
-        <span class="label">地址：</span>重庆市渝中区三期13-2-28-05
-      </div>
+      <div class="info-item"><span class="label">地址：</span>重庆市渝中区三期13-2-28-05</div>
     </div>
 
     <!-- 表格容器 -->
@@ -22,8 +20,7 @@
           v-loading="loading"
           header-align="center"
           border
-          style="border: 1px solid #000"
-        >
+          style="border: 1px solid #000">
           <el-table-column prop="id" label="id" width="50" />
           <el-table-column prop="issueNumber" label="问题号" width="80" />
           <el-table-column prop="cabinet" label="柜子" width="100" />
@@ -48,14 +45,9 @@
           v-loading="loading"
           header-align="left"
           border
-          style="border: 1px solid #000"
-        >
+          style="border: 1px solid #000">
           <el-table-column prop="orderNumber" label="下单号" width="120" />
-          <el-table-column
-            prop="supplementDetails"
-            label="补件明细"
-            min-width="150"
-          />
+          <el-table-column prop="supplementDetails" label="补件明细" min-width="150" />
           <el-table-column prop="quantity" label="数量" width="80" />
           <el-table-column prop="supplier" label="供货" width="100" />
           <el-table-column prop="status" label="当前状态" width="120" />
@@ -204,7 +196,7 @@ watch(
       fetchIssuesData();
       fetchSupplementData();
     }
-  }
+  },
 );
 
 onMounted(() => {
@@ -224,10 +216,7 @@ onMounted(() => {
 // 打印功能
 const handlePrint = () => {
   // 检查是否有数据可打印
-  if (
-    issuesTableData.value.length === 0 &&
-    supplementTableData.value.length === 0
-  ) {
+  if (issuesTableData.value.length === 0 && supplementTableData.value.length === 0) {
     ElMessage.warning("没有数据可以打印");
     return;
   }
@@ -380,10 +369,7 @@ const refreshData = () => {
 
 const exportData = (type: string) => {
   // 检查是否有数据可下载
-  if (
-    issuesTableData.value.length === 0 &&
-    supplementTableData.value.length === 0
-  ) {
+  if (issuesTableData.value.length === 0 && supplementTableData.value.length === 0) {
     ElMessage.warning("没有数据可以导出");
     return;
   }
@@ -469,10 +455,7 @@ const exportToCSV = (data: any) => {
     const link = document.createElement("a");
     const url = URL.createObjectURL(blob);
     link.setAttribute("href", url);
-    link.setAttribute(
-      "download",
-      `客户问题数据_${data.customerInfo.id}_${new Date().toISOString().slice(0, 10)}.csv`
-    );
+    link.setAttribute("download", `客户问题数据_${data.customerInfo.id}_${new Date().toISOString().slice(0, 10)}.csv`);
     link.style.visibility = "hidden";
 
     // 添加到文档并触发点击
@@ -502,10 +485,7 @@ const exportToJSON = (data: any) => {
     const link = document.createElement("a");
     const url = URL.createObjectURL(blob);
     link.setAttribute("href", url);
-    link.setAttribute(
-      "download",
-      `客户问题数据_${data.customerInfo.id}_${new Date().toISOString().slice(0, 10)}.json`
-    );
+    link.setAttribute("download", `客户问题数据_${data.customerInfo.id}_${new Date().toISOString().slice(0, 10)}.json`);
     link.style.visibility = "hidden";
 
     // 添加到文档并触发点击
@@ -606,11 +586,7 @@ const exportToPDF = (data: any) => {
       // 添加导出时间
       yPos += 40;
       ctx.font = "14px Arial";
-      ctx.fillText(
-        `导出时间: ${new Date(data.exportTime).toLocaleString()}`,
-        20,
-        yPos
-      );
+      ctx.fillText(`导出时间: ${new Date(data.exportTime).toLocaleString()}`, 20, yPos);
     }
 
     // 将canvas转换为图片
@@ -622,7 +598,7 @@ const exportToPDF = (data: any) => {
         link.setAttribute("href", url);
         link.setAttribute(
           "download",
-          `客户问题数据_${data.customerInfo.id}_${new Date().toISOString().slice(0, 10)}.pdf`
+          `客户问题数据_${data.customerInfo.id}_${new Date().toISOString().slice(0, 10)}.pdf`,
         );
         link.style.visibility = "hidden";
 
@@ -655,11 +631,9 @@ const convertToCSV = (objArray: any[]) => {
         .map((header) => {
           // 处理包含逗号或引号的字段
           const value = obj[header] !== undefined ? obj[header].toString() : "";
-          return value.includes(",") || value.includes("")
-            ? `"${value.replace(/"/g, "")}"`
-            : value;
+          return value.includes(",") || value.includes("") ? `"${value.replace(/"/g, "")}"` : value;
         })
-        .join(",")
+        .join(","),
     ),
   ];
 
@@ -669,10 +643,7 @@ const convertToCSV = (objArray: any[]) => {
 // 下载功能 - 保留旧功能兼容性
 const handleDownload = (type: string) => {
   // 检查是否有数据可下载
-  if (
-    issuesTableData.value.length === 0 &&
-    supplementTableData.value.length === 0
-  ) {
+  if (issuesTableData.value.length === 0 && supplementTableData.value.length === 0) {
     ElMessage.warning("没有数据可以下载");
     return;
   }

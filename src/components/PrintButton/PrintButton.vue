@@ -8,30 +8,30 @@
 </template>
 
 <script setup lang="ts">
-import { ref } from 'vue';
-import { ElMessage } from 'element-plus';
-import { Printer } from '@element-plus/icons-vue';
+import { ref } from "vue";
+import { ElMessage } from "element-plus";
+import { Printer } from "@element-plus/icons-vue";
 
 // 定义组件属性
 const props = defineProps({
   // 加载状态
   loading: {
     type: Boolean,
-    default: false
+    default: false,
   },
   // 打印样式内容
   printStyle: {
     type: String,
-    default: ''
-  }
+    default: "",
+  },
 });
 
 // 定义事件
-const emit = defineEmits(['print']);
+const emit = defineEmits(["print"]);
 
 // 打印页面
 const handlePrint = () => {
-  emit('print');
+  emit("print");
 };
 </script>
 

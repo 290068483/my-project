@@ -8,11 +8,8 @@
           :size="80"
           :src="userAvatar"
           class="border-2 border-blue-200 mb-4"
-          :alt="userName + '的头像'"
-        ></el-avatar>
-        <el-button type="primary" @click="updateAvatar" class="mb-2">
-          修改头像
-        </el-button>
+          :alt="userName + '的头像'"></el-avatar>
+        <el-button type="primary" @click="updateAvatar" class="mb-2"> 修改头像 </el-button>
       </div>
 
       <el-divider></el-divider>
@@ -48,19 +45,12 @@
       </div>
 
       <div class="flex justify-center">
-        <el-button type="primary" @click="openEditInfo" size="default">
-          编辑信息
-        </el-button>
+        <el-button type="primary" @click="openEditInfo" size="default"> 编辑信息 </el-button>
       </div>
     </div>
 
     <!-- 修改头像对话框 -->
-    <el-dialog
-      v-model="avatarDialogVisible"
-      title="修改头像"
-      width="500px"
-      @close="handleAvatarDialogClose"
-    >
+    <el-dialog v-model="avatarDialogVisible" title="修改头像" width="500px" @close="handleAvatarDialogClose">
       <div class="flex flex-col items-center">
         <el-upload
           class="avatar-uploader mb-4"
@@ -68,14 +58,9 @@
           :auto-upload="false"
           :show-file-list="false"
           :on-change="handleAvatarChange"
-          :before-upload="beforeAvatarUpload"
-        >
+          :before-upload="beforeAvatarUpload">
           <img v-if="tempAvatar" :src="tempAvatar" class="avatar-preview" />
-          <el-avatar
-            v-else
-            :size="80"
-            :src="userAvatar"
-          ></el-avatar>
+          <el-avatar v-else :size="80" :src="userAvatar"></el-avatar>
         </el-upload>
         <p class="text-sm text-gray-500 mt-2">点击上传新头像</p>
         <p class="text-xs text-gray-400 mt-1">支持JPG/PNG格式，大小不超过2MB</p>
@@ -84,12 +69,7 @@
       <template #footer>
         <span class="dialog-footer">
           <el-button @click="avatarDialogVisible = false">取消</el-button>
-          <el-button
-            type="primary"
-            @click="confirmUpdateAvatar"
-            :loading="updatingAvatar"
-            :disabled="!tempAvatar"
-          >
+          <el-button type="primary" @click="confirmUpdateAvatar" :loading="updatingAvatar" :disabled="!tempAvatar">
             确认修改
           </el-button>
         </span>
@@ -98,13 +78,7 @@
 
     <!-- 编辑信息对话框 -->
     <el-dialog v-model="editDialogVisible" title="编辑用户信息" width="500px">
-      <el-form
-        :model="editForm"
-        label-width="80px"
-        ref="editFormRef"
-        @submit.prevent
-        :rules="editFormRules"
-      >
+      <el-form :model="editForm" label-width="80px" ref="editFormRef" @submit.prevent :rules="editFormRules">
         <el-form-item label="用户名" prop="name">
           <el-input v-model="editForm.name" />
         </el-form-item>
@@ -125,13 +99,7 @@
       <template #footer>
         <span class="dialog-footer">
           <el-button @click="editDialogVisible = false">取消</el-button>
-          <el-button
-            type="primary"
-            @click="confirmEditInfo"
-            :loading="updatingInfo"
-          >
-            保存
-          </el-button>
+          <el-button type="primary" @click="confirmEditInfo" :loading="updatingInfo"> 保存 </el-button>
         </span>
       </template>
     </el-dialog>
@@ -142,10 +110,11 @@
 import { ref, reactive, onMounted, computed } from "vue";
 import { useUserStore } from "@/stores/user";
 import type { UploadFile, UploadRawFile } from "element-plus";
-import { ElMessage, ElMessageBox, FormRules } from "element-plus";
+import { ElMessage } from "element-plus";
+import type { FormRules } from "element-plus";
 
 // 定义常量
-const DEFAULT_AVATAR = 'https://cube.elemecdn.com/0/88/03b0d39583f48206768a7534e55bcpng.png';
+const DEFAULT_AVATAR = "https://cube.elemecdn.com/0/88/03b0d39583f48206768a7534e55bcpng.png";
 
 export interface UserInfo {
   name?: string;
@@ -206,18 +175,12 @@ const editForm = reactive<UserInfo>({
 // 表单验证规则
 const editFormRules: FormRules = {
   name: [
-    { required: true, message: '请输入用户名', trigger: 'blur' },
-    { min: 2, max: 20, message: '用户名长度应在2-20个字符之间', trigger: 'blur' }
+    { required: true, message: "请输入用户名", trigger: "blur" },
+    { min: 2, max: 20, message: "用户名长度应在2-20个字符之间", trigger: "blur" },
   ],
-  email: [
-    { type: 'email', message: '请输入正确的邮箱地址', trigger: 'blur' }
-  ],
-  position: [
-    { required: false, message: '请输入职位', trigger: 'blur' }
-  ],
-  department: [
-    { required: false, message: '请输入部门', trigger: 'blur' }
-  ]
+  email: [{ type: "email", message: "请输入正确的邮箱地址", trigger: "blur" }],
+  position: [{ required: false, message: "请输入职位", trigger: "blur" }],
+  department: [{ required: false, message: "请输入部门", trigger: "blur" }],
 };
 
 // 处理页面挂载
@@ -228,8 +191,19 @@ onMounted(() => {
 // 加载用户信息
 const loadUserInfo = () => {
   // 从用户存储中获取信息
-  const { name, department, position, avatar, email } = userStore.userInfo;
-  userInfo.value = { name, department, position, avatar, email };
+  if (userStore.userInfo) {
+    const { name, department, position, avatar, email } = userStore.userInfo;
+    userInfo.value = { name, department, position, avatar, email };
+  } else {
+    // 如果用户信息不存在，设置默认值
+    userInfo.value = {
+      name: "",
+      department: "",
+      position: "",
+      avatar: "",
+      email: "",
+    };
+  }
 };
 
 // 修改头像
@@ -240,15 +214,15 @@ const updateAvatar = () => {
 
 // 头像上传前的验证
 const beforeAvatarUpload = (rawFile: UploadRawFile) => {
-  const isJPGorPNG = rawFile.type === 'image/jpeg' || rawFile.type === 'image/png';
+  const isJPGorPNG = rawFile.type === "image/jpeg" || rawFile.type === "image/png";
   const isLt2M = rawFile.size / 1024 / 1024 < 2;
 
   if (!isJPGorPNG) {
-    ElMessage.error('头像图片只能是 JPG 或 PNG 格式!');
+    ElMessage.error("头像图片只能是 JPG 或 PNG 格式!");
     return false;
   }
   if (!isLt2M) {
-    ElMessage.error('头像图片大小不能超过 2MB!');
+    ElMessage.error("头像图片大小不能超过 2MB!");
     return false;
   }
   return true;
@@ -259,19 +233,19 @@ const handleAvatarChange = (file: UploadFile) => {
   if (!beforeAvatarUpload(file.raw as UploadRawFile)) {
     return;
   }
-  
+
   const reader = new FileReader();
   reader.onload = (e) => {
     const result = e.target?.result as string;
     // 简单的 XSS 防护，确保是有效的图片数据
-    if (result && (result.startsWith('data:image/jpeg;base64,') || result.startsWith('data:image/png;base64,'))) {
+    if (result && (result.startsWith("data:image/jpeg;base64,") || result.startsWith("data:image/png;base64,"))) {
       tempAvatar.value = result;
     } else {
-      ElMessage.error('无效的图片文件');
+      ElMessage.error("无效的图片文件");
     }
   };
   reader.onerror = () => {
-    ElMessage.error('读取文件时发生错误');
+    ElMessage.error("读取文件时发生错误");
   };
   reader.readAsDataURL(file.raw!);
 };
@@ -291,18 +265,20 @@ const confirmUpdateAvatar = async () => {
     await new Promise((resolve) => setTimeout(resolve, 1000));
 
     // 更新用户存储中的头像
-    userStore.updateUserInfo({
-      ...userStore.userInfo,
-      avatar: tempAvatar.value,
-    });
+    if (userStore.userInfo) {
+      userStore.updateUserInfo({
+        ...userStore.userInfo,
+        avatar: tempAvatar.value,
+      });
+    }
 
     // 更新本地用户信息
     userInfo.value.avatar = tempAvatar.value;
 
     ElMessage.success("头像修改成功");
     avatarDialogVisible.value = false;
-  } catch (error: any) {
-    ElMessage.error(error.message || "头像修改失败");
+  } catch (error) {
+    ElMessage.error((error as Error).message || "头像修改失败");
   } finally {
     updatingAvatar.value = false;
   }
@@ -327,10 +303,10 @@ const openEditInfo = () => {
 // 确认编辑信息
 const confirmEditInfo = async () => {
   if (!editFormRef.value) return;
-  
+
   await editFormRef.value.validate(async (valid: boolean) => {
     if (!valid) return;
-    
+
     updatingInfo.value = true;
 
     try {
@@ -338,13 +314,15 @@ const confirmEditInfo = async () => {
       await new Promise((resolve) => setTimeout(resolve, 1000));
 
       // 更新用户存储中的信息
-      userStore.updateUserInfo({
-        ...userStore.userInfo,
-        name: editForm.name,
-        department: editForm.department,
-        position: editForm.position,
-        email: editForm.email,
-      });
+      if (userStore.userInfo) {
+        userStore.updateUserInfo({
+          ...userStore.userInfo,
+          name: editForm.name,
+          department: editForm.department,
+          position: editForm.position,
+          email: editForm.email,
+        });
+      }
 
       // 更新本地用户信息
       userInfo.value.name = editForm.name;
@@ -354,8 +332,8 @@ const confirmEditInfo = async () => {
 
       ElMessage.success("用户信息更新成功");
       editDialogVisible.value = false;
-    } catch (error: any) {
-      ElMessage.error(error.message || "用户信息更新失败");
+    } catch (error) {
+      ElMessage.error((error as Error).message || "用户信息更新失败");
     } finally {
       updatingInfo.value = false;
     }

@@ -95,8 +95,7 @@ const routes: Array<RouteRecordRaw> = [
       {
         path: "shapping-issues-detail",
         name: "shapping-issues-detail",
-        component: () =>
-          import("../views/task-progress/shapping-issues-detail.vue"),
+        component: () => import("../views/task-progress/shapping-issues-detail.vue"),
         meta: {
           requiresAuth: false,
         },
@@ -114,8 +113,7 @@ const routes: Array<RouteRecordRaw> = [
       {
         path: "pending-reservation",
         name: "PendingReservation",
-        component: () =>
-          import("../views/custom-progress/PendingReservation.vue"),
+        component: () => import("../views/custom-progress/PendingReservation.vue"),
         meta: {
           requiresAuth: false,
         },
@@ -125,8 +123,7 @@ const routes: Array<RouteRecordRaw> = [
       {
         path: "pending-measurement",
         name: "PendingMeasurement",
-        component: () =>
-          import("../views/custom-progress/PendingMeasurement.vue"),
+        component: () => import("../views/custom-progress/PendingMeasurement.vue"),
         meta: {
           requiresAuth: false,
         },
@@ -135,8 +132,7 @@ const routes: Array<RouteRecordRaw> = [
       {
         path: "pending-contracts",
         name: "pending-contracts",
-        component: () =>
-          import("../views/custom-progress/PendingContracts.vue"),
+        component: () => import("../views/custom-progress/PendingContracts.vue"),
         meta: {
           requiresAuth: false,
         },
@@ -154,8 +150,7 @@ const routes: Array<RouteRecordRaw> = [
       {
         path: "pending-installation",
         name: "pending-installation",
-        component: () =>
-          import("../views/custom-progress/PendingInstallation.vue"),
+        component: () => import("../views/custom-progress/PendingInstallation.vue"),
         meta: {
           requiresAuth: false,
         },
@@ -164,8 +159,7 @@ const routes: Array<RouteRecordRaw> = [
       {
         path: "pending-finalization",
         name: "pending-finalization",
-        component: () =>
-          import("../views/custom-progress/PendingFinalization.vue"),
+        component: () => import("../views/custom-progress/PendingFinalization.vue"),
         meta: {
           requiresAuth: false,
         },
@@ -174,8 +168,7 @@ const routes: Array<RouteRecordRaw> = [
       {
         path: "pending-archiving",
         name: "pending-archiving",
-        component: () =>
-          import("../views/custom-progress/PendingArchiving.vue"),
+        component: () => import("../views/custom-progress/PendingArchiving.vue"),
         meta: {
           requiresAuth: false,
         },
@@ -184,8 +177,7 @@ const routes: Array<RouteRecordRaw> = [
       {
         path: "shipping-overview",
         name: "shipping-overview",
-        component: () =>
-          import("../views/shipping-issues/ShippingOverview.vue"),
+        component: () => import("../views/shipping-issues/ShippingOverview.vue"),
         meta: {
           requiresAuth: false,
         },
@@ -286,11 +278,7 @@ router.beforeEach((to, from, next) => {
   }
 
   // 检查权限
-  if (
-    to.meta.requiresAuth &&
-    to.meta.permissions &&
-    Array.isArray(to.meta.permissions)
-  ) {
+  if (to.meta.requiresAuth && to.meta.permissions && Array.isArray(to.meta.permissions)) {
     const hasPermission = to.meta.permissions.some((permission: string) => {
       return userStore.hasPermission(permission);
     });

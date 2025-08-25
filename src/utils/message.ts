@@ -1,5 +1,5 @@
-import { ElMessage, ElMessageBox, ElNotification } from 'element-plus';
-import type { Action } from 'element-plus';
+import { ElMessage, ElMessageBox, ElNotification } from "element-plus";
+import type { Action } from "element-plus";
 
 /**
  * 消息提示工具类
@@ -10,7 +10,7 @@ export default class MessageUtils {
    * @param message 消息内容
    * @param type 消息类型：'success' | 'warning' | 'info' | 'error'
    */
-  static message(message: string, type: 'success' | 'warning' | 'info' | 'error' = 'info') {
+  static message(message: string, type: "success" | "warning" | "info" | "error" = "info") {
     ElMessage({
       message,
       type,
@@ -24,7 +24,7 @@ export default class MessageUtils {
    * @param message 消息内容
    */
   static success(message: string) {
-    this.message(message, 'success');
+    this.message(message, "success");
   }
 
   /**
@@ -32,7 +32,7 @@ export default class MessageUtils {
    * @param message 消息内容
    */
   static warning(message: string) {
-    this.message(message, 'warning');
+    this.message(message, "warning");
   }
 
   /**
@@ -40,7 +40,7 @@ export default class MessageUtils {
    * @param message 消息内容
    */
   static error(message: string) {
-    this.message(message, 'error');
+    this.message(message, "error");
   }
 
   /**
@@ -48,7 +48,7 @@ export default class MessageUtils {
    * @param message 消息内容
    */
   static info(message: string) {
-    this.message(message, 'info');
+    this.message(message, "info");
   }
 
   /**
@@ -57,11 +57,7 @@ export default class MessageUtils {
    * @param message 消息内容
    * @param type 通知类型：'success' | 'warning' | 'info' | 'error'
    */
-  static notification(
-    title: string,
-    message: string,
-    type: 'success' | 'warning' | 'info' | 'error' = 'info'
-  ) {
+  static notification(title: string, message: string, type: "success" | "warning" | "info" | "error" = "info") {
     ElNotification({
       title,
       message,
@@ -82,10 +78,10 @@ export default class MessageUtils {
    */
   static confirm(
     message: string,
-    title = '提示',
-    confirmButtonText = '确定',
-    cancelButtonText = '取消',
-    type: 'success' | 'warning' | 'info' | 'error' = 'warning'
+    title = "提示",
+    confirmButtonText = "确定",
+    cancelButtonText = "取消",
+    type: "success" | "warning" | "info" | "error" = "warning",
   ): Promise<Action> {
     return ElMessageBox.confirm(message, title, {
       confirmButtonText,
@@ -107,9 +103,9 @@ export default class MessageUtils {
    */
   static alert(
     message: string,
-    title = '提示',
-    confirmButtonText = '确定',
-    type: 'success' | 'warning' | 'info' | 'error' = 'info'
+    title = "提示",
+    confirmButtonText = "确定",
+    type: "success" | "warning" | "info" | "error" = "info",
   ): Promise<Action> {
     return ElMessageBox.alert(message, title, {
       confirmButtonText,
@@ -134,13 +130,13 @@ export default class MessageUtils {
    */
   static prompt(
     message: string,
-    title = '提示',
-    defaultValue = '',
-    confirmButtonText = '确定',
-    cancelButtonText = '取消',
-    inputPlaceholder = '',
-    inputType: 'text' | 'textarea' | 'password' = 'text',
-    inputValidator?: (value: string) => boolean | string
+    title = "提示",
+    defaultValue = "",
+    confirmButtonText = "确定",
+    cancelButtonText = "取消",
+    inputPlaceholder = "",
+    inputType: "text" | "textarea" | "password" = "text",
+    inputValidator?: (value: string) => boolean | string,
   ): Promise<{ value: string; action: Action }> {
     return ElMessageBox.prompt(message, title, {
       confirmButtonText,
