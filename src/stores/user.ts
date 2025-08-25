@@ -1,122 +1,91 @@
 import { defineStore } from "pinia";
-import { config } from "../config/index";
+import { http } from "@/utils/request";
+import type { UserInfo } from "@/types/user";
 
-export interface UserInfo {
-  id: number;
-  username: string;
-  nickname?: string;
-  avatar?: string;
-  role?: string;
-  permissions: string[];
-  name?: string;
-  department?: string;
-  position?: string;
-  email?: string;
+// 定义用户状态接口
+interface UserState {
+  token: string | null;
+  userInfo: UserInfo | null;
+  isLoggedIn: boolean;
 }
 
+// 定义登录参数接口
 export interface LoginParams {
-  token: string;
-  userInfo: UserInfo;
-  expiresIn: number;
+  username: string;
+  password: string;
 }
 
 export const useUserStore = defineStore("user", {
-  // ========== State ==========
-  state: () => {
-    const token = localStorage.getItem(`${config.storagePrefix}token`);
-    const storedUserInfo = localStorage.getItem(`${config.storagePrefix}userInfo`);
-    const storedExpiresAt = localStorage.getItem(`${config.storagePrefix}expiresAt`);
+  state: (): UserState => ({
+    token: localStorage.getItem("token") || null,
+    userInfo: JSON.parse(localStorage.getItem("user-info") || "null"),
+    isLoggedIn: !!localStorage.getItem("token"),
+  }),
 
-    let userInfo: UserInfo | null = null;
-    if (storedUserInfo) {
-      try {
-        userInfo = JSON.parse(storedUserInfo);
-      } catch (e) {
-        console.error("Failed to parse user info from localStorage", e);
-      }
-    }
-
-    return {
-      token,
-      userInfo,
-      expiresAt: storedExpiresAt ? parseInt(storedExpiresAt, 10) : null,
-    };
-  },
-
-  // ========== Getters ==========
   getters: {
-    isLoggedIn: (state) => {
-      // 检查token是否存在且未过期
-      if (!state.token || !state.expiresAt) {
-        return false;
-      }
-      return Date.now() < state.expiresAt;
-    },
-
-    userRole: (state) => {
-      return state.userInfo?.role || "";
-    },
-
-    userPermissions: (state) => {
-      return state.userInfo?.permissions || [];
-    },
+    // 获取用户信息
+    getUserInfo: (state: UserState) => state.userInfo,
+    
+    // 获取用户角色
+    getUserRole: (state: UserState) => state.userInfo?.role || null,
+    
+    // 检查是否已登录
+    getIsLoggedIn: (state: UserState) => state.isLoggedIn,
   },
 
-  // ========== Actions ==========
   actions: {
-    login(params: LoginParams) {
-      const { token: newToken, userInfo: newUserInfo, expiresIn } = params;
-
-      // 设置token和用户信息
-      this.token = newToken;
-      this.userInfo = newUserInfo;
-      this.expiresAt = Date.now() + expiresIn * 1000;
-
-      // 保存到localStorage
-      localStorage.setItem(`${config.storagePrefix}token`, newToken || "");
-      localStorage.setItem(`${config.storagePrefix}userInfo`, JSON.stringify(newUserInfo));
-      localStorage.setItem(`${config.storagePrefix}expiresAt`, this.expiresAt?.toString() || "");
+    // 用户登录
+    async login(loginParams: LoginParams) {
+      try {
+        // 发送登录请求
+        const response: any = await http.post("/api/login", loginParams);
+        
+        // 保存token和用户信息
+        this.token = response.data.token;
+        this.userInfo = response.data.user;
+        this.isLoggedIn = true;
+        
+        // 保存到localStorage
+        if (this.token) {
+          localStorage.setItem("token", this.token);
+        }
+        localStorage.setItem("user-info", JSON.stringify(this.userInfo));
+        
+        return response;
+      } catch (error) {
+        console.error("登录失败:", error);
+        throw error;
+      }
     },
 
+    // 用户登出
     logout() {
-      // 清空状态
+      // 清除状态
       this.token = null;
       this.userInfo = null;
-      this.expiresAt = null;
-
+      this.isLoggedIn = false;
+      
       // 清除localStorage
-      localStorage.removeItem(`${config.storagePrefix}token`);
-      localStorage.removeItem(`${config.storagePrefix}userInfo`);
-      localStorage.removeItem(`${config.storagePrefix}expiresAt`);
+      localStorage.removeItem("token");
+      localStorage.removeItem("user-info");
     },
 
+    // 初始化用户信息
     initUserInfo() {
-      const storedUserInfo = localStorage.getItem(`${config.storagePrefix}userInfo`);
-      if (storedUserInfo) {
-        try {
-          this.userInfo = JSON.parse(storedUserInfo);
-        } catch (e) {
-          console.error("Failed to parse user info from localStorage", e);
-        }
+      const token = localStorage.getItem("token");
+      const userInfo = localStorage.getItem("user-info");
+      
+      if (token && userInfo) {
+        this.token = token;
+        this.userInfo = JSON.parse(userInfo);
+        this.isLoggedIn = true;
       }
     },
 
     // 更新用户信息
-    updateUserInfo(newUserInfo: UserInfo) {
-      this.userInfo = { ...this.userInfo, ...newUserInfo } as UserInfo;
-
-      // 更新localStorage
-      localStorage.setItem(`${config.storagePrefix}userInfo`, JSON.stringify(this.userInfo));
-    },
-
-    // 检查权限
-    hasPermission(permission: string) {
-      // 管理员拥有所有权限
-      if (this.userRole === "admin") {
-        return true;
-      }
-      // 检查用户是否有指定权限
-      return this.userPermissions.includes(permission);
+    updateUserInfo(userInfo: UserInfo) {
+      this.userInfo = userInfo;
+      localStorage.setItem("user-info", JSON.stringify(userInfo));
     },
   },
 });

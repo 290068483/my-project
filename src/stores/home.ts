@@ -1,19 +1,16 @@
-import { getTime } from "element-plus/es/components/countdown/src/utils.mjs";
 import { defineStore } from "pinia";
-
-export interface Notification {
-  id: number;
-  title: string;
-  content: string;
-  time: string;
-  iconColor: string;
-  iconPath: string;
-  type: "critical" | "warning" | "success" | "info";
-}
+import type { Notification } from "@/types/notification";
 
 export interface Item {
   name: string;
   count: number;
+}
+
+export interface DataItem {
+  id: number;
+  name: string;
+  count: string;
+  details: string;
 }
 
 export interface Announcement {
@@ -165,8 +162,8 @@ export const useHomeStore = defineStore("home", {
     getPendingItems: (state) => state.pendingItems,
     getRelatedItems: (state) => state.relatedItems,
     getAnnouncements: (state) => state.announcements,
-    getData1: (state) => state.data1,
-    getData2: (state) => state.data2,
+    getData1: (state): { title: string; data: DataItem[] } => state.data1,
+    getData2: (state): { title: string; data: DataItem[] } => state.data2,
     getDate: (state) => state.dateData.date,
     getTime: (state) => state.dateData.time,
     getLunarDate: (state) => state.dateData.lunarDate,
@@ -208,7 +205,7 @@ export const useHomeStore = defineStore("home", {
 
     // 添加新的通知
     addNotification(notification: Omit<Notification, "id">) {
-      const newId = Math.max(0, ...this.notifications.map((n) => n.id)) + 1;
+      const newId = Math.max(0, ...this.notifications.map((n: Notification) => n.id)) + 1;
       this.notifications.unshift({ ...notification, id: newId });
     },
 

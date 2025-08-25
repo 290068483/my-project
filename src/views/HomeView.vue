@@ -77,7 +77,7 @@
         </el-carousel>
       </div>
       <!-- 快捷信息区域 -->
-      <div class="quick-info rounded-lg shadow-card">
+      <div class="quick-info gap-5 rounded-lg shadow-card">
         <div
           v-for="(card, index) in quickInfoCards"
           :key="index"

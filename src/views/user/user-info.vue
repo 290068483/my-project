@@ -30,7 +30,7 @@
         </div>
 
         <div class="user-info-item">
-          <div class="text-sm text-gray-500 mb-1">部门</div>
+          <div class="text-sm text-gray-500 mb-1">所属部门</div>
           <div class="text-lg font-medium text-gray-800">
             {{ userDepartment }}
           </div>
@@ -45,7 +45,9 @@
       </div>
 
       <div class="flex justify-center">
-        <el-button type="primary" @click="openEditInfo" size="default"> 编辑信息 </el-button>
+        <el-button type="primary" @click="openEditInfo" size="default">
+          编辑信息
+        </el-button>
       </div>
     </div>
 
@@ -77,32 +79,12 @@
     </el-dialog>
 
     <!-- 编辑信息对话框 -->
-    <el-dialog v-model="editDialogVisible" title="编辑用户信息" width="500px">
-      <el-form :model="editForm" label-width="80px" ref="editFormRef" @submit.prevent :rules="editFormRules">
-        <el-form-item label="用户名" prop="name">
-          <el-input v-model="editForm.name" />
-        </el-form-item>
-
-        <el-form-item label="职位" prop="position">
-          <el-input v-model="editForm.position" />
-        </el-form-item>
-
-        <el-form-item label="部门" prop="department">
-          <el-input v-model="editForm.department" />
-        </el-form-item>
-
-        <el-form-item label="邮箱" prop="email">
-          <el-input v-model="editForm.email" type="email" />
-        </el-form-item>
-      </el-form>
-
-      <template #footer>
-        <span class="dialog-footer">
-          <el-button @click="editDialogVisible = false">取消</el-button>
-          <el-button type="primary" @click="confirmEditInfo" :loading="updatingInfo"> 保存 </el-button>
-        </span>
-      </template>
-    </el-dialog>
+    <EditUserInfoModal
+      v-model="editDialogVisible"
+      :user-info="userInfo"
+      @save="handleSaveUserInfo"
+      @close="editDialogVisible = false"
+    />
   </div>
 </template>
 
@@ -111,7 +93,7 @@ import { ref, reactive, onMounted, computed } from "vue";
 import { useUserStore } from "@/stores/user";
 import type { UploadFile, UploadRawFile } from "element-plus";
 import { ElMessage } from "element-plus";
-import type { FormRules } from "element-plus";
+import EditUserInfoModal from "@/components/EditUserInfoModal.vue";
 
 // 定义常量
 const DEFAULT_AVATAR = "https://cube.elemecdn.com/0/88/03b0d39583f48206768a7534e55bcpng.png";
@@ -140,7 +122,6 @@ const avatarDialogVisible = ref(false);
 const editDialogVisible = ref(false);
 const tempAvatar = ref("");
 const updatingAvatar = ref(false);
-const updatingInfo = ref(false);
 
 // 计算属性
 const userAvatar = computed(() => {
@@ -163,25 +144,13 @@ const userEmail = computed(() => {
   return userInfo.value.email || "未设置";
 });
 
-// 编辑表单引用和数据
-const editFormRef = ref();
+// 编辑表单数据
 const editForm = reactive<UserInfo>({
   name: "",
   department: "",
   position: "",
   email: "",
 });
-
-// 表单验证规则
-const editFormRules: FormRules = {
-  name: [
-    { required: true, message: "请输入用户名", trigger: "blur" },
-    { min: 2, max: 20, message: "用户名长度应在2-20个字符之间", trigger: "blur" },
-  ],
-  email: [{ type: "email", message: "请输入正确的邮箱地址", trigger: "blur" }],
-  position: [{ required: false, message: "请输入职位", trigger: "blur" }],
-  department: [{ required: false, message: "请输入部门", trigger: "blur" }],
-};
 
 // 处理页面挂载
 onMounted(() => {
@@ -214,74 +183,48 @@ const updateAvatar = () => {
 
 // 头像上传前的验证
 const beforeAvatarUpload = (rawFile: UploadRawFile) => {
-  const isJPGorPNG = rawFile.type === "image/jpeg" || rawFile.type === "image/png";
+  const isJPGorPNG = rawFile.type === 'image/jpeg' || rawFile.type === 'image/png';
   const isLt2M = rawFile.size / 1024 / 1024 < 2;
 
   if (!isJPGorPNG) {
-    ElMessage.error("头像图片只能是 JPG 或 PNG 格式!");
-    return false;
+    ElMessage.error('头像图片只能是 JPG 或 PNG 格式!');
   }
   if (!isLt2M) {
-    ElMessage.error("头像图片大小不能超过 2MB!");
-    return false;
+    ElMessage.error('头像图片大小不能超过 2MB!');
   }
-  return true;
+  return isJPGorPNG && isLt2M;
 };
 
 // 处理头像更改
 const handleAvatarChange = (file: UploadFile) => {
-  if (!beforeAvatarUpload(file.raw as UploadRawFile)) {
-    return;
-  }
-
-  const reader = new FileReader();
-  reader.onload = (e) => {
-    const result = e.target?.result as string;
-    // 简单的 XSS 防护，确保是有效的图片数据
-    if (result && (result.startsWith("data:image/jpeg;base64,") || result.startsWith("data:image/png;base64,"))) {
-      tempAvatar.value = result;
-    } else {
-      ElMessage.error("无效的图片文件");
-    }
-  };
-  reader.onerror = () => {
-    ElMessage.error("读取文件时发生错误");
-  };
-  reader.readAsDataURL(file.raw!);
+  // 创建临时预览URL
+  tempAvatar.value = URL.createObjectURL(file.raw!);
 };
 
 // 确认更新头像
 const confirmUpdateAvatar = async () => {
-  if (!tempAvatar.value) {
-    ElMessage.warning("请先选择头像文件");
-    return;
-  }
+  if (!tempAvatar.value) return;
 
   updatingAvatar.value = true;
-
-  try {
-    // 模拟上传头像到服务器
-    // 实际项目中这里应该调用上传接口
-    await new Promise((resolve) => setTimeout(resolve, 1000));
-
-    // 更新用户存储中的头像
-    if (userStore.userInfo) {
-      userStore.updateUserInfo({
-        ...userStore.userInfo,
-        avatar: tempAvatar.value,
-      });
-    }
-
-    // 更新本地用户信息
+    
+  // 模拟上传过程
+  setTimeout(() => {
+    // 更新用户信息
     userInfo.value.avatar = tempAvatar.value;
-
-    ElMessage.success("头像修改成功");
-    avatarDialogVisible.value = false;
-  } catch (error) {
-    ElMessage.error((error as Error).message || "头像修改失败");
-  } finally {
+      
+    // 更新store中的用户信息
+    if (userStore.userInfo) {
+      userStore.userInfo.avatar = tempAvatar.value;
+        
+      // 保存到localStorage
+      localStorage.setItem("user-info", JSON.stringify(userStore.userInfo));
+    }
+      
     updatingAvatar.value = false;
-  }
+    avatarDialogVisible.value = false;
+    tempAvatar.value = "";
+    ElMessage.success("头像更新成功");
+  }, 500);
 };
 
 // 处理头像对话框关闭
@@ -300,62 +243,57 @@ const openEditInfo = () => {
   editDialogVisible.value = true;
 };
 
-// 确认编辑信息
-const confirmEditInfo = async () => {
-  if (!editFormRef.value) return;
-
-  await editFormRef.value.validate(async (valid: boolean) => {
-    if (!valid) return;
-
-    updatingInfo.value = true;
-
-    try {
-      // 模拟更新用户信息
-      await new Promise((resolve) => setTimeout(resolve, 1000));
-
-      // 更新用户存储中的信息
-      if (userStore.userInfo) {
-        userStore.updateUserInfo({
-          ...userStore.userInfo,
-          name: editForm.name,
-          department: editForm.department,
-          position: editForm.position,
-          email: editForm.email,
-        });
-      }
-
-      // 更新本地用户信息
-      userInfo.value.name = editForm.name;
-      userInfo.value.department = editForm.department;
-      userInfo.value.position = editForm.position;
-      userInfo.value.email = editForm.email;
-
-      ElMessage.success("用户信息更新成功");
-      editDialogVisible.value = false;
-    } catch (error) {
-      ElMessage.error((error as Error).message || "用户信息更新失败");
-    } finally {
-      updatingInfo.value = false;
-    }
-  });
+// 保存用户信息
+const handleSaveUserInfo = (updatedUserInfo: UserInfo) => {
+  // 更新用户信息
+  userInfo.value = { ...userInfo.value, ...updatedUserInfo };
+  
+  // 更新store中的用户信息
+  if (userStore.userInfo) {
+    userStore.userInfo.name = updatedUserInfo.name;
+    userStore.userInfo.department = updatedUserInfo.department;
+    userStore.userInfo.position = updatedUserInfo.position;
+    userStore.userInfo.email = updatedUserInfo.email;
+    
+    // 保存到localStorage
+    localStorage.setItem("user-info", JSON.stringify(userStore.userInfo));
+  }
+  
+  ElMessage.success("用户信息更新成功");
 };
 </script>
 
 <style scoped>
-.avatar-preview {
-  width: 80px;
-  height: 80px;
-  border-radius: 50%;
-  object-fit: cover;
-}
-
 .user-info-item {
   padding: 0.5rem;
-  border-radius: 0.25rem;
-  transition: background-color 0.2s;
+  border-radius: 0.5rem;
+  transition: all 0.3s ease;
 }
 
 .user-info-item:hover {
-  background-color: #f9fafb;
+  background-color: #f8f9fa;
+  transform: translateY(-2px);
+  box-shadow: 0 2px 8px rgba(0, 0, 0, 0.1);
+}
+
+.avatar-uploader :deep(.el-upload) {
+  border: 1px dashed #d9d9d9;
+  border-radius: 6px;
+  cursor: pointer;
+  position: relative;
+  overflow: hidden;
+  transition: var(--el-transition-duration-fast);
+}
+
+.avatar-uploader :deep(.el-upload:hover) {
+  border-color: var(--el-color-primary);
+}
+
+.avatar-preview {
+  width: 80px;
+  height: 80px;
+  display: block;
+  border-radius: 50%;
+  object-fit: cover;
 }
 </style>
