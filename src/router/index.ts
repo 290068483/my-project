@@ -1,8 +1,6 @@
 import { createRouter, createWebHistory } from "vue-router";
 import type { RouteRecordRaw } from "vue-router";
 import HomeView from "@/views/HomeView.vue";
-import LoginView from "@/views/user/LoginView.vue";
-import ForgotPassword from "@/views/user/ForgotPassword.vue";
 import { useUserStore } from "@/stores/user";
 import { ElMessage } from "element-plus";
 import Layout from "@/components/Layout.vue";
@@ -228,6 +226,7 @@ const routes: Array<RouteRecordRaw> = [
       requiresAuth: false,
     },
   },
+
   // 忘记密码
   {
     path: "/forgot-password",

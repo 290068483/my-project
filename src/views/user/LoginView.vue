@@ -13,38 +13,19 @@
         <el-form-item label="用户名" prop="username" class="password-form-item">
           <el-input
             v-model="loginForm.username"
-            placeholder="请输入用户名"
+            placeholder="请输入用户名（字母或数字）"
             :disabled="isLoginDisabled"
             size="small"
             @blur="validateUsername" />
         </el-form-item>
-        <el-form-item
-          v-if="showCaptcha"
-          aria-disabled="!captchaEnabled"
-          label="验证码"
-          prop="captcha"
-          class="password-form-item">
-          <el-row :gutter="8" class="captcha-container">
-            <el-col :span="14">
-              <el-input
-                v-model="loginForm.captcha"
-                placeholder="请输入验证码"
-                :disabled="!captchaEnabled || !showCaptcha"
-                size="small" />
-            </el-col>
-            <el-col :span="10">
-              <!-- 验证码按钮禁用条件：登录禁用、验证码加载中或验证码未启用 -->
-              <el-button
-                type="default"
-                class="captcha-btn"
-                size="small"
-                @click="getCaptcha"
-                :disabled="isCaptchaButtonDisabled"
-                :loading="isCaptchaLoading">
-                {{ captchaText }}
-              </el-button>
-            </el-col>
-          </el-row>
+        <el-form-item v-if="showCaptcha" label="安全验证" prop="code" class="captcha-form-item">
+          <DragCaptcha
+            ref="dragCaptchaRef"
+            :width="300"
+            :height="150"
+            :disabled="!captchaEnabled || isLoginDisabled"
+            @verified="onCaptchaVerified"
+            @refresh="onCaptchaRefresh" />
         </el-form-item>
         <el-form-item label="密码" prop="password" class="password-form-item">
           <el-input
@@ -71,22 +52,13 @@
           </div>
         </div>
       </el-form>
-      <!-- 验证码日志显示区域 -->
-      <div v-if="captchaLogs.length > 0" class="captcha-logs">
-        <h4>验证码获取日志:</h4>
-        <ul class="logs-list">
-          <li v-for="(log, index) in captchaLogs" :key="index" class="log-item">
-            {{ log }}
-          </li>
-        </ul>
-      </div>
     </el-card>
   </div>
 </template>
 
 <script setup lang="ts">
 // 导入Vue相关API
-import { ref, reactive, onMounted, watch, onUnmounted, computed } from "vue";
+import { ref, reactive, onMounted, watch, onUnmounted } from "vue";
 // 导入Element Plus组件和消息提示
 import { ElMessage, ElForm } from "element-plus";
 // 导入图标
@@ -95,10 +67,12 @@ import { Lock } from "@element-plus/icons-vue";
 import { useRouter } from "vue-router";
 // 导入用户Store
 import { useUserStore } from "@/stores/user";
-// 导入HTTP请求工具
-import request from "@/utils/Http";
 // 导入防抖函数
 import { debounce } from "@/utils/debounce";
+// 导入类型定义
+import type { LoginRequest } from "@/types/auth";
+// 导入拖动验证码组件
+import DragCaptcha from "@/components/DragCaptcha.vue";
 
 // 定义组件Props
 defineProps<{
@@ -113,18 +87,15 @@ const userStore = useUserStore();
 // 登录表单引用
 const loginFormRef = ref<InstanceType<typeof ElForm>>();
 // 登录表单数据
-const loginForm = reactive<{
-  username: string;
-  password: string;
-  captcha: string;
-}>({
+const loginForm = reactive<LoginRequest>({
   username: "",
   password: "",
-  captcha: "",
+  code: "",
+  uuid: "",
 });
 
 // 加载状态
-const isLoading = ref(false);
+const loading = ref(false);
 // 是否禁用登录按钮
 const isLoginDisabled = ref(false);
 // 表单是否有效
@@ -137,46 +108,87 @@ const captchaCount = ref(0);
 const showCaptcha = ref(false);
 // 验证码是否启用
 const captchaEnabled = ref(false);
-// 验证码获取中状态
-const isCaptchaLoading = ref(false);
-// 验证码按钮文本
-const captchaText = ref("获取验证码");
-// 验证码倒计时定时器
-const captchaInterval = ref<number | null>(null);
-// 验证码倒计时时长(秒)
-const captchaTimeout = ref<number>(60);
-// 验证码日志
-const captchaLogs = ref<string[]>([]);
+// 拖动验证码组件引用
+const dragCaptchaRef = ref<InstanceType<typeof DragCaptcha>>();
+// 验证码验证token
+const captchaToken = ref<string>("");
 
 /**
- * 计算验证码按钮是否应该禁用
+ * 处理拖动验证码验证结果
  */
-const isCaptchaButtonDisabled = computed(() => {
-  // 组合条件判断，减少重复代码
-  return (!captchaEnabled.value && !isCaptchaLoading.value) || isCaptchaLoading.value || isLoginDisabled.value;
-});
+const onCaptchaVerified = (success: boolean, token?: string) => {
+  console.log("🎯 [验证码调试] 验证码验证结果:", { success, token: token ? token.substring(0, 10) + "..." : "无" });
 
-/**
- * 检查是否需要显示验证码
- * 登录失败2次后显示验证码
- */
-const checkShowCaptcha = () => {
-  showCaptcha.value = loginCount.value >= 2;
+  if (success && token) {
+    console.log("✅ [验证码调试] 验证成功，保存token");
+    captchaToken.value = token;
+    loginForm.code = "verified";
+    loginForm.uuid = token;
+  } else {
+    console.log("❌ [验证码调试] 验证失败，清空状态");
+    captchaToken.value = "";
+    loginForm.code = "";
+    loginForm.uuid = "";
+    captchaCount.value++;
+    console.log("📊 [验证码调试] 验证失败次数:", captchaCount.value);
+
+    // 验证失败3次后禁用验证码功能
+    if (captchaCount.value >= 3) {
+      console.log("⚠️ [验证码调试] 验证失败次数过多，禁用验证码功能");
+      captchaEnabled.value = false;
+      showCaptcha.value = false;
+      ElMessage.error("验证失败次数过多，请重新输入用户名");
+      loginForm.username = "";
+    }
+  }
 };
 
 /**
- * 验证用户名是否为手机号
- * 根据手机号格式决定是否启用验证码
+ * 处理验证码刷新
+ */
+const onCaptchaRefresh = () => {
+  console.log("🔄 [验证码调试] 验证码刷新，清空状态");
+  captchaToken.value = "";
+  loginForm.code = "";
+  loginForm.uuid = "";
+};
+
+/**
+ * 验证用户名格式
+ * 根据用户名格式决定是否启用验证码
  */
 const validateUsername = () => {
-  const phonePattern = /^1[3-9]\d{9}$/;
-  if (phonePattern.test(loginForm.username)) {
+  console.log("🔍 [用户名验证] 开始验证用户名:", loginForm.username);
+
+  // 用户名格式：5-20位，可以是纯字母、纯数字或字母+数字组合
+  const usernamePattern = /^[a-zA-Z\d]{5,20}$/;
+  const isValidUsername = usernamePattern.test(loginForm.username);
+
+  console.log("📝 [用户名验证] 验证结果:", {
+    username: loginForm.username,
+    length: loginForm.username.length,
+    isValidFormat: isValidUsername,
+    pattern: usernamePattern.toString(),
+  });
+
+  if (isValidUsername) {
+    console.log("✅ [用户名验证] 用户名格式正确，启用验证码");
     captchaEnabled.value = true;
+    showCaptcha.value = true;
   } else {
+    console.log("❌ [用户名验证] 用户名格式不正确，禁用验证码");
     captchaEnabled.value = false;
+    showCaptcha.value = false;
     // 清空验证码相关状态
-    loginForm.captcha = "";
+    loginForm.code = "";
+    loginForm.uuid = "";
+    captchaToken.value = "";
   }
+
+  console.log("🔄 [用户名验证] 验证码状态更新:", {
+    captchaEnabled: captchaEnabled.value,
+    showCaptcha: showCaptcha.value,
+  });
 };
 
 /**
@@ -190,71 +202,6 @@ watch(
 );
 
 /**
- * 添加日志到验证码日志数组
- */
-const addCaptchaLog = (message: string) => {
-  const timestamp = new Date().toLocaleTimeString();
-  captchaLogs.value.push(`[${timestamp}] ${message}`);
-  // 限制日志数量，只保留最近的10条
-  if (captchaLogs.value.length > 10) {
-    captchaLogs.value.shift();
-  }
-};
-
-/**
- * 获取验证码
- * 模拟发送验证码并启动倒计时
- */
-const getCaptcha = async () => {
-  if (!captchaEnabled.value) {
-    addCaptchaLog("验证码未启用，无法获取验证码");
-    return;
-  }
-
-  try {
-    addCaptchaLog("开始获取验证码...");
-
-    // 模拟获取验证码接口
-    await new Promise((resolve) => setTimeout(resolve, 500));
-
-    // 模拟生成验证码
-    const mockCaptcha = Math.floor(1000 + Math.random() * 9000); // 4位数字验证码
-    addCaptchaLog(`验证码获取成功: ${mockCaptcha}`);
-
-    // 启动倒计时
-    let countdown = captchaTimeout.value;
-    isCaptchaLoading.value = true;
-    captchaText.value = `${countdown}秒后重新获取`;
-    addCaptchaLog(`启动倒计时: ${countdown}秒`);
-
-    if (captchaInterval.value) {
-      clearInterval(captchaInterval.value);
-    }
-
-    captchaInterval.value = window.setInterval(() => {
-      countdown--;
-      if (countdown <= 0) {
-        if (captchaInterval.value) {
-          clearInterval(captchaInterval.value);
-          captchaInterval.value = null;
-        }
-        captchaText.value = "获取验证码";
-        isCaptchaLoading.value = false;
-        addCaptchaLog("倒计时结束，可以重新获取验证码");
-      } else {
-        captchaText.value = `${countdown}秒后重新获取`;
-      }
-    }, 1000);
-
-    ElMessage.success("验证码已发送，请注意查收");
-  } catch (error) {
-    addCaptchaLog(`获取验证码失败: ${error}`);
-    ElMessage.error("获取验证码失败，请重试");
-    isCaptchaLoading.value = false;
-  }
-};
-
-/**
  * 登录表单验证规则
  */
 const loginRules = {
@@ -265,19 +212,23 @@ const loginRules = {
       trigger: ["blur", "change"],
     },
     {
-      min: 6,
-      max: 20,
-      message: "用户名长度必须在6-20个字符之间",
+      pattern: /^[a-zA-Z\d]{5,20}$/,
+      message: "用户名必须为5-20位字母或数字",
       trigger: ["blur", "change"],
     },
     {
-      pattern: /^[a-zA-Z][a-zA-Z0-9_]{5,19}$/,
-      message: "用户名必须以字母开头，只能包含字母、数字和下划线",
-      trigger: ["blur", "change"],
-    },
-    {
-      pattern: /^1[3-9]\d{9}$/,
-      message: "请输入11位手机号码，以13/14/15/17/18/19开头",
+      validator: (rule: unknown, value: string, callback: (error?: Error) => void) => {
+        // 验证用户名格式：可以是纯字母、纯数字或字母+数字组合
+        const isAlphabetic = /^[a-zA-Z]+$/.test(value);
+        const isNumeric = /^\d+$/.test(value);
+        const isAlphanumeric = /^[a-zA-Z\d]+$/.test(value);
+
+        if (!isAlphabetic && !isNumeric && !isAlphanumeric) {
+          callback(new Error("用户名只能包含字母和数字"));
+        } else {
+          callback();
+        }
+      },
       trigger: ["blur", "change"],
     },
   ],
@@ -294,14 +245,14 @@ const loginRules = {
       trigger: ["blur", "change"],
     },
     {
-      validator: (rule: any, value: string, callback: any) => {
-        // 验证密码复杂度：必须包含大小写字母和数字
-        const hasUpper = /[A-Z]/.test(value);
-        const hasLower = /[a-z]/.test(value);
-        const hasNumber = /\d/.test(value);
+      validator: (rule: unknown, value: string, callback: (error?: Error) => void) => {
+        // 验证密码格式：可以是纯字母、纯数字或字母+数字组合
+        const isAlphabetic = /^[a-zA-Z]+$/.test(value);
+        const isNumeric = /^\d+$/.test(value);
+        const isAlphanumeric = /^[a-zA-Z\d]+$/.test(value);
 
-        if (!hasUpper || !hasLower || !hasNumber) {
-          callback(new Error("密码必须包含大小写字母和数字"));
+        if (!isAlphabetic && !isNumeric && !isAlphanumeric) {
+          callback(new Error("密码只能包含字母和数字"));
         } else {
           callback();
         }
@@ -309,25 +260,13 @@ const loginRules = {
       trigger: ["blur", "change"],
     },
   ],
-  captcha: [
+  code: [
     {
-      required: true,
-      message: "验证码不能为空",
-      trigger: ["blur", "change"],
-    },
-    {
-      pattern: /^[0-9]{4,6}$/,
-      message: "验证码必须为4-6位数字",
-      trigger: ["blur", "change"],
-    },
-    {
-      validator: (rule: any, value: string, callback: any) => {
-        // 模拟验证码验证（实际应由后端验证）
-        if (showCaptcha.value && value.length >= 4 && value.length <= 6) {
-          // 模拟验证码验证通过
-          callback();
+      validator: (rule: unknown, value: string, callback: (error?: Error) => void) => {
+        if (showCaptcha.value && (!captchaToken.value || captchaToken.value.trim() === "")) {
+          callback(new Error("请完成拖动验证"));
         } else {
-          callback(new Error("请输入正确的验证码"));
+          callback();
         }
       },
       trigger: ["blur", "change"],
@@ -338,7 +277,7 @@ const loginRules = {
 /**
  * 监听表单变化，验证表单是否有效
  */
-watch([() => loginForm.username, () => loginForm.password, () => loginForm.captcha], () => {
+watch([() => loginForm.username, () => loginForm.password, () => loginForm.code], () => {
   validateForm();
 });
 
@@ -351,7 +290,7 @@ const validateForm = async () => {
     await loginFormRef.value?.validateField("username");
     await loginFormRef.value?.validateField("password");
     if (showCaptcha.value) {
-      await loginFormRef.value?.validateField("captcha");
+      await loginFormRef.value?.validateField("code");
     }
     isFormValid.value = true;
   } catch {
@@ -364,116 +303,178 @@ const validateForm = async () => {
  * @returns {Promise<void>} 无返回值
  */
 const handleLogin = debounce(async () => {
+  console.log("🚀 [登录调试] 开始登录流程");
+  console.log("📝 [登录调试] 登录表单数据:", {
+    username: loginForm.username,
+    password: loginForm.password ? "***已填写***" : "未填写",
+    code: loginForm.code,
+    uuid: loginForm.uuid,
+  });
+
   try {
+    console.log("✅ [登录调试] 开始表单验证...");
     // 表单验证
     await loginFormRef.value?.validate();
-    // eslint-disable-next-line @typescript-eslint/no-explicit-any
+    console.log("✅ [登录调试] 表单验证通过");
 
-    isLoading.value = true;
+    loading.value = true;
     isLoginDisabled.value = true;
 
-    // 模拟验证码验证
-    if (showCaptcha.value && loginForm.captcha.trim() === "") {
-      // 合并验证码检查逻辑
-      ElMessage.error("请输入验证码");
+    // 验证拖动验证码
+    if (showCaptcha.value && (!captchaToken.value || captchaToken.value.trim() === "")) {
+      console.log("❌ [登录调试] 验证码验证失败: 需要完成拖动验证");
+      ElMessage.error("请完成拖动验证");
       return;
     }
 
-    // 调用登录接口
-    const response: unknown = await request.post("/mock/login", {
-      username: loginForm.username,
-      password: loginForm.password,
-      captcha: loginForm.captcha, // 将验证码一并发送
+    if (showCaptcha.value) {
+      console.log("✅ [登录调试] 拖动验证码验证通过, token:", captchaToken.value.substring(0, 10) + "...");
+    } else {
+      console.log("ℹ️ [登录调试] 无需验证码验证");
+    }
+
+    console.log("🌐 [登录调试] 开始调用登录API...");
+    // 调用用户store的登录方法
+    await userStore.login(loginForm);
+    console.log("🎉 [登录调试] 登录API调用成功");
+
+    // 登录成功，重置计数和状态
+    loginCount.value = 0;
+    captchaCount.value = 0;
+    console.log("🔄 [登录调试] 重置登录计数和验证码计数");
+    // 保持验证码显示状态，不重置为false
+
+    // 跳转到首页或重定向页面
+    const redirect = router.currentRoute.value.query.redirect;
+    if (redirect) {
+      console.log("🔄 [登录调试] 跳转到重定向页面:", redirect);
+      router.push(redirect as string);
+    } else {
+      console.log("🔄 [登录调试] 跳转到首页");
+      router.push("/");
+    }
+  } catch (error: unknown) {
+    console.error("❌ [登录调试] 登录失败:", error);
+    // 登录失败处理
+    loginCount.value++;
+    console.log("📊 [登录调试] 登录失败次数:", loginCount.value);
+
+    // 类型安全检查
+    const errorObj = error as { code?: number; message?: string };
+    console.log("🔍 [登录调试] 错误详情:", {
+      code: errorObj.code,
+      message: errorObj.message,
+      type: typeof error,
     });
 
-    // 类型检查
-    if (
-      response &&
-      typeof response === "object" &&
-      "data" in response &&
-      response.data &&
-      typeof response.data === "object"
-    ) {
-      const responseData = response.data;
-      if ("success" in responseData && responseData.success) {
-        if ("data" in responseData && responseData.data && typeof responseData.data === "object") {
-          const { token, userInfo, expiresIn } = responseData.data as {
-            token: string;
-            userInfo: unknown;
-            expiresIn: number;
-          };
+    // 如果是验证码相关错误，需要重置验证码
+    if (errorObj.code === 460 || errorObj.code === 461) {
+      console.log("🔄 [登录调试] 检测到验证码错误，重置验证码状态");
+      loginForm.code = "";
+      loginForm.uuid = "";
+      captchaToken.value = "";
+      captchaCount.value++;
+      console.log("📊 [登录调试] 验证码错误次数:", captchaCount.value);
 
-          // 存储用户信息
-          userStore.login({
-            token,
-            userInfo: userInfo as never, // 保持类型安全
-            expiresIn,
-          });
-
-          ElMessage.success("登录成功");
-
-          // 重置计数
-          loginCount.value = 0;
-          captchaCount.value = 0;
-          showCaptcha.value = false;
-
-          // 跳转到首页或重定向页面
-          const redirect = router.currentRoute.value.query.redirect;
-          if (redirect) {
-            router.push(redirect as string);
-          } else {
-            router.push("/");
-          }
-        }
-      } else {
-        // 登录失败
-        loginCount.value++;
-        checkShowCaptcha();
-        const message =
-          "message" in responseData && typeof responseData.message === "string" ? responseData.message : "登录失败";
-        ElMessage.error(message);
-
-        // 超过3次失败，清空表单
-        if (loginCount.value >= 3) {
-          loginForm.username = "";
-          loginForm.password = "";
-          loginForm.captcha = "";
-          ElMessage.warning("登录失败次数过多，请重新输入");
-        }
+      // 验证码错误3次后禁用验证码功能
+      if (captchaCount.value >= 3) {
+        console.log("⚠️ [登录调试] 验证码错误次数过多，禁用验证码功能");
+        captchaEnabled.value = false;
+        showCaptcha.value = false;
+        ElMessage.error("验证失败次数过多，请重新输入用户名");
+        loginForm.username = "";
+        return;
       }
-    } else {
-      throw new Error("Invalid response format");
+
+      // 重置拖动验证码
+      console.log("🔄 [登录调试] 重置拖动验证码组件");
+      dragCaptchaRef.value?.reset();
     }
-  } catch (error) {
-    // 表单验证失败或网络错误
-    if (error instanceof Error && error.name === "ValidationError") {
-      // 表单验证错误已经通过rules提示
-    } else {
-      ElMessage.error("登录失败，请检查网络连接或稍后重试");
+
+    // 超过3次失败，清空表单
+    if (loginCount.value >= 3) {
+      console.log("⚠️ [登录调试] 登录失败次数过多，清空表单");
+      loginForm.username = "";
+      loginForm.password = "";
+      loginForm.code = "";
+      ElMessage.warning("登录失败次数过多，请重新输入");
     }
   } finally {
-    isLoading.value = false;
+    console.log("🏁 [登录调试] 登录流程结束，恢复UI状态");
+    loading.value = false;
     isLoginDisabled.value = false;
   }
 });
 
 /**
  * 组件挂载时执行
- * 检查是否需要显示验证码
+ * 初始化验证码相关状态
  */
-onMounted(() => {
-  checkShowCaptcha();
-  addCaptchaLog("组件初始化完成");
+onMounted(async () => {
+  console.log("🚀 [登录组件] 组件已挂载");
+  console.log("📝 [登录组件] 初始状态:", {
+    captchaEnabled: captchaEnabled.value,
+    showCaptcha: showCaptcha.value,
+    loginCount: loginCount.value,
+    captchaCount: captchaCount.value,
+  });
+
+  // 初始状态：验证码功能默认禁用
+  captchaEnabled.value = false;
+  showCaptcha.value = false;
+
+  console.log("🔧 [登录组件] 测试模式已启用，可以在控制台使用以下命令:");
+  console.log("🧪 window.testLogin() - 快速填入 admin/admin123");
+  console.log("📊 window.getLoginState() - 查看当前登录状态");
+  console.log("🔄 window.simulateCaptcha() - 模拟验证码成功");
+
+  // 在全局对象上添加测试函数
+  (window as any).testLogin = () => {
+    console.log("🧪 [测试模式] 开始快速登录测试 - admin/admin123");
+    loginForm.username = "admin";
+    loginForm.password = "admin123";
+    console.log("✅ [测试模式] 已填入测试账号");
+    validateUsername();
+  };
+
+  (window as any).getLoginState = () => {
+    const state = {
+      username: loginForm.username,
+      password: loginForm.password ? "•".repeat(loginForm.password.length) : "未填写",
+      captchaEnabled: captchaEnabled.value,
+      showCaptcha: showCaptcha.value,
+      captchaToken: captchaToken.value ? captchaToken.value.substring(0, 10) + "..." : "空",
+      loginCount: loginCount.value,
+      captchaCount: captchaCount.value,
+      loading: loading.value,
+      isLoginDisabled: isLoginDisabled.value,
+    };
+    console.log("📊 [状态查看] 当前登录状态:", state);
+    return state;
+  };
+
+  (window as any).simulateCaptcha = () => {
+    console.log("🔄 [测试模式] 模拟验证码成功");
+    const mockToken = `test_captcha_token_${Date.now()}`;
+    onCaptchaVerified(true, mockToken);
+    console.log("✅ [测试模式] 验证码模拟完成，可以进行登录");
+  };
+
+  // 检查用户名是否已有值（例如从URL参数获取）
+  if (loginForm.username) {
+    console.log("🔄 [登录组件] 检测到预设用户名，开始验证:", loginForm.username);
+    validateUsername();
+  }
 });
 
 /**
  * 清理函数
- * 清除验证码定时器
+ * 清除定时器等资源
  */
 const cleanup = () => {
-  if (captchaInterval.value) {
-    clearInterval(captchaInterval.value);
-    captchaInterval.value = null;
+  // 清理拖动验证码组件
+  if (dragCaptchaRef.value) {
+    dragCaptchaRef.value.reset();
   }
 };
 
@@ -575,84 +576,6 @@ const goToForgotPassword = () => {
   transform: translateY(0);
 }
 
-.captcha-btn {
-  width: 100%;
-  max-width: 250px;
-  background: linear-gradient(135deg, #f093fb 0%, #f5576c 100%);
-  border: none;
-  border-radius: 6px;
-  color: white;
-  font-weight: 500;
-  transition: all 0.3s ease;
-}
-
-.captcha-btn:hover {
-  opacity: 0.9;
-  transform: translateY(-1px);
-  box-shadow: 0 2px 8px rgba(0, 0, 0, 0.1);
-}
-
-.register-link-container {
-  display: flex;
-  justify-content: flex-end;
-  width: 100%;
-  padding-top: 10px;
-  border-top: 1px solid #eee;
-}
-
-.return-login-link {
-  color: #667eea;
-  text-decoration: none;
-  font-size: 14px;
-  font-weight: 500;
-  transition: all 0.3s ease;
-  position: relative;
-  padding: 2px 0;
-}
-
-.return-login-link:hover {
-  color: #764ba2;
-}
-
-.return-login-link::after {
-  content: "";
-  position: absolute;
-  width: 0;
-  height: 1px;
-  bottom: 0;
-  left: 0;
-  background: linear-gradient(135deg, #667eea 0%, #764ba2 100%);
-  transition: width 0.3s ease;
-}
-
-.return-login-link:hover::after {
-  width: 100%;
-}
-
-.password-form-item {
-  /* width: 250px; */
-}
-
-.captcha-container {
-  display: flex;
-  align-items: center;
-  justify-content: space-between;
-  width: 100%;
-  flex-wrap: wrap; /* 允许在小屏幕上换行 */
-  gap: 8px; /* 添加元素间距 */
-}
-
-.captcha-container .el-col {
-  flex: 1 1 auto;
-  min-width: 45%; /* 在小屏幕上每个元素占据约45%宽度 */
-}
-
-.captcha-btn {
-  width: 100%;
-  max-width: 100%;
-  white-space: nowrap; /* 防止文本换行 */
-}
-
 .additional-links {
   display: flex;
   justify-content: space-between;
@@ -660,37 +583,13 @@ const goToForgotPassword = () => {
   margin-top: 10px;
 }
 
-/* 验证码日志样式 */
-.captcha-logs {
-  margin-top: 20px;
-  padding: 15px;
-  background-color: #f5f5f5;
-  border-radius: 8px;
-  max-height: 200px;
-  overflow-y: auto;
+/* 拖动验证码样式 */
+.captcha-form-item {
+  width: 100%;
 }
 
-.captcha-logs h4 {
-  margin: 0 0 10px 0;
-  color: #333;
-  font-size: 14px;
-}
-
-.logs-list {
-  list-style-type: none;
-  padding: 0;
-  margin: 0;
-}
-
-.log-item {
-  padding: 4px 0;
-  font-size: 12px;
-  color: #666;
-  border-bottom: 1px solid #eee;
-}
-
-.log-item:last-child {
-  border-bottom: none;
+.captcha-form-item :deep(.el-form-item__content) {
+  width: 100%;
 }
 
 /* 响应式设计 */
@@ -705,12 +604,8 @@ const goToForgotPassword = () => {
   }
 
   .password-form-item,
-  .captcha-container {
+  .captcha-form-item {
     width: 100%;
-  }
-
-  .captcha-container .el-col {
-    min-width: 100%;
   }
 }
 </style>

@@ -24,6 +24,11 @@ npm install vite --save-dev
 
 TypeScript默认无法处理.vue导入的类型信息，因此我们用`vue-tsc`替换`tsc`CLI进行类型检查。在编辑器中，我们需要[Volar](https://marketplace.visualstudio.com/items?itemName=Vue.volar)来让TypeScript语言服务识别.vue类型。
 
+## 账号
+
+- 账号 ：admin
+  密码：admin123
+
 ## 自定义配置
 
 查看[Vite配置参考](https://vite.dev/config/)。

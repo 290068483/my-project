@@ -1,3 +1,10 @@
+/**
+ * HTTP请求封装模块
+ * 
+ * 此文件保持向后兼容，同时集成了新的request模块功能
+ * 推荐使用新的request模块获得更多功能和更好的类型支持
+ */
+
 import axios, { type AxiosInstance, type AxiosRequestConfig, type AxiosResponse } from "axios";
 import type { AppConfig } from "@/config/index";
 import { ElMessage } from "element-plus";
@@ -5,7 +12,10 @@ import { useUserStore } from "@/stores/user";
 import router from "@/router";
 import config from "@/config/index";
 
-// 创建axios实例
+// 导入新的request模块
+import { request as newRequest, legacyRequest } from "./request/index";
+
+// 创建axios实例（保持原有逻辑用于向后兼容）
 const http: AxiosInstance = axios.create({
   baseURL: config.baseUrl,
   timeout: config.timeout,
@@ -84,8 +94,8 @@ http.interceptors.response.use(
   },
 );
 
-// 封装请求方法
-const request = {
+// 旧版本封装请求方法（保持兼容性）
+const legacyHttp = {
   get<T>(url: string, params?: any, config?: AxiosRequestConfig): Promise<T> {
     return http.get(url, { params, ...config });
   },
@@ -100,4 +110,11 @@ const request = {
   },
 };
 
-export default request;
+// 推荐使用新的request模块（功能更完善）
+export const request = newRequest;
+
+// 向后兼容导出
+export { legacyHttp as http };
+
+// 默认导出（向后兼容）
+export default legacyRequest;

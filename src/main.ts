@@ -66,4 +66,21 @@ axios.interceptors.response.use(
 // 全局注册axios
 app.config.globalProperties.$axios = axios;
 
+// 开发环境下启用API测试工具
+if (import.meta.env.DEV) {
+  import("./utils/apiTester")
+    .then((module) => {
+      console.log("🔧 [开发模式] API测试工具已加载");
+      console.log("💡 [提示] 在控制台中使用以下命令测试API:");
+      console.log("   testLogin() - 测试登录接口");
+      console.log("   testRegister() - 测试注册接口");
+      console.log("   testAll() - 运行所有API测试");
+      console.log('   quickLogin("admin", "admin123") - 快速测试登录');
+      console.log('   quickRegister("newuser") - 快速测试注册');
+    })
+    .catch((error) => {
+      console.warn("⚠️ [开发模式] API测试工具加载失败:", error);
+    });
+}
+
 app.mount("#app");
