@@ -1,53 +1,93 @@
 <template>
-  <div class="component-user-info p-6 max-w-2xl mx-auto">
+  <div class="component-user-info p-6">
     <div class="bg-white rounded-lg shadow-md p-6">
       <h2 class="text-2xl font-bold text-gray-800 mb-6">用户信息</h2>
 
-      <div class="flex flex-col items-center mb-8">
-        <el-avatar
-          :size="80"
-          :src="userAvatar"
-          class="border-2 border-blue-200 mb-4"
-          :alt="userName + '的头像'"></el-avatar>
-        <el-button type="primary" @click="updateAvatar" class="mb-2"> 修改头像 </el-button>
-      </div>
+      <div class="flex flex-col lg:flex-row gap-8">
+        <!-- 左侧：用户信息展示 -->
+        <div class="lg:w-1/2">
+          <div class="bg-gray-50 rounded-lg p-6">
+            <div class="flex flex-col items-center mb-6">
+              <el-avatar
+                :size="80"
+                :src="editForm.avatar"
+                class="border-2 border-blue-200 mb-4"
+                :alt="editForm.name + '的头像'"></el-avatar>
+              <el-button type="primary" @click="updateAvatar"> 修改头像 </el-button>
+            </div>
 
-      <el-divider></el-divider>
+            <el-divider></el-divider>
 
-      <div class="grid grid-cols-1 md:grid-cols-2 gap-4 mb-8">
-        <div class="user-info-item">
-          <div class="text-sm text-gray-500 mb-1">用户名</div>
-          <div class="text-lg font-medium text-gray-800">
-            {{ userName }}
+            <div class="space-y-4">
+              <div class="user-info-item">
+                <div class="text-sm text-gray-500 mb-1">用户名</div>
+                <div class="text-lg font-medium text-gray-800">
+                  {{ editForm.name }}
+                </div>
+              </div>
+
+              <div class="user-info-item">
+                <div class="text-sm text-gray-500 mb-1">职位</div>
+                <div class="text-lg font-medium text-gray-800">
+                  {{ editForm.position }}
+                </div>
+              </div>
+
+              <div class="user-info-item">
+                <div class="text-sm text-gray-500 mb-1">所属部门</div>
+                <div class="text-lg font-medium text-gray-800">
+                  {{ editForm.department }}
+                </div>
+              </div>
+
+              <div class="user-info-item">
+                <div class="text-sm text-gray-500 mb-1">邮箱</div>
+                <div class="text-lg font-medium text-gray-800">
+                  {{ editForm.email }}
+                </div>
+              </div>
+            </div>
           </div>
         </div>
 
-        <div class="user-info-item">
-          <div class="text-sm text-gray-500 mb-1">职位</div>
-          <div class="text-lg font-medium text-gray-800">
-            {{ userPosition }}
+        <!-- 右侧：编辑信息 -->
+        <div class="lg:w-1/2">
+          <div class="bg-gray-50 rounded-lg p-6 h-full">
+            <h3 class="text-xl font-semibold text-gray-800 mb-6">编辑信息</h3>
+
+            <el-form
+              :model="editForm"
+              label-width="80px"
+              ref="editFormRef"
+              @submit.prevent
+              :rules="editFormRules"
+              class="space-y-4">
+              <el-form-item label="用户名" prop="name">
+                <el-input v-model="editForm.name" :disabled="!isEditing" />
+              </el-form-item>
+
+              <el-form-item label="职位" prop="position">
+                <el-input v-model="editForm.position" :disabled="!isEditing" />
+              </el-form-item>
+
+              <el-form-item label="部门" prop="department">
+                <el-input v-model="editForm.department" :disabled="!isEditing" />
+              </el-form-item>
+
+              <el-form-item label="邮箱" prop="email">
+                <el-input v-model="editForm.email" type="email" :disabled="!isEditing" />
+              </el-form-item>
+            </el-form>
+
+            <div class="flex justify-end mt-8 space-x-4">
+              <el-button v-if="!isEditing" type="primary" @click="startEdit"> 编辑 </el-button>
+              <template v-else>
+                <el-button @click="cancelEdit">取消</el-button>
+                <el-button type="primary" @click="saveEditInfo" :loading="updatingInfo"> 保存 </el-button>
+              </template>
+            </div>
           </div>
         </div>
-
-        <div class="user-info-item">
-          <div class="text-sm text-gray-500 mb-1">所属部门</div>
-          <div class="text-lg font-medium text-gray-800">
-            {{ userDepartment }}
-          </div>
-        </div>
-
-        <div class="user-info-item">
-          <div class="text-sm text-gray-500 mb-1">邮箱</div>
-          <div class="text-lg font-medium text-gray-800">
-            {{ userEmail }}
-          </div>
-        </div>
-      </div>
-
-      <div class="flex justify-center">
-        <el-button type="primary" @click="openEditInfo" size="default">
-          编辑信息
-        </el-button>
       </div>
     </div>
 
@@ -62,7 +102,7 @@
           :on-change="handleAvatarChange"
           :before-upload="beforeAvatarUpload">
           <img v-if="tempAvatar" :src="tempAvatar" class="avatar-preview" />
-          <el-avatar v-else :size="80" :src="userAvatar"></el-avatar>
+          <el-avatar v-else :size="80" :src="userStore.getUserAvatar"></el-avatar>
         </el-upload>
         <p class="text-sm text-gray-500 mt-2">点击上传新头像</p>
         <p class="text-xs text-gray-400 mt-1">支持JPG/PNG格式，大小不超过2MB</p>
@@ -77,26 +117,15 @@
         </span>
       </template>
     </el-dialog>
-
-    <!-- 编辑信息对话框 -->
-    <EditUserInfoModal
-      v-model="editDialogVisible"
-      :user-info="userInfo"
-      @save="handleSaveUserInfo"
-      @close="editDialogVisible = false"
-    />
   </div>
 </template>
 
 <script setup lang="ts">
-import { ref, reactive, onMounted, computed } from "vue";
+import { ref, reactive, onMounted } from "vue";
 import { useUserStore } from "@/stores/user";
 import type { UploadFile, UploadRawFile } from "element-plus";
 import { ElMessage } from "element-plus";
-import EditUserInfoModal from "@/components/EditUserInfoModal.vue";
-
-// 定义常量
-const DEFAULT_AVATAR = "https://cube.elemecdn.com/0/88/03b0d39583f48206768a7534e55bcpng.png";
+import type { FormRules, FormInstance } from "element-plus";
 
 export interface UserInfo {
   name?: string;
@@ -110,39 +139,13 @@ export interface UserInfo {
 const userStore = useUserStore();
 
 // 响应式数据
-const userInfo = ref<UserInfo>({
-  name: "",
-  department: "",
-  position: "",
-  avatar: "",
-  email: "",
-});
-
+const isEditing = ref(false);
 const avatarDialogVisible = ref(false);
-const editDialogVisible = ref(false);
 const tempAvatar = ref("");
+const tempAvatarUrl = ref(""); // 用于存储创建的ObjectURL
 const updatingAvatar = ref(false);
-
-// 计算属性
-const userAvatar = computed(() => {
-  return userInfo.value.avatar || DEFAULT_AVATAR;
-});
-
-const userName = computed(() => {
-  return userInfo.value.name || "未设置";
-});
-
-const userPosition = computed(() => {
-  return userInfo.value.position || "未设置";
-});
-
-const userDepartment = computed(() => {
-  return userInfo.value.department || "未设置";
-});
-
-const userEmail = computed(() => {
-  return userInfo.value.email || "未设置";
-});
+const updatingInfo = ref(false);
+const editFormRef = ref<FormInstance>();
 
 // 编辑表单数据
 const editForm = reactive<UserInfo>({
@@ -152,53 +155,67 @@ const editForm = reactive<UserInfo>({
   email: "",
 });
 
+// 表单验证规则
+const editFormRules: FormRules = {
+  name: [
+    { required: true, message: "请输入用户名", trigger: "blur" },
+    { min: 2, max: 20, message: "用户名长度应在2-20个字符之间", trigger: "blur" },
+  ],
+  email: [{ type: "email", message: "请输入正确的邮箱地址", trigger: "blur" }],
+  position: [{ required: false, message: "请输入职位", trigger: "blur" }],
+  department: [{ required: false, message: "请输入部门", trigger: "blur" }],
+};
+
 // 处理页面挂载
 onMounted(() => {
-  loadUserInfo();
+  // 确保用户信息已初始化
+  if (!userStore.getUserInfo) {
+    userStore.initUserInfo();
+  }
+  // 初始化表单数据
+  initEditForm();
 });
 
-// 加载用户信息
-const loadUserInfo = () => {
-  // 从用户存储中获取信息
-  if (userStore.userInfo) {
-    const { name, department, position, avatar, email } = userStore.userInfo;
-    userInfo.value = { name, department, position, avatar, email };
-  } else {
-    // 如果用户信息不存在，设置默认值
-    userInfo.value = {
-      name: "",
-      department: "",
-      position: "",
-      avatar: "",
-      email: "",
-    };
+// 初始化编辑表单
+const initEditForm = () => {
+  const userInfo = userStore.getUserInfo;
+  if (userInfo) {
+    editForm.name = userInfo.name || userInfo.nickname || "";
+    editForm.department = userInfo.department || "";
+    editForm.position = userInfo.position || "";
+    editForm.email = userInfo.email || "";
   }
 };
 
 // 修改头像
 const updateAvatar = () => {
   avatarDialogVisible.value = true;
-  tempAvatar.value = userInfo.value.avatar || "";
+  tempAvatar.value = userStore.getUserAvatar || "";
 };
 
 // 头像上传前的验证
 const beforeAvatarUpload = (rawFile: UploadRawFile) => {
-  const isJPGorPNG = rawFile.type === 'image/jpeg' || rawFile.type === 'image/png';
+  const isJPGorPNG = rawFile.type === "image/jpeg" || rawFile.type === "image/png";
   const isLt2M = rawFile.size / 1024 / 1024 < 2;
 
   if (!isJPGorPNG) {
-    ElMessage.error('头像图片只能是 JPG 或 PNG 格式!');
+    ElMessage.error("头像图片只能是 JPG 或 PNG 格式!");
   }
   if (!isLt2M) {
-    ElMessage.error('头像图片大小不能超过 2MB!');
+    ElMessage.error("头像图片大小不能超过 2MB!");
   }
   return isJPGorPNG && isLt2M;
 };
 
 // 处理头像更改
 const handleAvatarChange = (file: UploadFile) => {
+  // 释放之前创建的URL
+  if (tempAvatarUrl.value) {
+    URL.revokeObjectURL(tempAvatarUrl.value);
+  }
   // 创建临时预览URL
-  tempAvatar.value = URL.createObjectURL(file.raw!);
+  tempAvatarUrl.value = URL.createObjectURL(file.raw!);
+  tempAvatar.value = tempAvatarUrl.value;
 };
 
 // 确认更新头像
@@ -206,66 +223,71 @@ const confirmUpdateAvatar = async () => {
   if (!tempAvatar.value) return;
 
   updatingAvatar.value = true;
-    
+
   // 模拟上传过程
   setTimeout(() => {
-    // 更新用户信息
-    userInfo.value.avatar = tempAvatar.value;
-      
-    // 更新store中的用户信息
-    if (userStore.userInfo) {
-      userStore.userInfo.avatar = tempAvatar.value;
-        
-      // 保存到localStorage
-      localStorage.setItem("user-info", JSON.stringify(userStore.userInfo));
-    }
-      
+    // 更新store中的用户头像
+    userStore.updateUserAvatar(tempAvatar.value);
+
     updatingAvatar.value = false;
     avatarDialogVisible.value = false;
+    // 释放URL并清空引用
+    if (tempAvatarUrl.value) {
+      URL.revokeObjectURL(tempAvatarUrl.value);
+    }
     tempAvatar.value = "";
+    tempAvatarUrl.value = "";
     ElMessage.success("头像更新成功");
   }, 500);
 };
 
 // 处理头像对话框关闭
 const handleAvatarDialogClose = () => {
+  // 释放创建的URL
+  if (tempAvatarUrl.value) {
+    URL.revokeObjectURL(tempAvatarUrl.value);
+  }
   tempAvatar.value = "";
+  tempAvatarUrl.value = "";
 };
 
-// 打开编辑信息弹窗
-const openEditInfo = () => {
-  // 初始化表单数据
-  editForm.name = userInfo.value.name || "";
-  editForm.department = userInfo.value.department || "";
-  editForm.position = userInfo.value.position || "";
-  editForm.email = userInfo.value.email || "";
+// 开始编辑
+const startEdit = () => {
+  isEditing.value = true;
+};
 
-  editDialogVisible.value = true;
+// 取消编辑
+const cancelEdit = () => {
+  isEditing.value = false;
+  // 恢复表单数据
+  initEditForm();
 };
 
 // 保存用户信息
-const handleSaveUserInfo = (updatedUserInfo: UserInfo) => {
-  // 更新用户信息
-  userInfo.value = { ...userInfo.value, ...updatedUserInfo };
-  
-  // 更新store中的用户信息
-  if (userStore.userInfo) {
-    userStore.userInfo.name = updatedUserInfo.name;
-    userStore.userInfo.department = updatedUserInfo.department;
-    userStore.userInfo.position = updatedUserInfo.position;
-    userStore.userInfo.email = updatedUserInfo.email;
-    
-    // 保存到localStorage
-    localStorage.setItem("user-info", JSON.stringify(userStore.userInfo));
+const saveEditInfo = async () => {
+  if (!editFormRef.value) return;
+
+  try {
+    await editFormRef.value.validate();
+    updatingInfo.value = true;
+
+    // 模拟保存过程
+    setTimeout(() => {
+      // 更新store中的用户信息
+      userStore.updateUserInfo({ ...editForm });
+      updatingInfo.value = false;
+      isEditing.value = false;
+      ElMessage.success("用户信息更新成功");
+    }, 500);
+  } catch (error) {
+    console.error("表单验证失败:", error);
   }
-  
-  ElMessage.success("用户信息更新成功");
 };
 </script>
 
 <style scoped>
 .user-info-item {
-  padding: 0.5rem;
+  padding: 0.75rem;
   border-radius: 0.5rem;
   transition: all 0.3s ease;
 }
