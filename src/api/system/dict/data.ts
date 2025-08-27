@@ -6,7 +6,6 @@
 import { request } from "@/utils/request";
 import type { ApiResponse } from "@/types/api";
 import type {
-  DictData,
   DictDataQueryParams,
   DictDataForm,
   DictDataListResponse,

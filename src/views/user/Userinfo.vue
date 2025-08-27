@@ -46,6 +46,41 @@
                   {{ editForm.email }}
                 </div>
               </div>
+
+              <div class="user-info-item">
+                <div class="text-sm text-gray-500 mb-1">手机号</div>
+                <div class="text-lg font-medium text-gray-800">
+                  {{ editForm.phone || "未填写" }}
+                </div>
+              </div>
+
+              <div class="user-info-item">
+                <div class="text-sm text-gray-500 mb-1">性别</div>
+                <div class="text-lg font-medium text-gray-800">
+                  {{ editForm.sex === "0" ? "男" : editForm.sex === "1" ? "女" : "未设置" }}
+                </div>
+              </div>
+
+              <div class="user-info-item">
+                <div class="text-sm text-gray-500 mb-1">生日</div>
+                <div class="text-lg font-medium text-gray-800">
+                  {{ editForm.birthday || "未填写" }}
+                </div>
+              </div>
+
+              <div class="user-info-item">
+                <div class="text-sm text-gray-500 mb-1">员工编号</div>
+                <div class="text-lg font-medium text-gray-800">
+                  {{ editForm.employeeId || "未填写" }}
+                </div>
+              </div>
+
+              <div class="user-info-item">
+                <div class="text-sm text-gray-500 mb-1">入职日期</div>
+                <div class="text-lg font-medium text-gray-800">
+                  {{ editForm.joinDate || "未填写" }}
+                </div>
+              </div>
             </div>
           </div>
         </div>
@@ -57,25 +92,98 @@
 
             <el-form
               :model="editForm"
-              label-width="80px"
+              label-width="100px"
               ref="editFormRef"
               @submit.prevent
               :rules="editFormRules"
               class="space-y-4">
               <el-form-item label="用户名" prop="name">
-                <el-input v-model="editForm.name" :disabled="!isEditing" />
+                <el-input v-model="editForm.name" :disabled="!isEditing" placeholder="请输入用户名" />
               </el-form-item>
 
               <el-form-item label="职位" prop="position">
-                <el-input v-model="editForm.position" :disabled="!isEditing" />
+                <el-input v-model="editForm.position" :disabled="!isEditing" placeholder="请输入职位" />
               </el-form-item>
 
               <el-form-item label="部门" prop="department">
-                <el-input v-model="editForm.department" :disabled="!isEditing" />
+                <el-input v-model="editForm.department" :disabled="!isEditing" placeholder="请输入部门" />
               </el-form-item>
 
               <el-form-item label="邮箱" prop="email">
-                <el-input v-model="editForm.email" type="email" :disabled="!isEditing" />
+                <el-input v-model="editForm.email" type="email" :disabled="!isEditing" placeholder="请输入邮箱地址" />
+              </el-form-item>
+
+              <el-form-item label="手机号" prop="phone">
+                <el-input v-model="editForm.phone" :disabled="!isEditing" placeholder="请输入手机号" />
+              </el-form-item>
+
+              <el-form-item label="性别" prop="sex">
+                <el-select v-model="editForm.sex" :disabled="!isEditing" placeholder="请选择性别" style="width: 100%">
+                  <el-option label="男" value="0" />
+                  <el-option label="女" value="1" />
+                </el-select>
+              </el-form-item>
+
+              <el-form-item label="生日" prop="birthday">
+                <el-date-picker
+                  v-model="editForm.birthday"
+                  type="date"
+                  placeholder="请选择生日"
+                  :disabled="!isEditing"
+                  style="width: 100%"
+                  format="YYYY-MM-DD"
+                  value-format="YYYY-MM-DD" />
+              </el-form-item>
+
+              <el-form-item label="员工编号" prop="employeeId">
+                <el-input v-model="editForm.employeeId" :disabled="!isEditing" placeholder="请输入员工编号" />
+              </el-form-item>
+
+              <el-form-item label="入职日期" prop="joinDate">
+                <el-date-picker
+                  v-model="editForm.joinDate"
+                  type="date"
+                  placeholder="请选择入职日期"
+                  :disabled="!isEditing"
+                  style="width: 100%"
+                  format="YYYY-MM-DD"
+                  value-format="YYYY-MM-DD" />
+              </el-form-item>
+
+              <el-form-item label="住址" prop="address">
+                <el-input
+                  v-model="editForm.address"
+                  type="textarea"
+                  :rows="2"
+                  :disabled="!isEditing"
+                  placeholder="请输入家庭住址"
+                  maxlength="200"
+                  show-word-limit />
+              </el-form-item>
+
+              <el-form-item label="个人签名" prop="personalSignature">
+                <el-input
+                  v-model="editForm.personalSignature"
+                  type="textarea"
+                  :rows="2"
+                  :disabled="!isEditing"
+                  placeholder="请输入个人签名"
+                  maxlength="100"
+                  show-word-limit />
+              </el-form-item>
+
+              <el-form-item label="紧急联系人" prop="emergencyContact">
+                <el-input
+                  v-model="editForm.emergencyContact"
+                  :disabled="!isEditing"
+                  placeholder="请输入紧急联系人姓名" />
+              </el-form-item>
+
+              <el-form-item label="紧急联系电话" prop="emergencyContactPhone">
+                <el-input
+                  v-model="editForm.emergencyContactPhone"
+                  :disabled="!isEditing"
+                  placeholder="请输入紧急联系人手机号" />
               </el-form-item>
             </el-form>
 
@@ -133,6 +241,15 @@ export interface UserInfo {
   position?: string;
   avatar?: string;
   email?: string;
+  phone?: string;
+  sex?: string;
+  birthday?: string;
+  address?: string;
+  personalSignature?: string;
+  emergencyContact?: string;
+  emergencyContactPhone?: string;
+  joinDate?: string;
+  employeeId?: string;
 }
 
 // 使用用户存储
@@ -153,6 +270,15 @@ const editForm = reactive<UserInfo>({
   department: "",
   position: "",
   email: "",
+  phone: "",
+  sex: "",
+  birthday: "",
+  address: "",
+  personalSignature: "",
+  emergencyContact: "",
+  emergencyContactPhone: "",
+  joinDate: "",
+  employeeId: "",
 });
 
 // 表单验证规则
@@ -162,8 +288,23 @@ const editFormRules: FormRules = {
     { min: 2, max: 20, message: "用户名长度应在2-20个字符之间", trigger: "blur" },
   ],
   email: [{ type: "email", message: "请输入正确的邮箱地址", trigger: "blur" }],
+  phone: [
+    {
+      pattern: /^1[3456789]\d{9}$/,
+      message: "请输入正确的手机号码",
+      trigger: "blur",
+    },
+  ],
   position: [{ required: false, message: "请输入职位", trigger: "blur" }],
   department: [{ required: false, message: "请输入部门", trigger: "blur" }],
+  emergencyContactPhone: [
+    {
+      pattern: /^1[3456789]\d{9}$/,
+      message: "请输入正确的紧急联系人手机号",
+      trigger: "blur",
+    },
+  ],
+  employeeId: [{ min: 3, max: 20, message: "员工编号长度应在3-20个字符之间", trigger: "blur" }],
 };
 
 // 处理页面挂载
@@ -184,6 +325,15 @@ const initEditForm = () => {
     editForm.department = userInfo.department || "";
     editForm.position = userInfo.position || "";
     editForm.email = userInfo.email || "";
+    editForm.phone = userInfo.phone || userInfo.phonenumber || "";
+    editForm.sex = userInfo.sex || "";
+    editForm.birthday = userInfo.birthday || "";
+    editForm.address = userInfo.address || "";
+    editForm.personalSignature = userInfo.personalSignature || "";
+    editForm.emergencyContact = userInfo.emergencyContact || "";
+    editForm.emergencyContactPhone = userInfo.emergencyContactPhone || "";
+    editForm.joinDate = userInfo.joinDate || "";
+    editForm.employeeId = userInfo.employeeId || userInfo.userId?.toString() || "";
   }
 };
 

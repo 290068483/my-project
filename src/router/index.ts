@@ -34,6 +34,53 @@ const routes: Array<RouteRecordRaw> = [
           requiresAuth: false,
         },
       },
+
+      // 用户中心
+      {
+        path: "userinfo",
+        name: "UserInfo",
+        component: () => import("../views/user/Userinfo.vue"),
+        meta: {
+          requiresAuth: true,
+          title: "个人信息",
+        },
+      },
+      {
+        path: "security-settings",
+        name: "SecuritySettings",
+        component: () => import("../views/user/SecuritySettings.vue"),
+        meta: {
+          requiresAuth: true,
+          title: "安全设置",
+        },
+      },
+      {
+        path: "notification-settings",
+        name: "NotificationSettings",
+        component: () => import("../views/user/NotificationSettings.vue"),
+        meta: {
+          requiresAuth: true,
+          title: "通知设置",
+        },
+      },
+      {
+        path: "data-management",
+        name: "DataManagement",
+        component: () => import("../views/user/DataManagement.vue"),
+        meta: {
+          requiresAuth: true,
+          title: "数据管理",
+        },
+      },
+      {
+        path: "permission-management",
+        name: "PermissionManagement",
+        component: () => import("../views/user/PermissionManagement.vue"),
+        meta: {
+          requiresAuth: true,
+          title: "权限管理",
+        },
+      },
       // 任务进度
 
       // 客户归档

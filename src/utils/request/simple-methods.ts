@@ -160,12 +160,8 @@ export class SimpleRequestManager {
    * 并发请求
    */
   async concurrent<T = any>(requests: SimpleRequestMethodConfig[]): Promise<T[]> {
-    try {
-      const promises = requests.map((config) => this.request<T>(config));
-      return await Promise.all(promises);
-    } catch (error) {
-      throw error;
-    }
+    const promises = requests.map((config) => this.request<T>(config));
+    return await Promise.all(promises);
   }
 
   /**

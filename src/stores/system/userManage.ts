@@ -20,7 +20,6 @@ import {
   checkUserNameUnique,
   checkPhoneUnique,
   checkEmailUnique,
-  batchDelUser,
   batchChangeUserStatus,
 } from "@/api/system/user";
 import type {
@@ -32,7 +31,6 @@ import type {
   UserForm,
   UserPasswordForm,
 } from "@/types/system/user";
-import type { PageResponse } from "@/types/api";
 
 export const useUserManageStore = defineStore("userManage", () => {
   // ==================== 状态定义 ====================
@@ -375,7 +373,7 @@ export const useUserManageStore = defineStore("userManage", () => {
   /**
    * 校验用户名唯一性
    */
-  async function validateUserName(userName: string, userId?: number): Promise<boolean> {
+  async function validateUserName(userName: string, _userId?: number): Promise<boolean> {
     try {
       const response = await checkUserNameUnique(userName);
 
@@ -393,7 +391,7 @@ export const useUserManageStore = defineStore("userManage", () => {
   /**
    * 校验手机号唯一性
    */
-  async function validatePhone(phonenumber: string, userId?: number): Promise<boolean> {
+  async function validatePhone(phonenumber: string, _userId?: number): Promise<boolean> {
     try {
       const response = await checkPhoneUnique(phonenumber);
 
@@ -411,7 +409,7 @@ export const useUserManageStore = defineStore("userManage", () => {
   /**
    * 校验邮箱唯一性
    */
-  async function validateEmail(email: string, userId?: number): Promise<boolean> {
+  async function validateEmail(email: string, _userId?: number): Promise<boolean> {
     try {
       const response = await checkEmailUnique(email);
 

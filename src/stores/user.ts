@@ -13,7 +13,6 @@ import type {
   CaptchaResponse,
   UserInfoResponse,
   RoutersResponse,
-  LogoutResponse,
   LoginStatus,
   RegisterStatus,
   RouterInfo,

@@ -3,7 +3,7 @@
  * 基于 RuoYi 架构设计
  */
 
-import type { ApiResponse, PageResponse } from "@/types/api";
+import type { ApiResponse } from "@/types/api";
 
 // ==================== 菜单数据类型定义 ====================
 
@@ -152,10 +152,11 @@ export interface RoleMenuTreeSelectResponse
 /**
  * 菜单权限接口
  */
-export interface MenuAuthResponse extends ApiResponse<{
-  menu: SystemMenu;
-  permissions: string[];
-}> {
+export interface MenuAuthResponse
+  extends ApiResponse<{
+    menu: SystemMenu;
+    permissions: string[];
+  }> {
   // 权限相关响应格式
   code: number;
   msg: string;

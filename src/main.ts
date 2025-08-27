@@ -73,7 +73,7 @@ app.config.globalProperties.$axios = axios;
 // 开发环境下启用API测试工具
 if (import.meta.env.DEV) {
   import("./utils/apiTester")
-    .then((module) => {
+    .then(() => {
       console.log("🔧 [开发模式] API测试工具已加载");
       console.log("💡 [提示] 在控制台中使用以下命令测试API:");
       console.log("   testLogin() - 测试登录接口");

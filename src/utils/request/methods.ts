@@ -1,18 +1,7 @@
-import type { AxiosInstance, AxiosProgressEvent, AxiosResponse } from 'axios';
-import type { 
-  RequestMethodConfig, 
-  UploadConfig, 
-  DownloadConfig, 
-  CreateRequestConfig 
-} from './types';
-import { 
-  memoryCache, 
-  sessionCache, 
-  localCache, 
-  generateCacheKey,
-  formatFileSize 
-} from './utils';
-import { mergeConfig } from './config';
+import type { AxiosInstance } from "axios";
+import type { RequestMethodConfig, UploadConfig, DownloadConfig, CreateRequestConfig } from "./types";
+import { memoryCache, sessionCache, localCache, generateCacheKey, formatFileSize } from "./utils";
+import { mergeConfig } from "./config";
 
 /**
  * 请求方法管理器
@@ -33,21 +22,21 @@ export class RequestManager {
    */
   async request<T = any>(config: RequestMethodConfig): Promise<T> {
     const finalConfig = mergeConfig(this.config, config);
-    
+
     // 缓存处理
-    if (finalConfig.cache && finalConfig.method?.toUpperCase() === 'GET') {
+    if (finalConfig.cache && finalConfig.method?.toUpperCase() === "GET") {
       const cacheKey = generateCacheKey(finalConfig);
       const cached = this.getFromCache(cacheKey, finalConfig.cache);
-      
+
       if (cached !== null) {
-        console.log('📦 Cache hit:', cacheKey);
+        console.log("📦 Cache hit:", cacheKey);
         return cached;
       }
     }
 
     try {
       const response = await this.instance.request({
-        method: finalConfig.method || 'GET',
+        method: finalConfig.method || "GET",
         url: finalConfig.url,
         data: finalConfig.data,
         params: finalConfig.params,
@@ -59,7 +48,7 @@ export class RequestManager {
       });
 
       // 缓存成功响应
-      if (finalConfig.cache && finalConfig.method?.toUpperCase() === 'GET') {
+      if (finalConfig.cache && finalConfig.method?.toUpperCase() === "GET") {
         const cacheKey = generateCacheKey(finalConfig);
         this.setToCache(cacheKey, response, finalConfig.cache, finalConfig.cacheTime);
       }
@@ -77,13 +66,9 @@ export class RequestManager {
    * @param config 配置选项
    * @returns Promise
    */
-  async get<T = any>(
-    url: string, 
-    params?: any, 
-    config?: Partial<RequestMethodConfig>
-  ): Promise<T> {
+  async get<T = any>(url: string, params?: any, config?: Partial<RequestMethodConfig>): Promise<T> {
     return this.request<T>({
-      method: 'GET',
+      method: "GET",
       url,
       params,
       ...config,
@@ -97,13 +82,9 @@ export class RequestManager {
    * @param config 配置选项
    * @returns Promise
    */
-  async post<T = any>(
-    url: string, 
-    data?: any, 
-    config?: Partial<RequestMethodConfig>
-  ): Promise<T> {
+  async post<T = any>(url: string, data?: any, config?: Partial<RequestMethodConfig>): Promise<T> {
     return this.request<T>({
-      method: 'POST',
+      method: "POST",
       url,
       data,
       ...config,
@@ -117,13 +98,9 @@ export class RequestManager {
    * @param config 配置选项
    * @returns Promise
    */
-  async put<T = any>(
-    url: string, 
-    data?: any, 
-    config?: Partial<RequestMethodConfig>
-  ): Promise<T> {
+  async put<T = any>(url: string, data?: any, config?: Partial<RequestMethodConfig>): Promise<T> {
     return this.request<T>({
-      method: 'PUT',
+      method: "PUT",
       url,
       data,
       ...config,
@@ -137,13 +114,9 @@ export class RequestManager {
    * @param config 配置选项
    * @returns Promise
    */
-  async delete<T = any>(
-    url: string, 
-    params?: any, 
-    config?: Partial<RequestMethodConfig>
-  ): Promise<T> {
+  async delete<T = any>(url: string, params?: any, config?: Partial<RequestMethodConfig>): Promise<T> {
     return this.request<T>({
-      method: 'DELETE',
+      method: "DELETE",
       url,
       params,
       ...config,
@@ -157,13 +130,9 @@ export class RequestManager {
    * @param config 配置选项
    * @returns Promise
    */
-  async patch<T = any>(
-    url: string, 
-    data?: any, 
-    config?: Partial<RequestMethodConfig>
-  ): Promise<T> {
+  async patch<T = any>(url: string, data?: any, config?: Partial<RequestMethodConfig>): Promise<T> {
     return this.request<T>({
-      method: 'PATCH',
+      method: "PATCH",
       url,
       data,
       ...config,
@@ -177,11 +146,7 @@ export class RequestManager {
    * @param config 上传配置
    * @returns Promise
    */
-  async upload<T = any>(
-    url: string, 
-    file: File | FormData, 
-    config?: UploadConfig
-  ): Promise<T> {
+  async upload<T = any>(url: string, file: File | FormData, config?: UploadConfig): Promise<T> {
     let formData: FormData;
 
     if (file instanceof FormData) {
@@ -194,16 +159,16 @@ export class RequestManager {
 
       // 文件类型检查
       if (config?.accept) {
-        const acceptTypes = config.accept.split(',').map(type => type.trim());
+        const acceptTypes = config.accept.split(",").map((type) => type.trim());
         const fileType = file.type;
         const fileName = file.name;
-        const fileExt = fileName.substring(fileName.lastIndexOf('.'));
+        const fileExt = fileName.substring(fileName.lastIndexOf("."));
 
-        const isValidType = acceptTypes.some(accept => {
-          if (accept.startsWith('.')) {
+        const isValidType = acceptTypes.some((accept) => {
+          if (accept.startsWith(".")) {
             return fileExt.toLowerCase() === accept.toLowerCase();
           } else {
-            return fileType.match(accept.replace('*', '.*'));
+            return fileType.match(accept.replace("*", ".*"));
           }
         });
 
@@ -213,15 +178,15 @@ export class RequestManager {
       }
 
       formData = new FormData();
-      formData.append('file', file);
+      formData.append("file", file);
     }
 
     return this.request<T>({
-      method: 'POST',
+      method: "POST",
       url,
       data: formData,
       headers: {
-        'Content-Type': 'multipart/form-data',
+        "Content-Type": "multipart/form-data",
       },
       onUploadProgress: config?.onProgress,
       ...config,
@@ -235,15 +200,11 @@ export class RequestManager {
    * @param config 下载配置
    * @returns Promise
    */
-  async download(
-    url: string, 
-    filename?: string, 
-    config?: DownloadConfig
-  ): Promise<void> {
+  async download(url: string, filename?: string, config?: DownloadConfig): Promise<void> {
     const response = await this.request<Blob>({
-      method: 'GET',
+      method: "GET",
       url,
-      responseType: 'blob',
+      responseType: "blob",
       onDownloadProgress: config?.onProgress,
       ...config,
     });
@@ -251,15 +212,15 @@ export class RequestManager {
     // 创建下载链接
     const blob = new Blob([response]);
     const downloadUrl = window.URL.createObjectURL(blob);
-    const link = document.createElement('a');
-    
+    const link = document.createElement("a");
+
     link.href = downloadUrl;
-    link.download = filename || this.getFilenameFromUrl(url) || 'download';
-    
+    link.download = filename || this.getFilenameFromUrl(url) || "download";
+
     // 触发下载
     document.body.appendChild(link);
     link.click();
-    
+
     // 清理
     document.body.removeChild(link);
     window.URL.revokeObjectURL(downloadUrl);
@@ -271,7 +232,7 @@ export class RequestManager {
    * @returns Promise
    */
   async concurrent<T = any>(requests: RequestMethodConfig[]): Promise<T[]> {
-    const promises = requests.map(config => this.request<T>(config));
+    const promises = requests.map((config) => this.request<T>(config));
     return Promise.all(promises);
   }
 
@@ -281,15 +242,12 @@ export class RequestManager {
    * @param concurrency 并发数
    * @returns Promise
    */
-  async queue<T = any>(
-    requests: RequestMethodConfig[], 
-    concurrency: number = 1
-  ): Promise<T[]> {
+  async queue<T = any>(requests: RequestMethodConfig[], concurrency: number = 1): Promise<T[]> {
     const results: T[] = [];
     const executing: Promise<void>[] = [];
 
     for (const [index, config] of requests.entries()) {
-      const promise = this.request<T>(config).then(result => {
+      const promise = this.request<T>(config).then((result) => {
         results[index] = result;
       });
 
@@ -297,9 +255,7 @@ export class RequestManager {
 
       if (executing.length >= concurrency) {
         await Promise.race(executing);
-        const completedIndex = executing.findIndex(p => 
-          p === promise || (p as any).resolved
-        );
+        const completedIndex = executing.findIndex((p) => p === promise || (p as any).resolved);
         if (completedIndex !== -1) {
           executing.splice(completedIndex, 1);
         }
@@ -318,11 +274,11 @@ export class RequestManager {
    */
   private getFromCache(key: string, cacheType: boolean | string): any | null {
     switch (cacheType) {
-      case 'memory':
+      case "memory":
         return memoryCache.get(key);
-      case 'session':
+      case "session":
         return sessionCache.get(key);
-      case 'local':
+      case "local":
         return localCache.get(key);
       default:
         return memoryCache.get(key);
@@ -336,20 +292,15 @@ export class RequestManager {
    * @param cacheType 缓存类型
    * @param ttl 过期时间
    */
-  private setToCache(
-    key: string, 
-    data: any, 
-    cacheType: boolean | string, 
-    ttl: number = 5 * 60 * 1000
-  ): void {
+  private setToCache(key: string, data: any, cacheType: boolean | string, ttl: number = 5 * 60 * 1000): void {
     switch (cacheType) {
-      case 'memory':
+      case "memory":
         memoryCache.set(key, data, ttl);
         break;
-      case 'session':
+      case "session":
         sessionCache.set(key, data, ttl);
         break;
-      case 'local':
+      case "local":
         localCache.set(key, data, ttl);
         break;
       default:
@@ -365,7 +316,7 @@ export class RequestManager {
   private getFilenameFromUrl(url: string): string | null {
     try {
       const pathname = new URL(url).pathname;
-      return pathname.substring(pathname.lastIndexOf('/') + 1);
+      return pathname.substring(pathname.lastIndexOf("/") + 1);
     } catch {
       return null;
     }

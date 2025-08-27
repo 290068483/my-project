@@ -150,7 +150,7 @@ describe("LoginView 验证码功能测试", () => {
     // 尝试登录
     try {
       await vm.handleLogin();
-    } catch (error) {
+    } catch {
       // 预期会抛出错误
     }
 
@@ -179,7 +179,7 @@ describe("LoginView 验证码功能测试", () => {
     // 尝试登录
     try {
       await vm.handleLogin();
-    } catch (error) {
+    } catch {
       // 预期会抛出错误
     }
 

@@ -184,6 +184,10 @@ export interface CaptchaResponse {
     uuid: string;
     img: string;
     expiresIn?: number;
+    // 支持返回验证码文本（用于自动填入）
+    captchaCode?: string;
+    // 验证码类型
+    captchaType?: "image" | "text" | "auto";
   };
 }
 

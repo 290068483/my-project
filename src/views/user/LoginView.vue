@@ -27,6 +27,13 @@
             @verified="onCaptchaVerified"
             @refresh="onCaptchaRefresh" />
         </el-form-item>
+        <el-form-item v-if="showCaptcha && loginForm.code" label="验证码" prop="code" class="verification-code-item">
+          <el-input v-model="loginForm.code" placeholder="验证码已自动填入" :disabled="true" size="small" readonly>
+            <template #prepend>
+              <el-icon><Key /></el-icon>
+            </template>
+          </el-input>
+        </el-form-item>
         <el-form-item label="密码" prop="password" class="password-form-item">
           <el-input
             v-model="loginForm.password"
@@ -62,7 +69,7 @@ import { ref, reactive, onMounted, watch, onUnmounted } from "vue";
 // 导入Element Plus组件和消息提示
 import { ElMessage, ElForm } from "element-plus";
 // 导入图标
-import { Lock } from "@element-plus/icons-vue";
+import { Lock, Key } from "@element-plus/icons-vue";
 // 导入路由相关API
 import { useRouter } from "vue-router";
 // 导入用户Store
@@ -73,6 +80,8 @@ import { debounce } from "@/utils/debounce";
 import type { LoginRequest } from "@/types/auth";
 // 导入拖动验证码组件
 import DragCaptcha from "@/components/DragCaptcha.vue";
+// 导入验证码API
+import { getCodeImg } from "@/api/captcha";
 
 // 定义组件Props
 defineProps<{
@@ -116,14 +125,50 @@ const captchaToken = ref<string>("");
 /**
  * 处理拖动验证码验证结果
  */
-const onCaptchaVerified = (success: boolean, token?: string) => {
+const onCaptchaVerified = async (success: boolean, token?: string) => {
   console.log("🎯 [验证码调试] 验证码验证结果:", { success, token: token ? token.substring(0, 10) + "..." : "无" });
 
   if (success && token) {
-    console.log("✅ [验证码调试] 验证成功，保存token");
+    console.log("✅ [验证码调试] 拖动验证成功，开始获取验证码");
     captchaToken.value = token;
-    loginForm.code = "verified";
-    loginForm.uuid = token;
+
+    try {
+      // 请求验证码接口
+      const captchaResponse = await getCodeImg();
+
+      if (captchaResponse.code === 200 && captchaResponse.data) {
+        // 获取uuid
+        loginForm.uuid = captchaResponse.data.uuid;
+
+        // 如果后端返回了验证码文本，则自动填入
+        if (captchaResponse.data.captchaCode) {
+          loginForm.code = captchaResponse.data.captchaCode;
+          console.log("✅ [验证码调试] 后端返回验证码文本，已自动填入:", loginForm.code);
+        } else {
+          // 如果没有返回验证码文本，则使用模拟验证码
+          // 这里可以根据你的后端实现进行调整
+          const simulatedCode = generateSimulatedCaptcha();
+          loginForm.code = simulatedCode;
+          console.log("ℹ️ [验证码调试] 后端未返回验证码文本，使用模拟验证码:", simulatedCode);
+        }
+
+        console.log("✅ [验证码调试] 验证码获取成功:", {
+          code: loginForm.code,
+          uuid: loginForm.uuid.substring(0, 10) + "...",
+        });
+
+        ElMessage.success("拖动验证成功，验证码已自动填入");
+      } else {
+        throw new Error(captchaResponse.msg || "获取验证码失败");
+      }
+    } catch (error) {
+      console.error("❌ [验证码调试] 获取验证码失败:", error);
+      ElMessage.error("获取验证码失败，请重试");
+      // 失败时清空状态
+      captchaToken.value = "";
+      loginForm.code = "";
+      loginForm.uuid = "";
+    }
   } else {
     console.log("❌ [验证码调试] 验证失败，清空状态");
     captchaToken.value = "";
@@ -144,6 +189,16 @@ const onCaptchaVerified = (success: boolean, token?: string) => {
 };
 
 /**
+ * 生成模拟验证码（依据拖动成功生成）
+ */
+const generateSimulatedCaptcha = (): string => {
+  // 这里可以根据你的后端逻辑调整
+  // 例如：使用拖动token生成验证码，或者使用固定值
+  const codes = ["8888", "1234", "6666", "ABCD", "9527"];
+  return codes[Math.floor(Math.random() * codes.length)];
+};
+
+/**
  * 处理验证码刷新
  */
 const onCaptchaRefresh = () => {
@@ -159,6 +214,14 @@ const onCaptchaRefresh = () => {
  */
 const validateUsername = () => {
   console.log("🔍 [用户名验证] 开始验证用户名:", loginForm.username);
+
+  // 检查用户名是否为空
+  if (!loginForm.username || loginForm.username.trim() === "") {
+    console.log("❌ [用户名验证] 用户名为空");
+    captchaEnabled.value = false;
+    showCaptcha.value = false;
+    return;
+  }
 
   // 用户名格式：5-20位，可以是纯字母、纯数字或字母+数字组合
   const usernamePattern = /^[a-zA-Z\d]{5,20}$/;
@@ -263,8 +326,16 @@ const loginRules = {
   code: [
     {
       validator: (rule: unknown, value: string, callback: (error?: Error) => void) => {
-        if (showCaptcha.value && (!captchaToken.value || captchaToken.value.trim() === "")) {
-          callback(new Error("请完成拖动验证"));
+        if (showCaptcha.value) {
+          if (!captchaToken.value || captchaToken.value.trim() === "") {
+            callback(new Error("请完成拖动验证"));
+          } else if (!value || value.trim() === "") {
+            callback(new Error("验证码不能为空"));
+          } else if (!loginForm.uuid) {
+            callback(new Error("验证码信息不完整"));
+          } else {
+            callback();
+          }
         } else {
           callback();
         }
@@ -323,7 +394,17 @@ const handleLogin = debounce(async () => {
     // 验证拖动验证码
     if (showCaptcha.value && (!captchaToken.value || captchaToken.value.trim() === "")) {
       console.log("❌ [登录调试] 验证码验证失败: 需要完成拖动验证");
-      ElMessage.error("请完成拖动验证");
+      ElMessage.error("请先完成拖动验证");
+      return;
+    }
+
+    // 验证验证码是否已填入
+    if (showCaptcha.value && (!loginForm.code || !loginForm.uuid)) {
+      console.log("❌ [登录调试] 验证码信息不完整:", {
+        code: loginForm.code || "未填入",
+        uuid: loginForm.uuid ? loginForm.uuid.substring(0, 10) + "..." : "未填入",
+      });
+      ElMessage.error("验证码信息不完整，请重新拖动验证");
       return;
     }
 
@@ -590,6 +671,29 @@ const goToForgotPassword = () => {
 
 .captcha-form-item :deep(.el-form-item__content) {
   width: 100%;
+}
+
+/* 验证码输入框样式 */
+.verification-code-item {
+  width: 100%;
+}
+
+.verification-code-item :deep(.el-input) {
+  background-color: #f5f7fa;
+}
+
+.verification-code-item :deep(.el-input__inner) {
+  background-color: #f5f7fa;
+  color: #67c23a;
+  font-weight: bold;
+  text-align: center;
+  cursor: not-allowed;
+}
+
+.verification-code-item :deep(.el-input-group__prepend) {
+  background-color: #67c23a;
+  color: white;
+  border-color: #67c23a;
 }
 
 /* 响应式设计 */

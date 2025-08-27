@@ -10,7 +10,6 @@ import type {
   ConfigForm,
   ConfigListResponse,
   ConfigDetailResponse,
-  ConfigOptionResponse,
 } from "@/types/system/config";
 import type { ApiResponse } from "@/types/api";
 

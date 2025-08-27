@@ -3,7 +3,7 @@
  * 提供基础的请求和响应拦截器
  */
 
-import axios, { type AxiosInstance, type AxiosRequestConfig, type AxiosResponse, type AxiosError } from "axios";
+import axios, { type AxiosInstance, type AxiosResponse, type AxiosError } from "axios";
 import type { SimpleRequestConfig, ApiResponse } from "./simple-config";
 
 /**

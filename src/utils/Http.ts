@@ -1,12 +1,12 @@
 /**
  * HTTP请求封装模块
- * 
+ *
  * 此文件保持向后兼容，同时集成了新的request模块功能
  * 推荐使用新的request模块获得更多功能和更好的类型支持
  */
 
 import axios, { type AxiosInstance, type AxiosRequestConfig, type AxiosResponse } from "axios";
-import type { AppConfig } from "@/config/index";
+// import type { AppConfig } from "@/config/index";
 import { ElMessage } from "element-plus";
 import { useUserStore } from "@/stores/user";
 import router from "@/router";

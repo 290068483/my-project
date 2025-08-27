@@ -3,11 +3,10 @@
  * 提供开箱即用的请求功能，无复杂依赖
  */
 
-import { createSimpleAxiosInstance } from "./simple-instance";
+// import { createSimpleAxiosInstance } from "./simple-instance";
 import { SimpleRequestManager, createSimpleRequest, batch } from "./simple-methods";
 import {
   defaultSimpleConfig,
-  mergeSimpleConfig,
   type SimpleRequestConfig,
   type SimpleRequestMethodConfig,
   type ApiResponse,

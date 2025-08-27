@@ -32,10 +32,14 @@ declare module 'vue' {
     ElTableColumn: typeof import('element-plus/es')['ElTableColumn']
     Header: typeof import('./src/components/header/Header.vue')['default']
     Layout: typeof import('./src/components/Layout.vue')['default']
+    PasswordStrengthChecker: typeof import('./src/components/PasswordStrengthChecker.vue')['default']
     PermissionDemo: typeof import('./src/components/PermissionDemo.vue')['default']
     PrintButton: typeof import('./src/components/PrintButton/PrintButton.vue')['default']
     RouterLink: typeof import('vue-router')['RouterLink']
     RouterView: typeof import('vue-router')['RouterView']
+    SecurityQuestionsSetup: typeof import('./src/components/SecurityQuestionsSetup.vue')['default']
     SettingsDemo: typeof import('./src/components/SettingsDemo.vue')['default']
+    UserCenterLayout: typeof import('./src/components/UserCenterLayout.vue')['default']
+    UserCenterNavigation: typeof import('./src/components/UserCenterNavigation.vue')['default']
   }
 }

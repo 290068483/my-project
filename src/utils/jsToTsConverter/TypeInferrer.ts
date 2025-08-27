@@ -12,8 +12,8 @@ import {
   ObjectNode,
   ArrayNode,
   FunctionNode,
-  VariableNode
-} from './types';
+  VariableNode,
+} from "./types";
 
 export class TypeInferrer {
   private config: ConversionConfig;
@@ -92,13 +92,13 @@ export class TypeInferrer {
     const type = typeof value;
 
     switch (type) {
-      case 'string':
+      case "string":
         return { name: PRIMITIVE_TYPES.STRING, isOptional: false, isArray: false };
-      case 'number':
+      case "number":
         return { name: PRIMITIVE_TYPES.NUMBER, isOptional: false, isArray: false };
-      case 'boolean':
+      case "boolean":
         return { name: PRIMITIVE_TYPES.BOOLEAN, isOptional: false, isArray: false };
-      case 'object':
+      case "object":
         if (Array.isArray(value)) {
           return this.inferArrayTypeFromValue(value);
         }
@@ -112,7 +112,7 @@ export class TypeInferrer {
    * 推断标识符类型
    */
   private inferIdentifierType(node: ASTNode, context: InferenceContext): TypeInfo {
-    const name = node.raw || '';
+    const name = node.raw || "";
 
     // 从作用域中查找类型
     if (context.scope.has(name)) {
@@ -139,10 +139,10 @@ export class TypeInferrer {
     }
 
     return {
-      name: 'object',
+      name: "object",
       isOptional: false,
       isArray: false,
-      properties
+      properties,
     };
   }
 
@@ -154,21 +154,19 @@ export class TypeInferrer {
       return {
         name: PRIMITIVE_TYPES.ANY,
         isOptional: false,
-        isArray: true
+        isArray: true,
       };
     }
 
     // 推断所有元素的类型
-    const elementTypes = node.elements.map(element =>
-      this.inferType(element, context)
-    );
+    const elementTypes = node.elements.map((element) => this.inferType(element, context));
 
     // 创建联合类型或统一类型
     const unifiedType = this.unifyTypes(elementTypes);
 
     return {
       ...unifiedType,
-      isArray: true
+      isArray: true,
     };
   }
 
@@ -177,22 +175,22 @@ export class TypeInferrer {
    */
   private inferFunctionType(node: FunctionNode, context: InferenceContext): TypeInfo {
     // 函数类型通常表示为函数签名
-    const paramTypes = node.parameters.map(param => param.paramType);
+    const paramTypes = node.parameters.map((param) => param.paramType);
     const returnType = node.returnType;
 
     return {
-      name: 'Function',
+      name: "Function",
       isOptional: false,
       isArray: false,
       properties: {
         parameters: {
-          name: 'array',
+          name: "array",
           isOptional: false,
           isArray: true,
-          unionTypes: paramTypes
+          unionTypes: paramTypes,
         },
-        returnType: returnType
-      }
+        returnType: returnType,
+      },
     };
   }
 
@@ -226,24 +224,22 @@ export class TypeInferrer {
 
     // 检查是否所有类型都相同
     const firstType = types[0];
-    const allSame = types.every(type => type.name === firstType.name);
+    const allSame = types.every((type) => type.name === firstType.name);
 
     if (allSame) {
       return firstType;
     }
 
     // 创建联合类型
-    const uniqueTypes = Array.from(
-      new Map(types.map(type => [type.name, type])).values()
-    );
+    const uniqueTypes = Array.from(new Map(types.map((type) => [type.name, type])).values());
 
     if (uniqueTypes.length <= 3) {
-      const unionName = uniqueTypes.map(t => t.name).join(' | ');
+      const unionName = uniqueTypes.map((t) => t.name).join(" | ");
       return {
         name: unionName,
         isOptional: false,
         isArray: false,
-        unionTypes: uniqueTypes
+        unionTypes: uniqueTypes,
       };
     }
 
@@ -259,16 +255,16 @@ export class TypeInferrer {
       return {
         name: PRIMITIVE_TYPES.ANY,
         isOptional: false,
-        isArray: true
+        isArray: true,
       };
     }
 
-    const elementTypes = arr.map(item => this.inferPrimitiveType(item));
+    const elementTypes = arr.map((item) => this.inferPrimitiveType(item));
     const unifiedType = this.unifyTypes(elementTypes);
 
     return {
       ...unifiedType,
-      isArray: true
+      isArray: true,
     };
   }
 
@@ -276,7 +272,7 @@ export class TypeInferrer {
    * 从值推断对象类型
    */
   private inferObjectTypeFromValue(obj: Record<string, any>): TypeInfo {
-    if (!obj || typeof obj !== 'object') {
+    if (!obj || typeof obj !== "object") {
       return this.createAnyType();
     }
 
@@ -287,10 +283,10 @@ export class TypeInferrer {
     }
 
     return {
-      name: 'object',
+      name: "object",
       isOptional: false,
       isArray: false,
-      properties
+      properties,
     };
   }
 
@@ -303,18 +299,17 @@ export class TypeInferrer {
       return JSON.parse(raw);
     } catch {
       // 如果不是JSON，检查特殊值
-      if (raw === 'null') return null;
-      if (raw === 'undefined') return undefined;
-      if (raw === 'true') return true;
-      if (raw === 'false') return false;
+      if (raw === "null") return null;
+      if (raw === "undefined") return undefined;
+      if (raw === "true") return true;
+      if (raw === "false") return false;
 
       // 检查是否是数字
       const num = Number(raw);
       if (!isNaN(num)) return num;
 
       // 默认为字符串（去掉引号）
-      if ((raw.startsWith('"') && raw.endsWith('"')) ||
-          (raw.startsWith("'") && raw.endsWith("'"))) {
+      if ((raw.startsWith('"') && raw.endsWith('"')) || (raw.startsWith("'") && raw.endsWith("'"))) {
         return raw.slice(1, -1);
       }
 
@@ -326,7 +321,7 @@ export class TypeInferrer {
    * 检查是否是内置类型
    */
   private isBuiltinType(name: string): boolean {
-    const builtins = ['console', 'window', 'document', 'process', 'global'];
+    const builtins = ["console", "window", "document", "process", "global"];
     return builtins.includes(name);
   }
 
@@ -335,11 +330,11 @@ export class TypeInferrer {
    */
   private getBuiltinType(name: string): TypeInfo {
     const builtinTypes: Record<string, TypeInfo> = {
-      'console': { name: 'Console', isOptional: false, isArray: false },
-      'window': { name: 'Window', isOptional: false, isArray: false },
-      'document': { name: 'Document', isOptional: false, isArray: false },
-      'process': { name: 'Process', isOptional: false, isArray: false },
-      'global': { name: 'Global', isOptional: false, isArray: false }
+      console: { name: "Console", isOptional: false, isArray: false },
+      window: { name: "Window", isOptional: false, isArray: false },
+      document: { name: "Document", isOptional: false, isArray: false },
+      process: { name: "Process", isOptional: false, isArray: false },
+      global: { name: "Global", isOptional: false, isArray: false },
     };
 
     return builtinTypes[name] || this.createAnyType();
@@ -352,7 +347,7 @@ export class TypeInferrer {
     return {
       name: PRIMITIVE_TYPES.ANY,
       isOptional: false,
-      isArray: false
+      isArray: false,
     };
   }
 
@@ -360,7 +355,7 @@ export class TypeInferrer {
    * 生成缓存键
    */
   private generateCacheKey(node: ASTNode): string {
-    return `${node.type}:${node.start}:${node.end}:${node.raw || ''}`;
+    return `${node.type}:${node.start}:${node.end}:${node.raw || ""}`;
   }
 
   /**
@@ -375,7 +370,7 @@ export class TypeInferrer {
    */
   inferReturnType(functionNode: FunctionNode, context: InferenceContext): TypeInfo {
     // 如果已经有返回类型，直接返回
-    if (functionNode.returnType && functionNode.returnType.name !== 'any') {
+    if (functionNode.returnType && functionNode.returnType.name !== "any") {
       return functionNode.returnType;
     }
 
@@ -383,7 +378,7 @@ export class TypeInferrer {
     const returnTypes = this.findReturnTypes(functionNode.body, context);
 
     if (returnTypes.length === 0) {
-      return { name: 'void', isOptional: false, isArray: false };
+      return { name: "void", isOptional: false, isArray: false };
     }
 
     if (returnTypes.length === 1) {
@@ -404,7 +399,7 @@ export class TypeInferrer {
     }
 
     // 如果已经有类型注解，直接返回
-    if (paramNode.paramType && paramNode.paramType.name !== 'any') {
+    if (paramNode.paramType && paramNode.paramType.name !== "any") {
       return paramNode.paramType;
     }
 
@@ -442,14 +437,8 @@ export class TypeInferrer {
   getCacheStats(): { size: number; hitRate: number } {
     return {
       size: this.typeCache.size,
-      hitRate: 0 // 简化实现
+      hitRate: 0, // 简化实现
     };
-  }
-}
-   */
-  private inferCallExpressionType(node: ASTNode, context: InferenceContext): TypeInfo {
-    // 基础实现，可以根据已知函数返回类型进行推断
-    return this.createAnyType();
   }
 
   /**
@@ -468,16 +457,16 @@ export class TypeInferrer {
       return {
         name: PRIMITIVE_TYPES.ANY,
         isOptional: false,
-        isArray: true
+        isArray: true,
       };
     }
 
-    const elementTypes = value.map(item => this.inferPrimitiveType(item));
+    const elementTypes = value.map((item) => this.inferPrimitiveType(item));
     const unifiedType = this.unifyTypes(elementTypes);
 
     return {
       ...unifiedType,
-      isArray: true
+      isArray: true,
     };
   }
 
@@ -492,10 +481,10 @@ export class TypeInferrer {
     }
 
     return {
-      name: 'object',
+      name: "object",
       isOptional: false,
       isArray: false,
-      properties
+      properties,
     };
   }
 
@@ -513,10 +502,7 @@ export class TypeInferrer {
 
     // 检查是否所有类型都相同
     const firstType = types[0];
-    const allSame = types.every(type =>
-      type.name === firstType.name &&
-      type.isArray === firstType.isArray
-    );
+    const allSame = types.every((type) => type.name === firstType.name && type.isArray === firstType.isArray);
 
     if (allSame) {
       return firstType;
@@ -524,10 +510,10 @@ export class TypeInferrer {
 
     // 创建联合类型
     return {
-      name: 'union',
+      name: "union",
       isOptional: false,
       isArray: false,
-      unionTypes: this.deduplicateTypes(types)
+      unionTypes: this.deduplicateTypes(types),
     };
   }
 
@@ -556,11 +542,11 @@ export class TypeInferrer {
     let result = type.name;
 
     if (type.isArray) {
-      result += '[]';
+      result += "[]";
     }
 
     if (type.unionTypes && type.unionTypes.length > 0) {
-      const unionStr = type.unionTypes.map(t => this.typeToString(t)).join(' | ');
+      const unionStr = type.unionTypes.map((t) => this.typeToString(t)).join(" | ");
       result = `(${unionStr})`;
     }
 
@@ -572,8 +558,18 @@ export class TypeInferrer {
    */
   private isBuiltinType(name: string): boolean {
     const builtinTypes = [
-      'console', 'window', 'document', 'Array', 'Object', 'String',
-      'Number', 'Boolean', 'Date', 'RegExp', 'Error', 'Promise'
+      "console",
+      "window",
+      "document",
+      "Array",
+      "Object",
+      "String",
+      "Number",
+      "Boolean",
+      "Date",
+      "RegExp",
+      "Error",
+      "Promise",
     ];
     return builtinTypes.includes(name);
   }
@@ -583,18 +579,18 @@ export class TypeInferrer {
    */
   private getBuiltinType(name: string): TypeInfo {
     const typeMapping: Record<string, TypeInfo> = {
-      console: { name: 'Console', isOptional: false, isArray: false },
-      window: { name: 'Window', isOptional: false, isArray: false },
-      document: { name: 'Document', isOptional: false, isArray: false },
-      Array: { name: 'ArrayConstructor', isOptional: false, isArray: false },
-      Object: { name: 'ObjectConstructor', isOptional: false, isArray: false },
-      String: { name: 'StringConstructor', isOptional: false, isArray: false },
-      Number: { name: 'NumberConstructor', isOptional: false, isArray: false },
-      Boolean: { name: 'BooleanConstructor', isOptional: false, isArray: false },
-      Date: { name: 'DateConstructor', isOptional: false, isArray: false },
-      RegExp: { name: 'RegExpConstructor', isOptional: false, isArray: false },
-      Error: { name: 'ErrorConstructor', isOptional: false, isArray: false },
-      Promise: { name: 'PromiseConstructor', isOptional: false, isArray: false }
+      console: { name: "Console", isOptional: false, isArray: false },
+      window: { name: "Window", isOptional: false, isArray: false },
+      document: { name: "Document", isOptional: false, isArray: false },
+      Array: { name: "ArrayConstructor", isOptional: false, isArray: false },
+      Object: { name: "ObjectConstructor", isOptional: false, isArray: false },
+      String: { name: "StringConstructor", isOptional: false, isArray: false },
+      Number: { name: "NumberConstructor", isOptional: false, isArray: false },
+      Boolean: { name: "BooleanConstructor", isOptional: false, isArray: false },
+      Date: { name: "DateConstructor", isOptional: false, isArray: false },
+      RegExp: { name: "RegExpConstructor", isOptional: false, isArray: false },
+      Error: { name: "ErrorConstructor", isOptional: false, isArray: false },
+      Promise: { name: "PromiseConstructor", isOptional: false, isArray: false },
     };
 
     return typeMapping[name] || this.createAnyType();
@@ -613,8 +609,7 @@ export class TypeInferrer {
   private parseValue(raw: string): any {
     try {
       // 去掉引号
-      if ((raw.startsWith('"') && raw.endsWith('"')) ||
-          (raw.startsWith("'") && raw.endsWith("'"))) {
+      if ((raw.startsWith('"') && raw.endsWith('"')) || (raw.startsWith("'") && raw.endsWith("'"))) {
         return raw.slice(1, -1);
       }
 
@@ -624,12 +619,12 @@ export class TypeInferrer {
       }
 
       // 解析布尔值
-      if (raw === 'true') return true;
-      if (raw === 'false') return false;
+      if (raw === "true") return true;
+      if (raw === "false") return false;
 
       // 解析null和undefined
-      if (raw === 'null') return null;
-      if (raw === 'undefined') return undefined;
+      if (raw === "null") return null;
+      if (raw === "undefined") return undefined;
 
       return raw;
     } catch {
@@ -641,67 +636,6 @@ export class TypeInferrer {
    * 生成缓存键
    */
   private generateCacheKey(node: ASTNode): string {
-    return `${node.type}_${node.start}_${node.end}_${node.raw || ''}`;
-  }
-
-  /**
-   * 推断函数参数类型
-   */
-  inferParameterType(paramNode: ASTNode, context: InferenceContext): TypeInfo {
-    // 如果参数有默认值，根据默认值推断类型
-    if (paramNode.children && paramNode.children.length > 0) {
-      return this.inferType(paramNode.children[0], context);
-    }
-
-    // 如果配置为严格模式，返回unknown类型，否则返回any类型
-    return this.config.strict ?
-      { name: PRIMITIVE_TYPES.UNKNOWN, isOptional: false, isArray: false } :
-      this.createAnyType();
-  }
-
-  /**
-   * 推断函数返回类型
-   */
-  inferReturnType(functionNode: FunctionNode, context: InferenceContext): TypeInfo {
-    if (!this.config.inferReturnTypes) {
-      return { name: PRIMITIVE_TYPES.VOID, isOptional: false, isArray: false };
-    }
-
-    // 分析函数体中的return语句
-    const returnTypes = this.findReturnTypes(functionNode.body, context);
-
-    if (returnTypes.length === 0) {
-      return { name: PRIMITIVE_TYPES.VOID, isOptional: false, isArray: false };
-    }
-
-    return this.unifyTypes(returnTypes);
-  }
-
-  /**
-   * 查找函数体中的返回类型
-   */
-  private findReturnTypes(bodyNode: ASTNode, context: InferenceContext): TypeInfo[] {
-    const returnTypes: TypeInfo[] = [];
-
-    const traverse = (node: ASTNode) => {
-      if (node.type === NodeType.ReturnStatement && node.children && node.children.length > 0) {
-        const returnValue = node.children[0];
-        returnTypes.push(this.inferType(returnValue, context));
-      }
-
-      if (node.children) {
-        node.children.forEach(traverse);
-      }
-    };
-
-    traverse(bodyNode);
-    return returnTypes;
-  }
-
-  /**
-   * 清除类型缓存
-   */
-  clearCache(): void {
-    this.typeCache.clear();
+    return `${node.type}_${node.start}_${node.end}_${node.raw || ""}`;
   }
 }

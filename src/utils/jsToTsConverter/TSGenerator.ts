@@ -548,9 +548,6 @@ export class TSGenerator {
   reset(): void {
     this.output = [];
     this.indentLevel = 0;
-  }
-}
-
   /**
    * 生成类声明代码
    */

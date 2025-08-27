@@ -5,7 +5,6 @@
 
 import { request } from "@/utils/request";
 import type {
-  SystemUser,
   UserQueryParams,
   UserForm,
   UserPasswordForm,
@@ -17,7 +16,6 @@ import type {
   DeptTreeResponse,
   RoleListResponse,
   PostListResponse,
-  UserImportResult,
   UserImportResponse,
   UserAuthDetailResponse,
 } from "@/types/system/user";

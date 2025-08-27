@@ -18,19 +18,6 @@ const router = createRouter({
   ],
 });
 
-// 创建路由
-const router = createRouter({
-  history: createMemoryHistory(),
-  routes: [
-    { path: "/", component: { template: "<div>Home</div>" } },
-    { path: "/home", component: { template: "<div>Home</div>" } },
-    { path: "/pending-reservation", component: { template: "<div>Pending Reservation</div>" } },
-    { path: "/shipping-overview", component: { template: "<div>Shipping Overview</div>" } },
-    { path: "/user-info", component: { template: "<div>User Info</div>" } },
-    { path: "/login", component: { template: "<div>Login</div>" } },
-  ],
-});
-
 describe("Header.vue", () => {
   beforeEach(async () => {
     // 创建 Pinia 实例

@@ -144,7 +144,7 @@ export async function convertObjectDefinition(jsCode: string): Promise<{ tsCode:
  * `);
  * ```
  */
-export async function convertFunctionDefinition(jsCode: string, inferReturnType: boolean = true): Promise<string> {
+export async function convertFunctionDefinition(jsCode: string, _inferReturnType: boolean = true): Promise<string> {
   const result = await baseConvert(jsCode);
 
   if (!result.success) {

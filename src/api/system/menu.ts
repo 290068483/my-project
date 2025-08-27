@@ -5,7 +5,6 @@
 
 import { request } from "@/utils/request";
 import type {
-  SystemMenu,
   MenuQueryParams,
   MenuForm,
   MenuListResponse,

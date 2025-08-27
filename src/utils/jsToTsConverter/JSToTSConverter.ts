@@ -11,12 +11,12 @@ import {
   ConversionError,
   ASTNode,
   DEFAULT_CONFIG,
-  JSToTSConverterOptions
-} from './types';
-import { JSParser } from './JSParser';
-import { TypeInferrer } from './TypeInferrer';
-import { SyntaxTransformer } from './SyntaxTransformer';
-import { TSGenerator } from './TSGenerator';
+  JSToTSConverterOptions,
+} from "./types";
+import { JSParser } from "./JSParser";
+import { TypeInferrer } from "./TypeInferrer";
+import { SyntaxTransformer } from "./SyntaxTransformer";
+import { TSGenerator } from "./TSGenerator";
 
 export class JSToTSConverter {
   private config: ConversionConfig;
@@ -31,13 +31,13 @@ export class JSToTSConverter {
   constructor(options: JSToTSConverterOptions = {}) {
     // 合并配置
     this.config = { ...DEFAULT_CONFIG, ...options.config };
-    
+
     // 初始化各个模块
     this.parser = new JSParser();
     this.typeInferrer = new TypeInferrer(this.config);
     this.transformer = new SyntaxTransformer(this.config);
     this.generator = new TSGenerator(this.config);
-    
+
     // 初始化统计和错误信息
     this.resetStatistics();
     this.warnings = [];
@@ -55,24 +55,24 @@ export class JSToTSConverter {
 
     try {
       // 验证输入
-      if (!jsCode || typeof jsCode !== 'string') {
-        throw new Error('输入的JavaScript代码无效');
+      if (!jsCode || typeof jsCode !== "string") {
+        throw new Error("输入的JavaScript代码无效");
       }
 
       // 更新统计信息
-      this.statistics.linesProcessed = jsCode.split('\n').length;
+      this.statistics.linesProcessed = jsCode.split("\n").length;
 
       // 步骤1: 解析JavaScript代码为AST
       let ast: ASTNode;
       try {
         ast = this.parser.parse(jsCode);
-        this.addWarningIfNeeded('parsing', '代码解析完成', 0, 0);
+        this.addWarningIfNeeded("parsing", "代码解析完成", 0, 0);
       } catch (error) {
         const parseError: ConversionError = {
-          type: 'parsing',
+          type: "parsing",
           message: `解析错误: ${error instanceof Error ? error.message : String(error)}`,
           line: 0,
-          column: 0
+          column: 0,
         };
         this.errors.push(parseError);
         throw parseError;
@@ -85,7 +85,7 @@ export class JSToTSConverter {
         this.updateTransformStatistics(transformedAst);
       } catch (error) {
         const transformError: ConversionError = {
-          type: 'transformation',
+          type: "transformation",
           message: `转换错误: ${error instanceof Error ? error.message : String(error)}`,
         };
         this.errors.push(transformError);
@@ -99,7 +99,7 @@ export class JSToTSConverter {
         tsCode = this.generator.format(tsCode);
       } catch (error) {
         const generateError: ConversionError = {
-          type: 'generation',
+          type: "generation",
           message: `代码生成错误: ${error instanceof Error ? error.message : String(error)}`,
         };
         this.errors.push(generateError);
@@ -107,13 +107,16 @@ export class JSToTSConverter {
       }
 
       // 步骤4: 生成类型声明
-      let typeDeclarations = '';
+      let typeDeclarations = "";
       if (this.config.generateInterfaces) {
         try {
           const interfaces = this.transformer.generateInterfaces();
           typeDeclarations = this.generator.generateTypeDeclarations(interfaces);
         } catch (error) {
-          this.addWarning('type-inference', `类型声明生成警告: ${error instanceof Error ? error.message : String(error)}`);
+          this.addWarning(
+            "type-inference",
+            `类型声明生成警告: ${error instanceof Error ? error.message : String(error)}`,
+          );
         }
       }
 
@@ -125,19 +128,18 @@ export class JSToTSConverter {
         typeDeclarations,
         statistics: this.statistics,
         warnings: this.warnings,
-        success: true
+        success: true,
       };
-
-    } catch (error) {
+    } catch {
       this.statistics.conversionTime = Date.now() - startTime;
-      
+
       return {
-        tsCode: '',
-        typeDeclarations: '',
+        tsCode: "",
+        typeDeclarations: "",
         statistics: this.statistics,
         warnings: this.warnings,
         success: false,
-        errors: this.errors
+        errors: this.errors,
       };
     }
   }
@@ -149,33 +151,35 @@ export class JSToTSConverter {
     try {
       // 读取文件内容（这里简化处理，实际应该使用fs模块）
       const jsCode = await this.readFile(inputPath);
-      
+
       // 转换代码
       const result = await this.convert(jsCode);
-      
+
       // 如果转换成功且提供了输出路径，写入文件
       if (result.success && outputPath) {
         await this.writeFile(outputPath, result.tsCode);
-        
+
         // 如果有类型声明，也写入.d.ts文件
         if (result.typeDeclarations) {
-          const declarationPath = outputPath.replace(/\.ts$/, '.d.ts');
+          const declarationPath = outputPath.replace(/\.ts$/, ".d.ts");
           await this.writeFile(declarationPath, result.typeDeclarations);
         }
       }
-      
+
       return result;
     } catch (error) {
       return {
-        tsCode: '',
-        typeDeclarations: '',
+        tsCode: "",
+        typeDeclarations: "",
         statistics: this.statistics,
         warnings: this.warnings,
         success: false,
-        errors: [{
-          type: 'syntax',
-          message: `文件操作错误: ${error instanceof Error ? error.message : String(error)}`
-        }]
+        errors: [
+          {
+            type: "syntax",
+            message: `文件操作错误: ${error instanceof Error ? error.message : String(error)}`,
+          },
+        ],
       };
     }
   }
@@ -185,26 +189,28 @@ export class JSToTSConverter {
    */
   async convertBatch(files: string[]): Promise<Map<string, ConversionResult>> {
     const results = new Map<string, ConversionResult>();
-    
+
     for (const file of files) {
       try {
         const result = await this.convertFile(file);
         results.set(file, result);
       } catch (error) {
         results.set(file, {
-          tsCode: '',
-          typeDeclarations: '',
+          tsCode: "",
+          typeDeclarations: "",
           statistics: this.resetStatistics(),
           warnings: [],
           success: false,
-          errors: [{
-            type: 'syntax',
-            message: `批量转换错误: ${error instanceof Error ? error.message : String(error)}`
-          }]
+          errors: [
+            {
+              type: "syntax",
+              message: `批量转换错误: ${error instanceof Error ? error.message : String(error)}`,
+            },
+          ],
         });
       }
     }
-    
+
     return results;
   }
 
@@ -213,7 +219,7 @@ export class JSToTSConverter {
    */
   setConfig(config: Partial<ConversionConfig>): void {
     this.config = { ...this.config, ...config };
-    
+
     // 重新初始化模块
     this.typeInferrer = new TypeInferrer(this.config);
     this.transformer = new SyntaxTransformer(this.config);
@@ -232,14 +238,14 @@ export class JSToTSConverter {
    */
   validateJS(jsCode: string): { isValid: boolean; errors: ConversionError[] } {
     const errors: ConversionError[] = [];
-    
+
     try {
       this.parser.parse(jsCode);
       return { isValid: true, errors: [] };
     } catch (error) {
       errors.push({
-        type: 'syntax',
-        message: error instanceof Error ? error.message : String(error)
+        type: "syntax",
+        message: error instanceof Error ? error.message : String(error),
       });
       return { isValid: false, errors };
     }
@@ -251,26 +257,26 @@ export class JSToTSConverter {
   validateTS(tsCode: string): { isValid: boolean; errors: ConversionError[] } {
     // 简单的语法检查，实际项目中可以集成TypeScript编译器
     const errors: ConversionError[] = [];
-    
+
     try {
       // 基础语法检查
       if (!tsCode.trim()) {
         errors.push({
-          type: 'syntax',
-          message: 'TypeScript代码为空'
+          type: "syntax",
+          message: "TypeScript代码为空",
         });
         return { isValid: false, errors };
       }
-      
+
       // 检查基本语法错误
       const syntaxErrors = this.checkBasicTSSyntax(tsCode);
       errors.push(...syntaxErrors);
-      
+
       return { isValid: errors.length === 0, errors };
     } catch (error) {
       errors.push({
-        type: 'syntax',
-        message: error instanceof Error ? error.message : String(error)
+        type: "syntax",
+        message: error instanceof Error ? error.message : String(error),
       });
       return { isValid: false, errors };
     }
@@ -306,7 +312,7 @@ export class JSToTSConverter {
       classesConverted: 0,
       typesInferred: 0,
       conversionTime: 0,
-      linesProcessed: 0
+      linesProcessed: 0,
     };
     return this.statistics;
   }
@@ -323,17 +329,17 @@ export class JSToTSConverter {
    */
   private countNodes(node: ASTNode): void {
     switch (node.type) {
-      case 'VariableDeclaration':
+      case "VariableDeclaration":
         this.statistics.variablesConverted++;
         break;
-      case 'FunctionDeclaration':
+      case "FunctionDeclaration":
         this.statistics.functionsConverted++;
         break;
-      case 'ClassDeclaration':
+      case "ClassDeclaration":
         this.statistics.classesConverted++;
         break;
     }
-    
+
     if (node.children) {
       for (const child of node.children) {
         this.countNodes(child);
@@ -344,21 +350,27 @@ export class JSToTSConverter {
   /**
    * 添加警告
    */
-  private addWarning(type: ConversionWarning['type'], message: string, line?: number, column?: number, suggestion?: string): void {
+  private addWarning(
+    type: ConversionWarning["type"],
+    message: string,
+    line?: number,
+    column?: number,
+    suggestion?: string,
+  ): void {
     this.warnings.push({
       type,
       message,
       line,
       column,
-      suggestion
+      suggestion,
     });
   }
 
   /**
    * 根据需要添加警告
    */
-  private addWarningIfNeeded(type: ConversionWarning['type'], message: string, line?: number, column?: number): void {
-    if (this.config.strict || this.config.inferenceLevel === 'strict') {
+  private addWarningIfNeeded(type: ConversionWarning["type"], message: string, line?: number, column?: number): void {
+    if (this.config.strict || this.config.inferenceLevel === "strict") {
       this.addWarning(type, message, line, column);
     }
   }
@@ -368,47 +380,47 @@ export class JSToTSConverter {
    */
   private checkBasicTSSyntax(code: string): ConversionError[] {
     const errors: ConversionError[] = [];
-    const lines = code.split('\n');
-    
+    const lines = code.split("\n");
+
     for (let i = 0; i < lines.length; i++) {
       const line = lines[i];
       const lineNum = i + 1;
-      
+
       // 检查基本语法错误
-      if (line.includes('function') && !line.includes('(')) {
+      if (line.includes("function") && !line.includes("(")) {
         errors.push({
-          type: 'syntax',
-          message: '函数声明缺少参数列表',
-          line: lineNum
+          type: "syntax",
+          message: "函数声明缺少参数列表",
+          line: lineNum,
         });
       }
-      
+
       // 检查类型注解语法
-      if (line.includes(':') && line.includes('=')) {
-        const colonIndex = line.indexOf(':');
-        const equalIndex = line.indexOf('=');
+      if (line.includes(":") && line.includes("=")) {
+        const colonIndex = line.indexOf(":");
+        const equalIndex = line.indexOf("=");
         if (colonIndex > equalIndex) {
           errors.push({
-            type: 'syntax',
-            message: '类型注解位置错误',
-            line: lineNum
+            type: "syntax",
+            message: "类型注解位置错误",
+            line: lineNum,
           });
         }
       }
     }
-    
+
     return errors;
   }
 
   /**
    * 读取文件（简化实现）
    */
-  private async readFile(path: string): Promise<string> {
+  private async readFile(_path: string): Promise<string> {
     // 在实际项目中应该使用fs.promises.readFile
-    return new Promise((resolve, reject) => {
+    return new Promise((resolve, _reject) => {
       // 模拟文件读取
       setTimeout(() => {
-        resolve('// 模拟的JavaScript代码内容');
+        resolve("// 模拟的JavaScript代码内容");
       }, 10);
     });
   }
@@ -416,7 +428,7 @@ export class JSToTSConverter {
   /**
    * 写入文件（简化实现）
    */
-  private async writeFile(path: string, content: string): Promise<void> {
+  private async writeFile(path: string, _content: string): Promise<void> {
     // 在实际项目中应该使用fs.promises.writeFile
     return new Promise((resolve) => {
       // 模拟文件写入
@@ -432,17 +444,17 @@ export class JSToTSConverter {
    */
   getSupportedFeatures(): string[] {
     return [
-      'Variable declarations (var, let, const)',
-      'Function declarations',
-      'Class declarations',
-      'Object expressions',
-      'Array expressions',
-      'Basic type inference',
-      'Return type inference',
-      'Parameter type inference',
-      'Interface generation',
-      'Union types',
-      'Optional properties'
+      "Variable declarations (var, let, const)",
+      "Function declarations",
+      "Class declarations",
+      "Object expressions",
+      "Array expressions",
+      "Basic type inference",
+      "Return type inference",
+      "Parameter type inference",
+      "Interface generation",
+      "Union types",
+      "Optional properties",
     ];
   }
 
@@ -451,8 +463,8 @@ export class JSToTSConverter {
    */
   getVersion(): { version: string; features: string[] } {
     return {
-      version: '1.0.0',
-      features: this.getSupportedFeatures()
+      version: "1.0.0",
+      features: this.getSupportedFeatures(),
     };
   }
 }

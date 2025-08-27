@@ -16,7 +16,7 @@ import {
   checkPhoneUnique,
   checkEmailUnique,
 } from "@/api/system/user";
-import type { UserQueryParams, UserForm, UserPasswordForm, SystemUser } from "@/types/system/user";
+import type { UserQueryParams, UserForm, UserPasswordForm } from "@/types/system/user";
 
 // Mock request module
 vi.mock("@/utils/request", () => ({

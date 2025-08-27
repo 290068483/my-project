@@ -15,9 +15,8 @@ import {
   TypeInfo,
   TransformContext,
   ConversionConfig,
-  PRIMITIVE_TYPES
-} from './types';
-import { TypeInferrer } from './TypeInferrer';
+} from "./types";
+import { TypeInferrer } from "./TypeInferrer";
 
 export class SyntaxTransformer {
   private typeInferrer: TypeInferrer;
@@ -30,7 +29,7 @@ export class SyntaxTransformer {
       currentScope: new Map(),
       typeRegistry: new Map(),
       imports: new Set(),
-      exports: new Set()
+      exports: new Set(),
     };
   }
 
@@ -77,7 +76,7 @@ export class SyntaxTransformer {
 
     return {
       ...node,
-      children: transformedChildren
+      children: transformedChildren,
     };
   }
 
@@ -93,7 +92,7 @@ export class SyntaxTransformer {
         node: node.initializer,
         parent: node,
         scope: this.context.currentScope,
-        config: this.context.config
+        config: this.context.config,
       };
 
       valueType = this.typeInferrer.inferType(node.initializer, inferenceContext);
@@ -111,7 +110,7 @@ export class SyntaxTransformer {
     return {
       ...node,
       valueType,
-      initializer: transformedInitializer
+      initializer: transformedInitializer,
     };
   }
 
@@ -145,7 +144,7 @@ export class SyntaxTransformer {
         node: node.body,
         parent: node,
         scope: this.context.currentScope,
-        config: this.context.config
+        config: this.context.config,
       };
 
       returnType = this.typeInferrer.inferReturnType(node, inferenceContext);
@@ -159,7 +158,7 @@ export class SyntaxTransformer {
       ...node,
       parameters: transformedParameters,
       returnType,
-      body: transformedBody
+      body: transformedBody,
     };
   }
 
@@ -174,7 +173,7 @@ export class SyntaxTransformer {
       const inferenceContext = {
         node: param,
         scope: this.context.currentScope,
-        config: this.context.config
+        config: this.context.config,
       };
 
       paramType = this.typeInferrer.inferParameterType(param, inferenceContext);
@@ -182,7 +181,7 @@ export class SyntaxTransformer {
 
     return {
       ...param,
-      paramType
+      paramType,
     };
   }
 
@@ -224,7 +223,7 @@ export class SyntaxTransformer {
       ...node,
       properties: transformedProperties,
       methods: transformedMethods,
-      constructor: transformedConstructor
+      constructor: transformedConstructor,
     };
   }
 
@@ -240,14 +239,14 @@ export class SyntaxTransformer {
    * 转换对象表达式
    */
   private transformObjectExpression(node: ObjectNode): ObjectNode {
-    const transformedProperties = node.properties.map(prop => ({
+    const transformedProperties = node.properties.map((prop) => ({
       ...prop,
-      value: this.transform(prop.value)
+      value: this.transform(prop.value),
     }));
 
     return {
       ...node,
-      properties: transformedProperties
+      properties: transformedProperties,
     };
   }
 
@@ -255,13 +254,11 @@ export class SyntaxTransformer {
    * 转换数组表达式
    */
   private transformArrayExpression(node: ArrayNode): ArrayNode {
-    const transformedElements = node.elements.map(element =>
-      this.transform(element)
-    );
+    const transformedElements = node.elements.map((element) => this.transform(element));
 
     return {
       ...node,
-      elements: transformedElements
+      elements: transformedElements,
     };
   }
 
@@ -280,7 +277,7 @@ export class SyntaxTransformer {
 
     return {
       ...node,
-      children: transformedChildren
+      children: transformedChildren,
     };
   }
 
@@ -291,12 +288,12 @@ export class SyntaxTransformer {
     let transformedChildren: ASTNode[] | undefined;
 
     if (node.children) {
-      transformedChildren = node.children.map(child => this.transform(child));
+      transformedChildren = node.children.map((child) => this.transform(child));
     }
 
     return {
       ...node,
-      children: transformedChildren
+      children: transformedChildren,
     };
   }
 
@@ -307,12 +304,12 @@ export class SyntaxTransformer {
     let transformedChildren: ASTNode[] | undefined;
 
     if (node.children) {
-      transformedChildren = node.children.map(child => this.transform(child));
+      transformedChildren = node.children.map((child) => this.transform(child));
     }
 
     return {
       ...node,
-      children: transformedChildren
+      children: transformedChildren,
     };
   }
 
@@ -323,12 +320,12 @@ export class SyntaxTransformer {
     let transformedChildren: ASTNode[] | undefined;
 
     if (node.children) {
-      transformedChildren = node.children.map(child => this.transform(child));
+      transformedChildren = node.children.map((child) => this.transform(child));
     }
 
     return {
       ...node,
-      children: transformedChildren
+      children: transformedChildren,
     };
   }
 
@@ -354,15 +351,15 @@ export class SyntaxTransformer {
    */
   private generateInterfaceDefinition(name: string, type: TypeInfo): string {
     if (!type.properties) {
-      return '';
+      return "";
     }
 
     const properties = Object.entries(type.properties)
       .map(([key, propType]) => {
-        const optional = propType.isOptional ? '?' : '';
+        const optional = propType.isOptional ? "?" : "";
         return `  ${key}${optional}: ${this.getTypeString(propType)};`;
       })
-      .join('\n');
+      .join("\n");
 
     return `interface ${this.capitalize(name)} {\n${properties}\n}`;
   }
@@ -372,12 +369,12 @@ export class SyntaxTransformer {
    */
   private getTypeString(type: TypeInfo): string {
     if (type.isArray) {
-      const baseType = type.name.replace('[]', '');
+      const baseType = type.name.replace("[]", "");
       return `${baseType}[]`;
     }
 
     if (type.unionTypes && type.unionTypes.length > 0) {
-      return type.unionTypes.map(t => t.name).join(' | ');
+      return type.unionTypes.map((t) => t.name).join(" | ");
     }
 
     return type.name;
@@ -408,355 +405,5 @@ export class SyntaxTransformer {
    */
   getContext(): TransformContext {
     return this.context;
-  }
-}
-    for (const prop of node.properties) {
-      const transformedProp = this.transformProperty(prop);
-      transformedProperties.push(transformedProp);
-
-      // 将属性添加到作用域
-      this.context.currentScope.set(prop.name, transformedProp.propertyType);
-    }
-
-    // 转换方法
-    const transformedMethods: FunctionNode[] = [];
-    for (const method of node.methods) {
-      const transformedMethod = this.transformFunctionDeclaration(method);
-      transformedMethods.push(transformedMethod);
-    }
-
-    // 转换构造函数
-    let transformedConstructor: FunctionNode | undefined;
-    if (node.constructor) {
-      transformedConstructor = this.transformConstructor(node.constructor);
-    }
-
-    // 恢复上下文
-    this.context.currentClass = previousClass;
-    this.context.currentScope = previousScope;
-
-    return {
-      ...node,
-      properties: transformedProperties,
-      methods: transformedMethods,
-      constructor: transformedConstructor
-    };
-  }
-
-  /**
-   * 转换属性
-   */
-  private transformProperty(prop: PropertyNode): PropertyNode {
-    // 基础实现，可以根据使用情况推断属性类型
-    return prop;
-  }
-
-  /**
-   * 转换构造函数
-   */
-  private transformConstructor(constructor: FunctionNode): FunctionNode {
-    return this.transformFunctionDeclaration(constructor);
-  }
-
-  /**
-   * 转换对象表达式
-   */
-  private transformObjectExpression(node: ObjectNode): ObjectNode {
-    const transformedProperties: Array<{key: string, value: ASTNode, valueType: TypeInfo}> = [];
-
-    for (const prop of node.properties) {
-      const transformedValue = this.transform(prop.value);
-
-      // 推断属性值类型
-      const inferenceContext = {
-        node: prop.value,
-        parent: node,
-        scope: this.context.currentScope,
-        config: this.context.config
-      };
-
-      const valueType = this.typeInferrer.inferType(prop.value, inferenceContext);
-
-      transformedProperties.push({
-        key: prop.key,
-        value: transformedValue,
-        valueType
-      });
-    }
-
-    return {
-      ...node,
-      properties: transformedProperties
-    };
-  }
-
-  /**
-   * 转换数组表达式
-   */
-  private transformArrayExpression(node: ArrayNode): ArrayNode {
-    const transformedElements: ASTNode[] = [];
-    const elementTypes: TypeInfo[] = [];
-
-    for (const element of node.elements) {
-      const transformedElement = this.transform(element);
-      transformedElements.push(transformedElement);
-
-      // 推断元素类型
-      const inferenceContext = {
-        node: element,
-        parent: node,
-        scope: this.context.currentScope,
-        config: this.context.config
-      };
-
-      const elementType = this.typeInferrer.inferType(element, inferenceContext);
-      elementTypes.push(elementType);
-    }
-
-    return {
-      ...node,
-      elements: transformedElements,
-      elementTypes
-    };
-  }
-
-  /**
-   * 转换块语句
-   */
-  private transformBlockStatement(node: ASTNode): ASTNode {
-    // 创建新的作用域
-    const previousScope = new Map(this.context.currentScope);
-
-    const transformedChildren: ASTNode[] = [];
-    if (node.children) {
-      for (const child of node.children) {
-        const transformed = this.transform(child);
-        transformedChildren.push(transformed);
-      }
-    }
-
-    // 恢复作用域
-    this.context.currentScope = previousScope;
-
-    return {
-      ...node,
-      children: transformedChildren
-    };
-  }
-
-  /**
-   * 转换返回语句
-   */
-  private transformReturnStatement(node: ASTNode): ASTNode {
-    const transformedChildren: ASTNode[] = [];
-
-    if (node.children) {
-      for (const child of node.children) {
-        const transformed = this.transform(child);
-        transformedChildren.push(transformed);
-      }
-    }
-
-    return {
-      ...node,
-      children: transformedChildren
-    };
-  }
-
-  /**
-   * 转换表达式语句
-   */
-  private transformExpressionStatement(node: ASTNode): ASTNode {
-    const transformedChildren: ASTNode[] = [];
-
-    if (node.children) {
-      for (const child of node.children) {
-        const transformed = this.transform(child);
-        transformedChildren.push(transformed);
-      }
-    }
-
-    return {
-      ...node,
-      children: transformedChildren
-    };
-  }
-
-  /**
-   * 转换通用节点
-   */
-  private transformGenericNode(node: ASTNode): ASTNode {
-    const transformedChildren: ASTNode[] = [];
-
-    if (node.children) {
-      for (const child of node.children) {
-        const transformed = this.transform(child);
-        transformedChildren.push(transformed);
-      }
-    }
-
-    return {
-      ...node,
-      children: transformedChildren
-    };
-  }
-
-  /**
-   * 应用转换规则
-   */
-  applyTransformRules(node: ASTNode): ASTNode {
-    switch (node.type) {
-      case NodeType.VariableDeclaration:
-        return this.applyVariableTransformRules(node as VariableNode);
-      case NodeType.FunctionDeclaration:
-        return this.applyFunctionTransformRules(node as FunctionNode);
-      default:
-        return node;
-    }
-  }
-
-  /**
-   * 应用变量转换规则
-   */
-  private applyVariableTransformRules(node: VariableNode): VariableNode {
-    // 严格模式下，避免使用any类型
-    if (this.context.config.strict && node.valueType.name === PRIMITIVE_TYPES.ANY) {
-      node.valueType.name = PRIMITIVE_TYPES.UNKNOWN;
-    }
-
-    return node;
-  }
-
-  /**
-   * 应用函数转换规则
-   */
-  private applyFunctionTransformRules(node: FunctionNode): FunctionNode {
-    // 严格模式下，确保所有参数都有类型注解
-    if (this.context.config.strict) {
-      for (const param of node.parameters) {
-        if (param.paramType.name === PRIMITIVE_TYPES.ANY) {
-          param.paramType.name = PRIMITIVE_TYPES.UNKNOWN;
-        }
-      }
-    }
-
-    return node;
-  }
-
-  /**
-   * 优化转换结果
-   */
-  optimize(node: ASTNode): ASTNode {
-    if (!this.context.config.optimize) {
-      return node;
-    }
-
-    return this.applyOptimizations(node);
-  }
-
-  /**
-   * 应用优化
-   */
-  private applyOptimizations(node: ASTNode): ASTNode {
-    // 移除重复的类型定义
-    // 合并相似的接口
-    // 简化联合类型
-    return node;
-  }
-
-  /**
-   * 获取转换上下文
-   */
-  getContext(): TransformContext {
-    return this.context;
-  }
-
-  /**
-   * 重置转换器状态
-   */
-  reset(): void {
-    this.context.currentScope.clear();
-    this.context.typeRegistry.clear();
-    this.context.imports.clear();
-    this.context.exports.clear();
-    this.context.currentFunction = undefined;
-    this.context.currentClass = undefined;
-    this.typeInferrer.clearCache();
-  }
-
-  /**
-   * 添加类型到注册表
-   */
-  registerType(name: string, type: TypeInfo): void {
-    this.context.typeRegistry.set(name, type);
-  }
-
-  /**
-   * 获取注册的类型
-   */
-  getRegisteredType(name: string): TypeInfo | undefined {
-    return this.context.typeRegistry.get(name);
-  }
-
-  /**
-   * 生成接口定义
-   */
-  generateInterfaces(): string[] {
-    const interfaces: string[] = [];
-
-    if (!this.context.config.generateInterfaces) {
-      return interfaces;
-    }
-
-    for (const [name, type] of this.context.typeRegistry) {
-      if (type.properties && Object.keys(type.properties).length > 0) {
-        const interfaceDef = this.generateInterface(name, type);
-        interfaces.push(interfaceDef);
-      }
-    }
-
-    return interfaces;
-  }
-
-  /**
-   * 生成单个接口定义
-   */
-  private generateInterface(name: string, type: TypeInfo): string {
-    let result = `interface ${this.capitalize(name)} {\n`;
-
-    if (type.properties) {
-      for (const [propName, propType] of Object.entries(type.properties)) {
-        const optional = propType.isOptional ? '?' : '';
-        const typeStr = this.typeToString(propType);
-        result += `  ${propName}${optional}: ${typeStr};\n`;
-      }
-    }
-
-    result += '}';
-    return result;
-  }
-
-  /**
-   * 将类型转换为字符串
-   */
-  private typeToString(type: TypeInfo): string {
-    let result = type.name;
-
-    if (type.unionTypes && type.unionTypes.length > 0) {
-      result = type.unionTypes.map(t => this.typeToString(t)).join(' | ');
-    }
-
-    if (type.isArray) {
-      result += '[]';
-    }
-
-    return result;
-  }
-
-  /**
-   * 首字母大写
-   */
-  private capitalize(str: string): string {
-    return str.charAt(0).toUpperCase() + str.slice(1);
   }
 }
