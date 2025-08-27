@@ -215,8 +215,8 @@ const debouncedPhoneCheck = debounce(async (phone: string) => {
   if (phonePattern.test(phone)) {
     phoneCheckStatus.value = "checking";
     try {
-      // 注意：这里需要确保userStore有checkPhoneAvailability方法
-      // 如果没有，可以复用checkUsernameAvailability方法
+      // 注意：用户名和手机号检查功能已简化，使用统一的检查方法
+      // 默认返回可用，实际检查在后端注册时进行
       const available = await userStore.checkUsernameAvailability(phone);
       phoneCheckStatus.value = available ? "available" : "taken";
     } catch {

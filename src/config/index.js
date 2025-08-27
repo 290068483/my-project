@@ -6,7 +6,7 @@
 // 基础配置（所有环境共享）
 const baseConfig = {
   // API基础路径
-  baseUrl: import.meta.env.VITE_API_BASE_URL || "/api",
+  baseUrl: "/api", // 使用本地代理
 
   // WebSocket基础地址
   wsBaseUrl: import.meta.env.VITE_WS_BASE_URL || "ws://localhost:3000",
@@ -18,7 +18,7 @@ const baseConfig = {
   port: Number(import.meta.env.VITE_PORT) || 5173,
 
   // 是否启用Mock
-  useMock: import.meta.env.VITE_USE_MOCK === "true",
+  useMock: false, // 暂时禁用Mock
 
   // 是否开启调试模式
   debug: import.meta.env.VITE_DEBUG === "true",

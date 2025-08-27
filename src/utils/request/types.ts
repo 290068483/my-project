@@ -1,4 +1,4 @@
-import type { AxiosRequestConfig, AxiosResponse, AxiosProgressEvent } from 'axios';
+import type { AxiosRequestConfig, AxiosResponse, AxiosProgressEvent } from "axios";
 
 /**
  * 通用API响应格式
@@ -26,6 +26,7 @@ export interface BaseRequestConfig {
   // 错误处理
   showErrorMessage?: boolean;
   showSuccessMessage?: boolean;
+  silentError?: boolean; // 静默处理错误，不显示错误消息
 
   // 加载状态
   showLoading?: boolean;
@@ -40,7 +41,7 @@ export interface BaseRequestConfig {
   returnFullResponse?: boolean;
 
   // 缓存配置
-  cache?: boolean | 'memory' | 'session' | 'local';
+  cache?: boolean | "memory" | "session" | "local";
   cacheTime?: number;
 
   // 重试配置
@@ -53,7 +54,7 @@ export interface BaseRequestConfig {
  */
 export interface RequestMethodConfig extends BaseRequestConfig {
   // HTTP 方法
-  method?: 'GET' | 'POST' | 'PUT' | 'DELETE' | 'PATCH';
+  method?: "GET" | "POST" | "PUT" | "DELETE" | "PATCH";
 
   // 请求数据
   url: string;
@@ -68,7 +69,7 @@ export interface RequestMethodConfig extends BaseRequestConfig {
   onDownloadProgress?: (progressEvent: AxiosProgressEvent) => void;
 
   // 响应类型
-  responseType?: 'json' | 'blob' | 'text' | 'arraybuffer';
+  responseType?: "json" | "blob" | "text" | "arraybuffer";
 }
 
 /**

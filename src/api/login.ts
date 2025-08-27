@@ -1,36 +1,28 @@
-import { request } from "@/utils/request";
-import type { LoginRequest, LoginResponse } from "@/types/auth";
-
 /**
- * 登录方法
- * @param username 用户名
- * @param password 密码
- * @param code 验证码
- * @param uuid 验证码唯一标识
- * @returns Promise<LoginResponse>
+ * 登录认证相关API
+ * 基于RuoYi架构设计，符合API接口文档规范
  */
-export function login(username: string, password: string, code: string, uuid: string): Promise<LoginResponse> {
-  const data: LoginRequest = {
-    username,
-    password,
-    code,
-    uuid,
-  };
 
-  return request.post("/login", data, {
-    withToken: false,
-    showErrorMessage: true,
-    showLoading: true,
-    loadingText: "登录中...",
-  });
-}
+import { request } from "@/utils/request";
+import type {
+  LoginRequest,
+  LoginResponse,
+  CaptchaResponse,
+  UserInfoResponse,
+  RoutersResponse,
+  LogoutResponse,
+} from "@/types/auth";
+import type { ApiResponse } from "@/types/api";
+
+// ==================== 认证授权接口 ====================
 
 /**
- * 登录方法（使用对象参数）
+ * 用户登录
+ * 支持多种登录方式：用户名+密码、手机号+验证码、邮箱+密码
  * @param loginData 登录数据对象
  * @returns Promise<LoginResponse>
  */
-export function loginWithData(loginData: LoginRequest): Promise<LoginResponse> {
+export function login(loginData: LoginRequest): Promise<LoginResponse> {
   return request.post("/login", loginData, {
     withToken: false,
     showErrorMessage: true,
@@ -40,122 +32,63 @@ export function loginWithData(loginData: LoginRequest): Promise<LoginResponse> {
 }
 
 /**
- * 手机号登录（新增）
- * @param phone 手机号
- * @param code 验证码
- * @returns Promise<LoginResponse>
+ * 获取验证码
+ * @returns Promise<CaptchaResponse>
  */
-export function loginWithPhone(phone: string, code: string): Promise<LoginResponse> {
-  return request.post(
-    "/login/phone",
-    { phone, code },
-    {
-      withToken: false,
-      showErrorMessage: true,
-      showLoading: true,
-      loadingText: "登录中...",
-    },
-  );
+export function getCaptchaImage(): Promise<CaptchaResponse> {
+  return request.get("/captchaImage", {
+    withToken: false,
+  });
 }
 
 /**
- * 邮箱登录（新增）
- * @param email 邮箱
- * @param password 密码
- * @param code 验证码（可选）
- * @param uuid 验证码唯一标识（可选）
- * @returns Promise<LoginResponse>
+ * 获取当前登录用户信息
+ * @returns Promise<UserInfoResponse>
  */
-export function loginWithEmail(email: string, password: string, code?: string, uuid?: string): Promise<LoginResponse> {
-  return request.post(
-    "/login/email",
-    { email, password, code, uuid },
-    {
-      withToken: false,
-      showErrorMessage: true,
-      showLoading: true,
-      loadingText: "登录中...",
-    },
-  );
+export function getUserInfo(): Promise<UserInfoResponse> {
+  return request.get("/getInfo");
 }
 
 /**
- * 发送登录手机验证码（新增）
- * @param phone 手机号
- * @returns Promise<{ code: number; msg: string }>
+ * 获取用户可访问的路由菜单
+ * @returns Promise<RoutersResponse>
  */
-export function sendLoginSms(phone: string): Promise<{ code: number; msg: string }> {
-  return request.post(
-    "/login/send-sms",
-    { phone },
-    {
-      withToken: false,
-      showErrorMessage: true,
-    },
-  );
+export function getRouters(): Promise<RoutersResponse> {
+  return request.get("/getRouters");
 }
 
 /**
- * 密码重置 - 发送验证码（新增）
- * @param account 账号（手机号或邮箱）
- * @param type 类型：'phone' | 'email'
- * @returns Promise<{ code: number; msg: string }>
+ * 用户退出登录
+ * @returns Promise<LogoutResponse>
  */
-export function sendResetCode(account: string, type: "phone" | "email"): Promise<{ code: number; msg: string }> {
-  return request.post(
-    "/reset-password/send-code",
-    { account, type },
-    {
-      withToken: false,
-      showErrorMessage: true,
-    },
-  );
+export function logout(): Promise<LogoutResponse> {
+  return request.post("/logout");
+}
+
+// ==================== 兼容性支持 ====================
+
+/**
+ * 兼容原有的验证码接口名称
+ * @returns Promise<CaptchaResponse>
+ */
+export function getCodeImg(): Promise<CaptchaResponse> {
+  return getCaptchaImage();
 }
 
 /**
- * 密码重置 - 验证验证码（新增）
- * @param account 账号
- * @param code 验证码
- * @param type 类型
- * @returns Promise<{ code: number; msg: string; data: { token: string } }>
+ * 刷新验证码（重新获取）
+ * @returns Promise<CaptchaResponse>
  */
-export function verifyResetCode(
-  account: string,
-  code: string,
-  type: "phone" | "email",
-): Promise<{
-  code: number;
-  msg: string;
-  data: { token: string };
-}> {
-  return request.post(
-    "/reset-password/verify-code",
-    { account, code, type },
-    {
-      withToken: false,
-      showErrorMessage: true,
-    },
-  );
-}
-
-/**
- * 密码重置 - 设置新密码（新增）
- * @param token 验证令牌
- * @param newPassword 新密码
- * @returns Promise<{ code: number; msg: string }>
- */
-export function resetPassword(token: string, newPassword: string): Promise<{ code: number; msg: string }> {
-  return request.post(
-    "/reset-password/set-new",
-    { token, newPassword },
-    {
-      withToken: false,
-      showErrorMessage: true,
-      showLoading: true,
-      loadingText: "设置新密码中...",
-    },
-  );
+export function refreshCaptcha(): Promise<CaptchaResponse> {
+  return getCaptchaImage();
 }
 
 // 导出类型定义
-export type { LoginRequest, LoginResponse } from "@/types/auth";
+export type {
+  LoginRequest,
+  LoginResponse,
+  CaptchaResponse,
+  UserInfoResponse,
+  RoutersResponse,
+  LogoutResponse,
+} from "@/types/auth";

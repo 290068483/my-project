@@ -231,6 +231,11 @@ const navData = [
     path: "/home",
   },
   {
+    key: "7",
+    name: "消息演示",
+    path: "/optimized-message-demo",
+  },
+  {
     key: "8",
     name: "财务管理1",
     path: "/home",

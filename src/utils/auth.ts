@@ -1,7 +1,7 @@
 import { useUserStore } from "@/stores/user";
 import MessageUtils from "./message";
 import router from "@/router";
-import type { UserInfo, LoginRequest, PhoneLoginRequest, EmailLoginRequest } from "@/types/auth";
+import type { UserInfo, LoginRequest } from "@/types/auth";
 
 /**
  * 通用认证工具类
@@ -66,8 +66,72 @@ export class AuthUtils {
    * @returns boolean
    */
   static hasRole(role: string): boolean {
-    const userRole = this.getUserRole();
-    return userRole === role;
+    const user = this.getCurrentUser();
+    return user?.roles?.includes(role) || user?.role === role;
+  }
+
+  /**
+   * 检查用户是否有多个权限中的任意一个（或关系）
+   * @param permissions 权限代码数组
+   * @returns boolean
+   */
+  static hasAnyPermission(permissions: string[]): boolean {
+    const user = this.getCurrentUser();
+    if (!user?.permissions) return false;
+    return permissions.some((permission) => user.permissions.includes(permission));
+  }
+
+  /**
+   * 检查用户是否有所有指定权限（且关系）
+   * @param permissions 权限代码数组
+   * @returns boolean
+   */
+  static hasAllPermissions(permissions: string[]): boolean {
+    const user = this.getCurrentUser();
+    if (!user?.permissions) return false;
+    return permissions.every((permission) => user.permissions.includes(permission));
+  }
+
+  /**
+   * 检查用户是否有多个角色中的任意一个（或关系）
+   * @param roles 角色代码数组
+   * @returns boolean
+   */
+  static hasAnyRole(roles: string[]): boolean {
+    const user = this.getCurrentUser();
+    if (!user) return false;
+    const userRoles = user.roles || [user.role];
+    return roles.some((role) => userRoles.includes(role));
+  }
+
+  /**
+   * 检查用户是否有所有指定角色（且关系）
+   * @param roles 角色代码数组
+   * @returns boolean
+   */
+  static hasAllRoles(roles: string[]): boolean {
+    const user = this.getCurrentUser();
+    if (!user) return false;
+    const userRoles = user.roles || [user.role];
+    return roles.every((role) => userRoles.includes(role));
+  }
+
+  /**
+   * 综合权限检查（支持角色和权限的组合检查）
+   * @param options 权限检查选项
+   * @returns boolean
+   */
+  static checkPermission(options: { roles?: string[]; permissions?: string[]; mode?: "and" | "or" }): boolean {
+    const { roles, permissions, mode = "and" } = options;
+
+    const hasRoleAccess = roles ? this.hasAnyRole(roles) : true;
+    const hasPermissionAccess = permissions ? this.hasAnyPermission(permissions) : true;
+
+    if (mode === "or") {
+      return hasRoleAccess || hasPermissionAccess;
+    } else {
+      return hasRoleAccess && hasPermissionAccess;
+    }
   }
 
   /**
@@ -118,7 +182,7 @@ export class AuthUtils {
   }
 
   /**
-   * 手机号登录
+   * 手机号登录（使用统一登录方法）
    * @param phone 手机号
    * @param code 验证码
    * @returns Promise<boolean>
@@ -126,7 +190,7 @@ export class AuthUtils {
   static async loginWithPhone(phone: string, code: string): Promise<boolean> {
     try {
       const userStore = useUserStore();
-      const phoneData: PhoneLoginRequest = { phone, code };
+      const phoneData = { phone, code };
       await userStore.loginWithPhoneNumber(phoneData);
       return true;
     } catch (error) {
@@ -136,7 +200,7 @@ export class AuthUtils {
   }
 
   /**
-   * 邮箱登录
+   * 邮箱登录（使用统一登录方法）
    * @param email 邮箱
    * @param password 密码
    * @param code 验证码（可选）
@@ -146,8 +210,14 @@ export class AuthUtils {
   static async loginWithEmail(email: string, password: string, code?: string, uuid?: string): Promise<boolean> {
     try {
       const userStore = useUserStore();
-      const emailData: EmailLoginRequest = { email, password, code, uuid };
-      await userStore.loginWithEmailAddress(emailData);
+      const loginData: LoginRequest = {
+        email,
+        password,
+        code,
+        uuid,
+        loginType: "email",
+      };
+      await userStore.login(loginData);
       return true;
     } catch (error) {
       console.error("邮箱登录失败:", error);

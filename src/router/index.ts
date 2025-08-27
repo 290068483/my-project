@@ -3,6 +3,7 @@ import type { RouteRecordRaw } from "vue-router";
 import HomeView from "@/views/HomeView.vue";
 import { useUserStore } from "@/stores/user";
 import { ElMessage } from "element-plus";
+import { AuthUtils } from "@/utils/auth";
 import Layout from "@/components/Layout.vue";
 // 路由定义
 const routes: Array<RouteRecordRaw> = [
@@ -13,7 +14,7 @@ const routes: Array<RouteRecordRaw> = [
     meta: {
       requiresAuth: false,
     },
-    redirect: "/Home",
+    redirect: "/home",
     children: [
       {
         path: "custom-index",
@@ -197,13 +198,115 @@ const routes: Array<RouteRecordRaw> = [
           requiresAuth: false,
         },
       },
+
+      // 系统管理模块
+      {
+        path: "system",
+        name: "System",
+        meta: {
+          requiresAuth: true,
+          title: "系统管理",
+          icon: "system",
+          sort: 900,
+        },
+        children: [
+          // 用户管理
+          {
+            path: "user",
+            name: "SystemUser",
+            component: () => import("../views/system/user/index.vue"),
+            meta: {
+              requiresAuth: true,
+              permissions: ["system:user:list"],
+              title: "用户管理",
+              icon: "user",
+              sort: 1,
+            },
+          },
+          // 角色管理
+          {
+            path: "role",
+            name: "SystemRole",
+            component: () => import("../views/system/role/index.vue"),
+            meta: {
+              requiresAuth: true,
+              permissions: ["system:role:list"],
+              title: "角色管理",
+              icon: "peoples",
+              sort: 2,
+            },
+          },
+          // 菜单管理
+          {
+            path: "menu",
+            name: "SystemMenu",
+            component: () => import("../views/system/menu/index.vue"),
+            meta: {
+              requiresAuth: true,
+              permissions: ["system:menu:list"],
+              title: "菜单管理",
+              icon: "tree-table",
+              sort: 3,
+            },
+          },
+          // 部门管理
+          {
+            path: "dept",
+            name: "SystemDept",
+            component: () => import("../views/system/dept/index.vue"),
+            meta: {
+              requiresAuth: true,
+              permissions: ["system:dept:list"],
+              title: "部门管理",
+              icon: "tree",
+              sort: 4,
+            },
+          },
+          // 岗位管理
+          {
+            path: "post",
+            name: "SystemPost",
+            component: () => import("../views/system/post/index.vue"),
+            meta: {
+              requiresAuth: true,
+              permissions: ["system:post:list"],
+              title: "岗位管理",
+              icon: "post",
+              sort: 5,
+            },
+          },
+        ],
+      },
+
       // 用户信息页面
       {
         path: "user-info",
         name: "UserInfo",
-        component: () => import("../views/user/UserInfo.vue"),
+        component: () => import("../views/user/Userinfo.vue"),
         meta: {
           requiresAuth: false,
+        },
+      },
+
+      // 消息演示页面
+      {
+        path: "message-demo",
+        name: "MessageDemo",
+        component: () => import("../views/components/MessageDemo.vue"),
+        meta: {
+          requiresAuth: false,
+          title: "消息演示",
+        },
+      },
+
+      // 优化后的消息演示页面
+      {
+        path: "optimized-message-demo",
+        name: "OptimizedMessageDemo",
+        component: () => import("../views/components/OptimizedMessageDemo.vue"),
+        meta: {
+          requiresAuth: false,
+          title: "优化消息演示",
         },
       },
     ],
@@ -264,22 +367,15 @@ const router = createRouter({
 router.beforeEach((to, from, next) => {
   const userStore = useUserStore();
 
-  // 检查登录是否过期
-  if (userStore.isLoggedIn && Date.now() >= (userStore.expiresAt || 0)) {
-    userStore.logout();
-    ElMessage.warning("登录已过期，请重新登录");
-    return next({ name: "login", query: { redirect: to.fullPath } });
-  }
-
   // 检查是否需要登录
   if (to.meta.requiresAuth && !userStore.isLoggedIn) {
-    return next({ name: "login", query: { redirect: to.fullPath } });
+    return next({ name: "login-inner", query: { redirect: to.fullPath } });
   }
 
   // 检查权限
   if (to.meta.requiresAuth && to.meta.permissions && Array.isArray(to.meta.permissions)) {
     const hasPermission = to.meta.permissions.some((permission: string) => {
-      return userStore.hasPermission(permission);
+      return AuthUtils.hasPermission(permission);
     });
 
     if (!hasPermission) {
@@ -289,7 +385,7 @@ router.beforeEach((to, from, next) => {
   }
 
   // 管理员角色检查
-  if (to.meta.requiresAuth && userStore.userRole === "admin") {
+  if (to.meta.requiresAuth && AuthUtils.getUserRole() === "admin") {
     // 管理员可以访问所有页面
     return next();
   }

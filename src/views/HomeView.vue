@@ -1,24 +1,45 @@
 <template>
   <div class="home-container bg-[#d3ceca] min-h-screen min-w-full bg-neutral flex flex-col font-sans">
-    <div class="w-full px-4 sm:px-6 pt-6 sm:pt-8 pb-4 sm:pb-6 flex-grow">
+    <!-- 网络错误提示 -->
+    <div v-if="hasNetworkError" class="network-warning bg-yellow-50 border-l-4 border-yellow-400 p-3 mb-4">
+      <div class="flex items-center">
+        <svg class="w-5 h-5 text-yellow-400 mr-2" fill="none" stroke="currentColor" viewBox="0 0 24 24">
+          <path
+            stroke-linecap="round"
+            stroke-linejoin="round"
+            stroke-width="2"
+            d="M12 9v2m0 4h.01m-6.938 4h13.856c1.54 0 2.502-1.667 1.732-3L13.732 4c-.77-1.333-2.694-1.333-3.464 0L3.34 16c-.77 1.333.192 3 1.732 3z"></path>
+        </svg>
+        <p class="text-yellow-700 text-sm">🔍 网络连接不稳定，部分数据可能不是最新的，但页面功能正常</p>
+      </div>
+    </div>
+
+    <!-- 加载状态 -->
+    <div v-if="!isComponentReady" class="loading-container flex items-center justify-center min-h-[400px]">
+      <div class="text-center">
+        <div class="animate-spin rounded-full h-12 w-12 border-b-2 border-blue-500 mx-auto mb-4"></div>
+        <p class="text-gray-600">正在加载页面...</p>
+      </div>
+    </div>
+
+    <!-- 主要内容 -->
+    <div v-show="isComponentReady" class="w-full px-4 sm:px-6 pt-6 sm:pt-8 pb-4 sm:pb-6 flex-grow">
       <!-- 用户信息和欢迎区域 -->
       <div
         class="user-info-area border-b border-gray-200 bg-white px-4 sm:px-6 py-3 sm:py-4 bg-gradient-to-r from-blue-50 to-gray-50 flex flex-col sm:flex-row flex-wrap items-center shadow-sm">
         <div class="user-details min-w-[300px] flex items-center space-x-3 sm:space-x-4 mb-2 sm:mb-0 w-full sm:w-auto">
           <div
             class="user-avatar w-12 h-12 bg-primary rounded-full flex items-center justify-center text-white font-bold shadow-md border border-primary/20">
-            {{ userInfo?.avatar || "未" }}
+            {{ userInfo.avatar }}
           </div>
           <div class="user-text">
             <div class="user-info-grid">
               <div class="info-label">姓名：</div>
-              <div class="info-value">{{ userInfo?.name || "未设置" }}</div>
+              <div class="info-value">{{ userInfo.name }}</div>
               <div class="info-label">所属部门：</div>
-              <div class="info-value">
-                {{ userInfo?.department || "未设置" }}
-              </div>
+              <div class="info-value">{{ userInfo.department }}</div>
               <div class="info-label">职位：</div>
-              <div class="info-value">{{ userInfo?.position || "未设置" }}</div>
+              <div class="info-value">{{ userInfo.position }}</div>
             </div>
           </div>
         </div>
@@ -154,47 +175,84 @@
 </template>
 
 <script setup lang="ts">
-import { onMounted, computed } from "vue";
+import { onMounted, computed, ref, onErrorCaptured } from "vue";
 import { useUserStore } from "@/stores/user";
 import { useHomeStore } from "@/stores/home";
 import type { Announcement } from "@/stores/home";
 import moment from "moment";
 import "moment/locale/zh-cn";
+import { ElMessage } from "element-plus";
 
 // 设置moment.js为中文
 moment.locale("zh-cn");
+
+// 组件正常加载状态
+const isComponentReady = ref(false);
+const hasNetworkError = ref(false);
 
 // 使用stores
 const userStore = useUserStore();
 const homeStore = useHomeStore();
 
-onMounted(() => {
-  // 初始化用户信息
-  userStore.initUserInfo();
+// 错误捕获器
+onErrorCaptured((error) => {
+  console.warn("🚨 组件错误捕获:", error);
+  // 不阻止组件渲染
+  return false;
 });
 
-// 计算属性获取用户信息
-const userInfo = computed(() => userStore.userInfo);
+onMounted(async () => {
+  try {
+    // 初始化用户信息（在localStorage中有数据的话）
+    userStore.initUserInfo();
+
+    // 尝试获取用户信息（如果有Token的话）
+    if (userStore.token) {
+      try {
+        await userStore.fetchUserInfo();
+      } catch (error) {
+        console.warn("🔍 获取用户信息失败，使用本地数据:", error);
+        hasNetworkError.value = true;
+      }
+    }
+  } catch (error) {
+    console.error("🚨 初始化失败:", error);
+    hasNetworkError.value = true;
+  } finally {
+    // 无论是否成功，都设置组件为准备就绪状态
+    isComponentReady.value = true;
+  }
+});
+
+// 计算属性获取用户信息（带默认值）
+const userInfo = computed(() => {
+  const info = userStore.userInfo;
+  return {
+    name: info?.nickname || info?.username || "未设置",
+    avatar: info?.avatar ? info.avatar.charAt(0).toUpperCase() : "未",
+    department: info?.dept?.name || "未设置",
+    position: info?.role || "未设置",
+  };
+});
 
 // 计算属性获取当前日期
 const getDate = computed(() => {
-  return homeStore.getDate;
+  return homeStore.getDate || moment().format("YYYY-MM-DD");
 });
 
 // 计算属性获取农历日期
 const getLunarDate = computed(() => {
-  // 实际项目中应使用农历计算库
-  return homeStore.getLunarDate;
+  return homeStore.getLunarDate || "农历日期";
 });
 
 // 计算属性获取星期
 const getWeekday = computed(() => {
-  return homeStore.getWeekdays;
+  return homeStore.getWeekdays || moment().format("dddd");
 });
 
 // 计算属性获取当前时间
 const getTime = computed(() => {
-  return homeStore.getTime;
+  return homeStore.getTime || moment().format("HH:mm:ss");
 });
 
 // 从 homeStore 获取数据
@@ -204,6 +262,7 @@ const relatedItems = computed(() => homeStore.getRelatedItems);
 const announcements = computed(() => homeStore.getAnnouncements);
 const data1 = computed(() => homeStore.getData1);
 const data2 = computed(() => homeStore.getData1);
+
 const showItemDetails = (name: string) => {
   homeStore.showItemDetails(name);
 };
@@ -217,6 +276,10 @@ const quickInfoCards = [{ bgColor: "bg-[#3b3838]" }, { bgColor: "bg-[#3b3838]" }
 function handleButtonClick() {
   // TODO: 实现录入新进度功能
   console.log("录入新进度按钮被点击");
+}
+
+function sortBy(sortConfig: any) {
+  console.log("排序配置:", sortConfig);
 }
 </script>
 

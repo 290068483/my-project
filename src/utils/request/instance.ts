@@ -1,15 +1,10 @@
-import axios, { 
-  type AxiosInstance, 
-  type AxiosRequestConfig, 
-  type AxiosResponse,
-  type AxiosError 
-} from 'axios';
-import { ElMessage, ElLoading } from 'element-plus';
-import type { ElLoadingService } from 'element-plus/es/components/loading/src/service';
-import { useUserStore } from '@/stores/user';
-import router from '@/router';
-import type { CreateRequestConfig, RequestError } from './types';
-import { repeatSubmitChecker, delay } from './utils';
+import axios, { type AxiosInstance, type AxiosRequestConfig, type AxiosResponse, type AxiosError } from "axios";
+import { ElMessage, ElLoading } from "element-plus";
+import { useUserStore } from "@/stores/user";
+import router from "@/router";
+import type { CreateRequestConfig, RequestError } from "./types";
+import { repeatSubmitChecker, delay } from "./utils";
+// import { installMockInterceptor } from '@/utils/mockInterceptor.js';
 
 /**
  * 创建axios实例
@@ -21,21 +16,21 @@ export function createAxiosInstance(config: CreateRequestConfig): AxiosInstance 
     baseURL: config.baseURL,
     timeout: config.timeout,
     headers: {
-      'Content-Type': 'application/json',
+      "Content-Type": "application/json",
     },
   });
 
   // 全局Loading实例
-  let loadingInstance: ElLoadingService | null = null;
+  let loadingInstance: ReturnType<typeof ElLoading.service> | null = null;
   let loadingCount = 0;
 
   // 显示Loading
-  const showLoading = (text: string = '加载中...') => {
+  const showLoading = (text: string = "加载中...") => {
     if (loadingCount === 0) {
       loadingInstance = ElLoading.service({
         lock: true,
         text,
-        background: 'rgba(0, 0, 0, 0.7)',
+        background: "rgba(0, 0, 0, 0.7)",
       });
     }
     loadingCount++;
@@ -61,14 +56,14 @@ export function createAxiosInstance(config: CreateRequestConfig): AxiosInstance 
         const userStore = useUserStore();
         if (userStore.token) {
           requestConfig.headers = requestConfig.headers || {};
-          requestConfig.headers['Authorization'] = `${config.tokenPrefix} ${userStore.token}`;
+          requestConfig.headers["Authorization"] = `${config.tokenPrefix} ${userStore.token}`;
         }
       }
 
       // 重复提交检查
-      if (config.preventRepeatSubmit && requestConfig.method?.toLowerCase() !== 'get') {
+      if (config.preventRepeatSubmit && requestConfig.method?.toLowerCase() !== "get") {
         if (repeatSubmitChecker.isRepeating(requestConfig)) {
-          const error = new Error('请勿重复提交') as RequestError;
+          const error = new Error("请勿重复提交") as RequestError;
           error.code = -1;
           return Promise.reject(error);
         }
@@ -81,8 +76,8 @@ export function createAxiosInstance(config: CreateRequestConfig): AxiosInstance 
       }
 
       // 请求日志
-      if (process.env.NODE_ENV === 'development') {
-        console.log('🚀 Request:', {
+      if (process.env.NODE_ENV === "development") {
+        console.log("🚀 Request:", {
           method: requestConfig.method?.toUpperCase(),
           url: requestConfig.url,
           data: requestConfig.data,
@@ -94,9 +89,9 @@ export function createAxiosInstance(config: CreateRequestConfig): AxiosInstance 
     },
     (error) => {
       hideLoading();
-      console.error('❌ Request Error:', error);
+      console.error("❌ Request Error:", error);
       return Promise.reject(error);
-    }
+    },
   );
 
   // 响应拦截器
@@ -113,8 +108,8 @@ export function createAxiosInstance(config: CreateRequestConfig): AxiosInstance 
       }
 
       // 响应日志
-      if (process.env.NODE_ENV === 'development') {
-        console.log('✅ Response:', {
+      if (process.env.NODE_ENV === "development") {
+        console.log("✅ Response:", {
           status: response.status,
           data: response.data,
           config: {
@@ -129,7 +124,7 @@ export function createAxiosInstance(config: CreateRequestConfig): AxiosInstance 
       // 统一响应格式处理
       if (config.transformResponse) {
         // 根据项目的API响应格式进行处理
-        if (data && typeof data === 'object') {
+        if (data && typeof data === "object") {
           if (data.code === 200 || data.code === 0) {
             // 成功响应
             if (config.showSuccessMessage && data.message) {
@@ -138,7 +133,7 @@ export function createAxiosInstance(config: CreateRequestConfig): AxiosInstance 
             return config.returnFullResponse ? response : data.data;
           } else {
             // 业务错误
-            const errorMessage = data.message || '请求失败';
+            const errorMessage = data.message || "请求失败";
             if (config.showErrorMessage) {
               ElMessage.error(errorMessage);
             }
@@ -165,7 +160,7 @@ export function createAxiosInstance(config: CreateRequestConfig): AxiosInstance 
       }
 
       // 错误日志
-      console.error('❌ Response Error:', {
+      console.error("❌ Response Error:", {
         status: error.response?.status,
         message: error.message,
         config: {
@@ -176,14 +171,19 @@ export function createAxiosInstance(config: CreateRequestConfig): AxiosInstance 
 
       // 处理网络错误
       if (!error.response) {
-        const networkError = new Error('网络错误，请检查网络连接') as RequestError;
+        const networkError = new Error("网络连接失败") as RequestError;
         networkError.isAxiosError = true;
         networkError.config = error.config;
-        
-        if (config.showErrorMessage) {
-          ElMessage.error('网络错误，请检查网络连接');
+
+        // 只在特定情况下显示错误消息，避免干扰页面显示
+        if (config.showErrorMessage && !config.silentError) {
+          console.warn("🔍 网络连接失败，请检查网络连接");
+          // 延迟显示错误消息，给页面加载时间
+          setTimeout(() => {
+            ElMessage.warning("网络连接不稳定，部分功能可能受影响");
+          }, 2000);
         }
-        
+
         return Promise.reject(networkError);
       }
 
@@ -191,41 +191,44 @@ export function createAxiosInstance(config: CreateRequestConfig): AxiosInstance 
       const { status, data } = error.response;
       const userStore = useUserStore();
 
-      let errorMessage = '请求失败';
-      let shouldShowMessage = config.showErrorMessage;
+      let errorMessage = "请求失败";
+      const shouldShowMessage = config.showErrorMessage;
+
+      // 安全的数据访问
+      const responseData = data as Record<string, unknown>;
 
       switch (status) {
         case 401:
-          errorMessage = data?.message || '登录已过期，请重新登录';
+          errorMessage = (responseData?.message as string) || "登录已过期，请重新登录";
           userStore.logout();
-          router.push('/login');
+          router.push("/login");
           break;
         case 403:
-          errorMessage = data?.message || '权限不足，无法访问该资源';
+          errorMessage = (responseData?.message as string) || "权限不足，无法访问该资源";
           break;
         case 404:
-          errorMessage = data?.message || '请求的资源不存在';
+          errorMessage = (responseData?.message as string) || "请求的资源不存在";
           break;
         case 422:
-          errorMessage = data?.message || '参数验证失败';
+          errorMessage = (responseData?.message as string) || "参数验证失败";
           break;
         case 429:
-          errorMessage = data?.message || '请求过于频繁，请稍后再试';
+          errorMessage = (responseData?.message as string) || "请求过于频繁，请稍后再试";
           break;
         case 500:
-          errorMessage = data?.message || '服务器内部错误，请联系管理员';
+          errorMessage = (responseData?.message as string) || "服务器内部错误，请联系管理员";
           break;
         case 502:
-          errorMessage = '网关错误，请稍后再试';
+          errorMessage = "网关错误，请稍后再试";
           break;
         case 503:
-          errorMessage = '服务暂时不可用，请稍后再试';
+          errorMessage = "服务暂时不可用，请稍后再试";
           break;
         case 504:
-          errorMessage = '网关超时，请稍后再试';
+          errorMessage = "网关超时，请稍后再试";
           break;
         default:
-          errorMessage = data?.message || `请求失败 (${status})`;
+          errorMessage = (responseData?.message as string) || `请求失败 (${status})`;
       }
 
       if (shouldShowMessage) {
@@ -234,7 +237,7 @@ export function createAxiosInstance(config: CreateRequestConfig): AxiosInstance 
 
       // 创建标准化错误对象
       const requestError = new Error(errorMessage) as RequestError;
-      requestError.code = data?.code || status;
+      requestError.code = (responseData?.code as number) || status;
       requestError.status = status;
       requestError.response = error.response;
       requestError.request = error.request;
@@ -242,10 +245,11 @@ export function createAxiosInstance(config: CreateRequestConfig): AxiosInstance 
       requestError.isAxiosError = true;
 
       // 重试逻辑
-      const retryCount = (error.config as any).__retryCount || 0;
+      const retryConfig = error.config as AxiosRequestConfig & { __retryCount?: number };
+      const retryCount = retryConfig.__retryCount || 0;
       if (config.retry && retryCount < config.retry) {
-        (error.config as any).__retryCount = retryCount + 1;
-        
+        retryConfig.__retryCount = retryCount + 1;
+
         // 只对特定错误进行重试
         const retryableStatuses = [408, 429, 500, 502, 503, 504];
         if (retryableStatuses.includes(status)) {
@@ -256,8 +260,12 @@ export function createAxiosInstance(config: CreateRequestConfig): AxiosInstance 
       }
 
       return Promise.reject(requestError);
-    }
+    },
   );
+
+  // 安装Mock拦截器（用于开发环境）
+  // TODO: 修复Mock拦截器后启用
+  // installMockInterceptor(instance);
 
   return instance;
 }
@@ -267,14 +275,24 @@ export function createAxiosInstance(config: CreateRequestConfig): AxiosInstance 
  * @param error 错误对象
  * @returns 错误信息
  */
-export function getErrorMessage(error: any): string {
-  if (error?.response?.data?.message) {
-    return error.response.data.message;
+export function getErrorMessage(error: unknown): string {
+  if (error && typeof error === "object") {
+    const errorObj = error as Record<string, unknown>;
+
+    if (errorObj?.response && typeof errorObj.response === "object") {
+      const response = errorObj.response as Record<string, unknown>;
+      if (response?.data && typeof response.data === "object") {
+        const data = response.data as Record<string, unknown>;
+        if (data?.message && typeof data.message === "string") {
+          return data.message;
+        }
+      }
+    }
+
+    if (errorObj?.message && typeof errorObj.message === "string") {
+      return errorObj.message;
+    }
   }
-  
-  if (error?.message) {
-    return error.message;
-  }
-  
-  return '未知错误';
+
+  return "未知错误";
 }

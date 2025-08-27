@@ -7,6 +7,7 @@ import ElementPlus from "element-plus";
 import axios from "axios";
 import config from "./config/index";
 import PopconfirmDirective from "./utils/popconfirm";
+import { setupDirectives } from "./directive";
 
 import App from "./App.vue";
 import router from "./router";
@@ -18,6 +19,9 @@ app.use(ElementPlus);
 
 // 配置全局指令
 app.directive("popconfirm", PopconfirmDirective);
+
+// 配置权限指令
+setupDirectives(app);
 
 // 配置Pinia
 app.use(createPinia());
@@ -31,13 +35,13 @@ axios.defaults.timeout = config.timeout;
 
 // 添加请求拦截器
 axios.interceptors.request.use(
-  (config) => {
+  (reqConfig) => {
     // 从localStorage获取token
-    const token = localStorage.getItem(`${config?.storagePrefix}token`);
+    const token = localStorage.getItem(`${config.storagePrefix}token`);
     if (token) {
-      config.headers.Authorization = `Bearer ${token}`;
+      reqConfig.headers.Authorization = `Bearer ${token}`;
     }
-    return config;
+    return reqConfig;
   },
   (error) => {
     return Promise.reject(error);

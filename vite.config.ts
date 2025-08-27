@@ -57,17 +57,11 @@ export default defineConfig(({ mode }) => {
       open: isDev,
       proxy: isDev
         ? {
-            // detail: https://cli.vuejs.org/config/#devserver-proxy
-            [env.VITE_APP_BASE_API]: {
-              target: env.VITE_API_BASE_URL || "http://localhost:8080",
+            // API代理配置
+            "/api": {
+              target: "http://localhost:8080",
               changeOrigin: true,
-              rewrite: (path) => path.replace(new RegExp("^" + env.VITE_APP_BASE_API), ""),
-            },
-            // Mock服务配置
-            "/mock": {
-              target: "http://localhost:" + (Number(env.VITE_PORT) || 5173),
-              changeOrigin: true,
-              rewrite: (path) => path.replace(/^\/mock/, "/public/mock"),
+              rewrite: (path) => path.replace(/^\/api/, ""),
             },
           }
         : undefined,

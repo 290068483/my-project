@@ -1,14 +1,5 @@
-import { loginWithData, loginWithPhone, loginWithEmail, sendLoginSms } from "@/api/login";
-import {
-  register,
-  registerWithPhone,
-  registerWithEmail,
-  checkUsername,
-  checkPhone,
-  checkEmail,
-  sendRegisterCode,
-  sendRegisterEmailCode,
-} from "@/api/register";
+import { login } from "@/api/login";
+import { register } from "@/api/register";
 import type { LoginRequest, RegisterRequest } from "@/types/auth";
 
 /**
@@ -49,7 +40,7 @@ export class ApiTester {
         console.log(`\n📝 [登录测试] 测试用例: ${testCase.name}`);
         console.log(`📤 [登录测试] 请求数据:`, testCase.data);
 
-        const result = await loginWithData(testCase.data as LoginRequest);
+        const result = await login(testCase.data as LoginRequest);
         console.log(`✅ [登录测试] 响应成功:`, result);
       } catch (error: any) {
         console.log(`❌ [登录测试] 响应失败:`, {
@@ -113,93 +104,29 @@ export class ApiTester {
 
   /**
    * 测试用户名可用性检查
+   * 注意：用户名检查功能已在API简化过程中移除
    */
   async testUsernameCheck() {
-    console.log("\n🧪 [用户名检查测试] 开始测试用户名可用性检查...");
-
-    const testUsernames = ["admin", "newuser123", "testuser456", ""];
-
-    for (const username of testUsernames) {
-      try {
-        console.log(`\n📝 [用户名检查] 检查用户名: "${username}"`);
-
-        if (!username) {
-          console.log(`⚠️ [用户名检查] 用户名为空，跳过测试`);
-          continue;
-        }
-
-        const result = await checkUsername(username);
-        console.log(`✅ [用户名检查] 检查结果:`, result);
-      } catch (error: any) {
-        console.log(`❌ [用户名检查] 检查失败:`, {
-          username,
-          message: error.message,
-          status: error.response?.status,
-          data: error.response?.data,
-        });
-      }
-    }
+    console.log("\n🧪 [用户名检查测试] 用户名检查功能已简化，跳过此测试");
+    console.log("💡 [提示] 用户名重复检查现在由后端在注册时统一处理");
   }
 
   /**
    * 测试手机号可用性检查
+   * 注意：手机号检查功能已在API简化过程中移除
    */
   async testPhoneCheck() {
-    console.log("\n🧪 [手机号检查测试] 开始测试手机号可用性检查...");
-
-    const testPhones = ["13800138000", "13900139000", "1234567890"];
-
-    for (const phone of testPhones) {
-      try {
-        console.log(`\n📝 [手机号检查] 检查手机号: "${phone}"`);
-
-        const result = await checkPhone(phone);
-        console.log(`✅ [手机号检查] 检查结果:`, result);
-      } catch (error: any) {
-        console.log(`❌ [手机号检查] 检查失败:`, {
-          phone,
-          message: error.message,
-          status: error.response?.status,
-          data: error.response?.data,
-        });
-      }
-    }
+    console.log("\n🧪 [手机号检查测试] 手机号检查功能已简化，跳过此测试");
+    console.log("💡 [提示] 手机号重复检查现在由后端在注册时统一处理");
   }
 
   /**
    * 测试验证码发送
+   * 注意：验证码发送功能已在API简化过程中移除
    */
   async testSendCode() {
-    console.log("\n🧪 [验证码发送测试] 开始测试验证码发送接口...");
-
-    const testPhone = "13800138000";
-    const testEmail = "test@example.com";
-
-    // 测试注册验证码
-    try {
-      console.log(`\n📝 [注册验证码] 发送短信验证码到: ${testPhone}`);
-      const result = await sendRegisterCode(testPhone);
-      console.log(`✅ [注册验证码] 发送成功:`, result);
-    } catch (error: any) {
-      console.log(`❌ [注册验证码] 发送失败:`, {
-        message: error.message,
-        status: error.response?.status,
-        data: error.response?.data,
-      });
-    }
-
-    // 测试邮箱验证码
-    try {
-      console.log(`\n📝 [邮箱验证码] 发送邮箱验证码到: ${testEmail}`);
-      const result = await sendRegisterEmailCode(testEmail);
-      console.log(`✅ [邮箱验证码] 发送成功:`, result);
-    } catch (error: any) {
-      console.log(`❌ [邮箱验证码] 发送失败:`, {
-        message: error.message,
-        status: error.response?.status,
-        data: error.response?.data,
-      });
-    }
+    console.log("\n🧪 [验证码发送测试] 验证码发送功能已简化，跳过此测试");
+    console.log("💡 [提示] 验证码发送现在集成在登录/注册流程中统一处理");
   }
 
   /**
@@ -237,7 +164,7 @@ export class ApiTester {
         uuid: "test-uuid",
       };
 
-      const result = await loginWithData(loginData);
+      const result = await login(loginData);
       console.log(`✅ [快速登录测试] 登录成功:`, result);
       return result;
     } catch (error: any) {
