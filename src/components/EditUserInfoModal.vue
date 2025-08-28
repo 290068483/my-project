@@ -45,7 +45,7 @@
 </template>
 
 <script setup lang="ts">
-import { ref, reactive, computed, watch, defineProps, defineEmits } from "vue";
+import { ref, reactive, computed, watch } from "vue";
 import type { FormRules, FormInstance } from "element-plus";
 import { ElMessage } from "element-plus";
 

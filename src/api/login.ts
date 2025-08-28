@@ -28,41 +28,168 @@ export function login(loginData: LoginRequest): Promise<LoginResponse> {
     showErrorMessage: true,
     showLoading: true,
     loadingText: "登录中...",
+    timeout: 30000, // 增加超时时间
+    silentError: false, // 登录错误需要显示
   });
 }
 
 /**
- * 获取验证码
+ * 获取验证码图片
+ * RuoYi标准接口：/captchaImage
  * @returns Promise<CaptchaResponse>
  */
 export function getCaptchaImage(): Promise<CaptchaResponse> {
-  return request.get("/captchaImage", {
+  return request.get("/captchaImage", undefined, {
     withToken: false,
+    timeout: 10000,
+    silentError: false,
   });
 }
 
 /**
  * 获取当前登录用户信息
+ * RuoYi标准接口：/getInfo
  * @returns Promise<UserInfoResponse>
  */
-export function getUserInfo(): Promise<UserInfoResponse> {
-  return request.get("/getInfo");
+export function getInfo(): Promise<UserInfoResponse> {
+  return request.get("/getInfo", undefined, {
+    timeout: 15000,
+    silentError: true, // 用户信息获取失败时静默处理
+  });
 }
 
 /**
  * 获取用户可访问的路由菜单
+ * RuoYi标准接口：/getRouters
  * @returns Promise<RoutersResponse>
  */
 export function getRouters(): Promise<RoutersResponse> {
-  return request.get("/getRouters");
+  return request.get("/getRouters", undefined, {
+    timeout: 15000,
+    silentError: true, // 路由获取失败时静默处理
+  });
 }
 
 /**
  * 用户退出登录
+ * RuoYi标准接口：/logout
  * @returns Promise<LogoutResponse>
  */
 export function logout(): Promise<LogoutResponse> {
-  return request.post("/logout");
+  return request.post(
+    "/logout",
+    {},
+    {
+      timeout: 10000,
+      silentError: true, // 退出登录失败时静默处理
+    },
+  );
+}
+
+// ==================== 密码重置相关接口 ====================
+
+/**
+ * 忘记密码 - 发送重置验证码
+ * @param identifier 邮箱或手机号
+ * @param type 类型：email 或 phone
+ * @returns Promise<ApiResponse<any>>
+ */
+export function sendResetCode(identifier: string, type: "email" | "phone"): Promise<ApiResponse<unknown>> {
+  return request.post(
+    "/auth/reset/sendCode",
+    { identifier, type },
+    {
+      withToken: false,
+      showLoading: true,
+      loadingText: "发送中...",
+      timeout: 30000,
+    },
+  );
+}
+
+/**
+ * 验证重置验证码
+ * @param identifier 邮箱或手机号
+ * @param code 验证码
+ * @param type 类型：email 或 phone
+ * @returns Promise<ApiResponse<{ resetToken: string }>>
+ */
+export function verifyResetCode(
+  identifier: string,
+  code: string,
+  type: "email" | "phone",
+): Promise<ApiResponse<{ resetToken: string }>> {
+  return request.post(
+    "/auth/reset/verifyCode",
+    { identifier, code, type },
+    {
+      withToken: false,
+      timeout: 15000,
+    },
+  );
+}
+
+/**
+ * 重置密码
+ * @param resetToken 重置令牌
+ * @param newPassword 新密码
+ * @returns Promise<ApiResponse<any>>
+ */
+export function resetPassword(resetToken: string, newPassword: string): Promise<ApiResponse<unknown>> {
+  return request.post(
+    "/auth/reset/password",
+    { resetToken, newPassword },
+    {
+      withToken: false,
+      timeout: 15000,
+    },
+  );
+}
+
+// ==================== 注册相关接口 ====================
+
+/**
+ * 用户注册
+ * @param registerData 注册数据
+ * @returns Promise<ApiResponse<any>>
+ */
+export function register(registerData: {
+  username: string;
+  password: string;
+  email?: string;
+  phone?: string;
+  code: string;
+  uuid: string;
+}): Promise<ApiResponse<unknown>> {
+  return request.post("/register", registerData, {
+    withToken: false,
+    showLoading: true,
+    loadingText: "注册中...",
+    timeout: 30000,
+  });
+}
+
+/**
+ * 检查用户名是否可用
+ * @param username 用户名
+ * @returns Promise<ApiResponse<{ available: boolean }>>
+ */
+export function checkUsername(username: string): Promise<ApiResponse<{ available: boolean }>> {
+  return request.get(`/auth/checkUsername/${username}`, undefined, {
+    withToken: false,
+    timeout: 10000,
+    silentError: true,
+  });
+}
+
+// ==================== 辅助函数 ====================
+
+/**
+ * 刷新验证码
+ * @returns Promise<CaptchaResponse>
+ */
+export function refreshCaptcha(): Promise<CaptchaResponse> {
+  return getCaptchaImage();
 }
 
 // ==================== 兼容性支持 ====================
@@ -74,21 +201,3 @@ export function logout(): Promise<LogoutResponse> {
 export function getCodeImg(): Promise<CaptchaResponse> {
   return getCaptchaImage();
 }
-
-/**
- * 刷新验证码（重新获取）
- * @returns Promise<CaptchaResponse>
- */
-export function refreshCaptcha(): Promise<CaptchaResponse> {
-  return getCaptchaImage();
-}
-
-// 导出类型定义
-export type {
-  LoginRequest,
-  LoginResponse,
-  CaptchaResponse,
-  UserInfoResponse,
-  RoutersResponse,
-  LogoutResponse,
-} from "@/types/auth";

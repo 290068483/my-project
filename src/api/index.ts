@@ -176,6 +176,21 @@ export {
 // 在线用户管理API
 export { listOnlineUser, getOnlineUser, forceLogout } from "./system/online";
 
+// 用户设置管理API
+export {
+  getUserLoginLogs,
+  getNotificationSettings,
+  updateNotificationSettings,
+  getPrivacySettings,
+  updatePrivacySettings,
+  exportUserData,
+  requestAccountDeletion,
+  cancelAccountDeletion,
+  verifyCurrentPassword,
+  setupTwoFactorAuth,
+  verifyTwoFactorCode,
+} from "./userSettings";
+
 // 导出类型定义
 export type {
   // 认证相关类型
@@ -256,6 +271,9 @@ export type {
   OnlineUserListResponse,
   OnlineUserDetailResponse,
 } from "@/types/system/online";
+
+// 用户设置管理类型
+export type { UserProfileUpdateRequest, LoginLog, NotificationSettings, PrivacySettings } from "./userSettings";
 
 // 系统监控相关类型
 export type { ServerInfo, DruidInfo, ServerInfoResponse, DruidInfoResponse } from "@/types/monitor/server";

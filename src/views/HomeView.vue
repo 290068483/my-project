@@ -175,16 +175,26 @@
 </template>
 
 <script setup lang="ts">
-import { onMounted, computed, ref, onErrorCaptured } from "vue";
+import { ref, onMounted, computed, onErrorCaptured } from "vue";
 import { useUserStore } from "@/stores/user";
 import { useHomeStore } from "@/stores/home";
-import type { Announcement } from "@/stores/home";
+import { getFullDateWithWeekday } from "@/utils/dateUtils";
 import moment from "moment";
 import "moment/locale/zh-cn";
 import { ElMessage } from "element-plus";
 
 // 设置moment.js为中文
 moment.locale("zh-cn");
+
+// 定义常量
+const DEFAULT_AVATAR = "https://cube.elemecdn.com/0/88/03b0d39583f48206768a7534e55bcpng.png";
+
+export interface Announcement {
+  id: number;
+  title: string;
+  content: string;
+  date: string;
+}
 
 // 组件正常加载状态
 const isComponentReady = ref(false);
@@ -224,14 +234,14 @@ onMounted(async () => {
   }
 });
 
-// 计算属性获取用户信息（带默认值）
+// 计算属性获取用户信息
 const userInfo = computed(() => {
-  const info = userStore.userInfo;
+  const info = userStore.getUserInfo;
   return {
-    name: info?.nickname || info?.username || "未设置",
-    avatar: info?.avatar ? info.avatar.charAt(0).toUpperCase() : "未",
-    department: info?.dept?.name || "未设置",
-    position: info?.role || "未设置",
+    name: info?.name || info?.nickname || "未设置",
+    position: info?.position || "未设置",
+    department: info?.department || "未设置",
+    avatar: info?.avatar || DEFAULT_AVATAR,
   };
 });
 

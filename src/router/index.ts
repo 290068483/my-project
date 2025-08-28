@@ -1,12 +1,69 @@
 import { createRouter, createWebHistory } from "vue-router";
-import type { RouteRecordRaw } from "vue-router";
+import type { RouteRecordRaw, RouteLocationNormalized } from "vue-router";
+
+// 简化用户信息类型接口
+interface UserStoreType {
+  token: string | null;
+  userInfo: any;
+  permissions: string[];
+  roles: string[];
+}
 import HomeView from "@/views/HomeView.vue";
 import { useUserStore } from "@/stores/user";
 import { ElMessage } from "element-plus";
 import { AuthUtils } from "@/utils/auth";
 import Layout from "@/components/Layout.vue";
+import NProgress from "nprogress";
+import "nprogress/nprogress.css";
+
+// 配置NProgress
+NProgress.configure({ showSpinner: false });
+
+// 白名单路由（不需要登录即可访问）
+const whiteList = ["/login", "/register", "/forgot-password", "/reset-password"];
 // 路由定义
 const routes: Array<RouteRecordRaw> = [
+  // 登录
+  {
+    path: "/login",
+    name: "LoginOld",
+    component: () => import("@/views/user/auth/LoginView.vue"),
+    meta: {
+      requiresAuth: false,
+      title: "登录(旧版)",
+      hidden: true,
+    },
+  },
+  {
+    path: "/register",
+    name: "Register",
+    component: () => import("@/views/user/auth/Register.vue"),
+    meta: {
+      requiresAuth: false,
+      title: "注册",
+      hidden: true,
+    },
+  },
+  {
+    path: "/forgot-password",
+    name: "ForgotPassword",
+    component: () => import("@/views/user/auth/ForgotPassword.vue"),
+    meta: {
+      requiresAuth: false,
+      title: "忘记密码",
+      hidden: true,
+    },
+  },
+  {
+    path: "/reset-password",
+    name: "ResetPassword",
+    component: () => import("@/views/user/auth/ResetPassword.vue"),
+    meta: {
+      requiresAuth: false,
+      title: "重置密码",
+      hidden: true,
+    },
+  },
   {
     path: "/",
     name: "Layout",
@@ -37,9 +94,9 @@ const routes: Array<RouteRecordRaw> = [
 
       // 用户中心
       {
-        path: "userinfo",
-        name: "UserInfo",
-        component: () => import("../views/user/Userinfo.vue"),
+        path: "profile",
+        name: "profile",
+        component: () => import("../views/user/profile/UserProfile.vue"),
         meta: {
           requiresAuth: true,
           title: "个人信息",
@@ -48,7 +105,7 @@ const routes: Array<RouteRecordRaw> = [
       {
         path: "security-settings",
         name: "SecuritySettings",
-        component: () => import("../views/user/SecuritySettings.vue"),
+        component: () => import("../views/user/profile/SecuritySettings.vue"),
         meta: {
           requiresAuth: true,
           title: "安全设置",
@@ -57,7 +114,7 @@ const routes: Array<RouteRecordRaw> = [
       {
         path: "notification-settings",
         name: "NotificationSettings",
-        component: () => import("../views/user/NotificationSettings.vue"),
+        component: () => import("../views/user/profile/NotificationSettings.vue"),
         meta: {
           requiresAuth: true,
           title: "通知设置",
@@ -66,7 +123,7 @@ const routes: Array<RouteRecordRaw> = [
       {
         path: "data-management",
         name: "DataManagement",
-        component: () => import("../views/user/DataManagement.vue"),
+        component: () => import("../views/user/profile/DataManagement.vue"),
         meta: {
           requiresAuth: true,
           title: "数据管理",
@@ -75,7 +132,7 @@ const routes: Array<RouteRecordRaw> = [
       {
         path: "permission-management",
         name: "PermissionManagement",
-        component: () => import("../views/user/PermissionManagement.vue"),
+        component: () => import("../views/user/profile/PermissionManagement.vue"),
         meta: {
           requiresAuth: true,
           title: "权限管理",
@@ -329,7 +386,7 @@ const routes: Array<RouteRecordRaw> = [
       {
         path: "user-info",
         name: "UserInfo",
-        component: () => import("../views/user/Userinfo.vue"),
+        component: () => import("../views/user/profile/UserProfile.vue"),
         meta: {
           requiresAuth: false,
         },
@@ -362,7 +419,7 @@ const routes: Array<RouteRecordRaw> = [
   {
     path: "/register",
     name: "register",
-    component: () => import("../views/user/register.vue"),
+    component: () => import("../views/user/auth/Register.vue"),
     meta: {
       requiresAuth: false,
     },
@@ -371,7 +428,7 @@ const routes: Array<RouteRecordRaw> = [
   {
     path: "/login",
     name: "login-inner",
-    component: () => import("../views/user/LoginView.vue"),
+    component: () => import("../views/user/auth/LoginView.vue"),
     meta: {
       requiresAuth: false,
     },
@@ -381,7 +438,7 @@ const routes: Array<RouteRecordRaw> = [
   {
     path: "/forgot-password",
     name: "forgot-password",
-    component: () => import("../views/user/ForgotPassword.vue"),
+    component: () => import("../views/user/auth/ForgotPassword.vue"),
     meta: {
       requiresAuth: false,
     },
@@ -410,34 +467,153 @@ const router = createRouter({
   routes,
 });
 
-// 路由守卫
-router.beforeEach((to, from, next) => {
-  const userStore = useUserStore();
+// ==================== 路由守卫（RuoYi标准） ====================
 
-  // 检查是否需要登录
-  if (to.meta.requiresAuth && !userStore.isLoggedIn) {
-    return next({ name: "login-inner", query: { redirect: to.fullPath } });
+/**
+ * 全局前置守卫
+ * 基于RuoYi-Vue标准实现
+ */
+router.beforeEach(async (to, from, next) => {
+  // 开始进度条
+  NProgress.start();
+
+  // 设置页面标题
+  if (to.meta?.title) {
+    document.title = `${to.meta.title} - 蓝岸管理系统`;
+  }
+
+  const userStore = useUserStore();
+  const hasToken = userStore.token;
+
+  if (hasToken) {
+    // 已登录用户处理
+    if (to.path === "/login") {
+      // 已登录用户访问登录页，重定向到首页
+      next({ path: "/home" });
+      NProgress.done();
+    } else {
+      // 检查用户信息是否存在
+      const hasUserInfo = userStore.userInfo && userStore.userInfo.id;
+
+      if (hasUserInfo) {
+        // 用户信息已存在，检查权限
+        if (to.meta?.requiresAuth !== false) {
+          // 需要认证的路由，检查权限
+          const hasPermission = checkRoutePermission(to, userStore);
+          if (hasPermission) {
+            next();
+          } else {
+            ElMessage.error("您没有访问此页面的权限");
+            next({ path: "/403" });
+            NProgress.done();
+          }
+        } else {
+          next();
+        }
+      } else {
+        try {
+          // 获取用户信息
+          await userStore.fetchUserInfo();
+
+          // 获取成功后检查权限
+          if (to.meta?.requiresAuth !== false) {
+            const hasPermission = checkRoutePermission(to, userStore);
+            if (hasPermission) {
+              next();
+            } else {
+              ElMessage.error("您没有访问此页面的权限");
+              next({ path: "/403" });
+              NProgress.done();
+            }
+          } else {
+            next();
+          }
+        } catch (error) {
+          console.error("获取用户信息失败:", error);
+
+          // Token已过期或无效，清理状态并重定向到登录页
+          userStore.logout();
+          ElMessage.error("登录状态已过期，请重新登录");
+          next({ path: "/login", query: { redirect: to.fullPath } });
+          NProgress.done();
+        }
+      }
+    }
+  } else {
+    // 未登录用户处理
+    if (whiteList.includes(to.path)) {
+      // 在白名单中，直接放行
+      next();
+    } else {
+      // 不在白名单中，重定向到登录页
+      next({ path: "/login", query: { redirect: to.fullPath } });
+      NProgress.done();
+    }
+  }
+});
+
+/**
+ * 全局后置守卫
+ */
+router.afterEach(() => {
+  // 结束进度条
+  NProgress.done();
+});
+
+/**
+ * 检查路由权限
+ * @param to 目标路由
+ * @param userStore 用户Store
+ * @returns boolean
+ */
+function checkRoutePermission(to: RouteLocationNormalized, userStore: UserStoreType): boolean {
+  const { meta } = to;
+
+  // 如果路由没有设置权限要求，则允许访问
+  if (!meta?.permissions && !meta?.roles) {
+    return true;
   }
 
   // 检查权限
-  if (to.meta.requiresAuth && to.meta.permissions && Array.isArray(to.meta.permissions)) {
-    const hasPermission = to.meta.permissions.some((permission: string) => {
-      return AuthUtils.hasPermission(permission);
-    });
-
+  if (meta.permissions) {
+    const permissions = Array.isArray(meta.permissions) ? meta.permissions : [meta.permissions];
+    const hasPermission = permissions.some((permission: string) => userStore.permissions.includes(permission));
     if (!hasPermission) {
-      ElMessage.error("没有权限访问此页面");
-      return next({ name: "home" });
+      return false;
     }
   }
 
-  // 管理员角色检查
-  if (to.meta.requiresAuth && AuthUtils.getUserRole() === "admin") {
-    // 管理员可以访问所有页面
-    return next();
+  // 检查角色
+  if (meta.roles) {
+    const roles = Array.isArray(meta.roles) ? meta.roles : [meta.roles];
+    const hasRole = roles.some((role: string) => userStore.roles.includes(role));
+    if (!hasRole) {
+      return false;
+    }
   }
 
-  next();
-});
+  return true;
+}
+
+/**
+ * 重置路由
+ * 用于刷新页面时重新加载路由
+ */
+export function resetRouter() {
+  const newRouter = createRouter({
+    history: createWebHistory(import.meta.env.BASE_URL),
+    routes: routes,
+    scrollBehavior: (to, from, savedPosition) => {
+      if (savedPosition) {
+        return savedPosition;
+      } else {
+        return { top: 0 };
+      }
+    },
+  });
+
+  // 替换路由实例
+  (router as typeof router).matcher = (newRouter as typeof newRouter).matcher;
+}
 
 export default router;

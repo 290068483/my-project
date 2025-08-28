@@ -2,7 +2,7 @@ import { defineStore } from "pinia";
 import { ElMessage } from "element-plus";
 import router from "@/router";
 // 导入API接口
-import { login, getCaptchaImage, getUserInfo, getRouters, logout } from "@/api/login";
+import { login, getCaptchaImage, getInfo, getRouters, logout } from "@/api/login";
 import { register } from "@/api";
 import type {
   UserInfo,
@@ -308,7 +308,7 @@ export const useUserStore = defineStore("user", {
     // 获取用户详细信息（含权限和角色）
     async fetchUserInfo(): Promise<void> {
       try {
-        const response: UserInfoResponse = await getUserInfo();
+        const response: UserInfoResponse = await getInfo();
 
         if (response.code === 200) {
           this.userInfo = response.data.user;

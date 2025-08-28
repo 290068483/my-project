@@ -146,13 +146,12 @@
 </template>
 
 <script setup lang="ts">
-import { ref, reactive, onMounted, computed } from "vue";
+import { ref, onMounted, computed, reactive } from "vue";
 import { useUserStore } from "@/stores/user";
 import router from "@/router";
 import { ArrowDown } from "@element-plus/icons-vue";
-import { ElMessage, ElMessageBox } from "element-plus";
 import type { FormInstance, FormRules } from "element-plus";
-import LoginOut from "@/views/user/login-out.vue";
+import { ElMessage, ElMessageBox } from "element-plus";
 import { AuthUtils } from "@/utils/auth";
 
 export interface UserInfo {
