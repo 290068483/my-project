@@ -11,7 +11,13 @@
       </template>
 
       <!-- 账号登录表单 -->
-      <el-form ref="loginFormRef" :model="loginForm" :rules="loginRules" label-width="80px" class="login-form">
+      <el-form
+        ref="loginFormRef"
+        :model="loginForm"
+        @submit.prevent="handleLogin"
+        :rules="loginRules"
+        label-width="80px"
+        class="login-form">
         <el-form-item label="用户名" prop="username" class="password-form-item">
           <el-input
             v-model="loginForm.username"
@@ -35,22 +41,30 @@
             <div
               class="qrcode-container"
               @click="refreshQrcode"
-              :class="{ 'qrcode-hover': isHovered }"
+              :class="{ 'qrcode-hover': isHovered, 'qrcode-error': !userStore?.captcha?.image }"
               @mouseenter="isHovered = true"
               @mouseleave="isHovered = false">
-              <img
-                :src="qrcodeImg"
-                alt="二维码验证码"
-                class="qrcode-image"
-                :class="{ 'qrcode-refreshing': isRefreshing }" />
-              <div class="refresh-indicator">
-                <el-icon :size="16" :class="{ 'rotate-icon': isRefreshing }">
-                  <Refresh />
-                </el-icon>
-              </div>
+              <!-- 显示验证码图片或错误提示 -->
+              <template v-if="userStore?.captcha?.image">
+                <img
+                  :src="userStore.captchaImage"
+                  alt="二维码验证码"
+                  class="qrcode-image"
+                  :class="{ 'qrcode-refreshing': isRefreshing }"
+                  @error="handleImageError"
+                  @load="handleImageLoad" />
+                <div class="refresh-indicator">
+                  <el-icon :size="16" :class="{ 'rotate-icon': isRefreshing }">
+                    <Refresh />
+                  </el-icon>
+                </div>
+              </template>
+              <template v-else>
+                <div class="qrcode-error-message">点击刷新</div>
+              </template>
             </div>
           </div>
-          <div v-if="qrcodeUuid" class="qrcode-uuid-tip">二维码ID: {{ qrcodeUuid.substring(0, 8) }}...</div>
+          <div v-if="!userStore?.captcha?.image" class="qrcode-error-tip">验证码加载失败，请点击刷新</div>
         </el-form-item>
         <el-form-item label="密码" prop="password" class="password-form-item">
           <el-input
@@ -61,14 +75,8 @@
             size="small" />
         </el-form-item>
         <div class="form-footer">
-          <el-button
-            type="primary"
-            size="large"
-            class="login-btn"
-            :loading="loading"
-            @click="handleLogin"
-            native-type="submit">
-            登录
+          <el-button type="primary" size="large" class="login-btn" :loading="loading" native-type="submit">
+            {{ loading ? "登录中..." : "登录" }}
           </el-button>
 
           <div class="additional-links">
@@ -83,21 +91,17 @@
 
 <script setup lang="ts">
 // 导入Vue相关API
-import { ref, reactive, onMounted, watch } from "vue";
+import { ref, reactive, onMounted, watch, computed } from "vue";
 // 导入Element Plus组件和消息提示
 import { ElMessage, ElForm } from "element-plus";
 // 导入图标
-import { Lock, Refresh, Loading } from "@element-plus/icons-vue";
+import { Lock, Refresh } from "@element-plus/icons-vue";
 // 导入路由相关API
 import { useRouter } from "vue-router";
 // 导入用户Store
 import { useUserStore } from "@/stores/user";
-// 导入防抖函数
-import { debounce } from "@/utils/debounce";
 // 导入类型定义
 import type { LoginRequest } from "@/types/auth";
-// 导入二维码登录API
-import { setupTwoFactorAuth } from "@/api/userSettings";
 
 // 定义组件Props
 defineProps<{
@@ -119,32 +123,55 @@ const loginForm = reactive<LoginRequest>({
   uuid: "",
 });
 
-// 二维码相关数据
-const qrcodeImg = ref("");
-const qrcodeUuid = ref("");
-
 // 状态管理
 const isRefreshing = ref(false);
 const isHovered = ref(false);
 const loading = ref(false);
 const isLoginDisabled = ref(false);
-const isFormValid = ref(false);
 const loginCount = ref(0);
+
+// 计算表单是否有效
+const isFormValid = computed(() => {
+  return (
+    loginForm.username &&
+    loginForm.password &&
+    loginForm.code &&
+    loginForm.username.length >= 5 &&
+    loginForm.code.length >= 1
+  );
+});
 
 /**
  * 刷新二维码
  */
-const refreshQrcode = () => {
-  isRefreshing.value = true;
-  userStore
-    .getCaptcha()
-    .then(() => {
-      qrcodeImg.value = userStore.captchaImage || "";
-      qrcodeUuid.value = userStore.captchaUuid || "";
-    })
-    .finally(() => {
-      isRefreshing.value = false;
-    });
+const refreshQrcode = async () => {
+  try {
+    isRefreshing.value = true;
+
+    // 调用用户Store的刷新验证码方法
+    await userStore.refreshCaptcha();
+  } catch (error: any) {
+    console.error("刷新验证码失败:", error);
+    ElMessage.error("验证码刷新失败，请重试");
+  } finally {
+    isRefreshing.value = false;
+  }
+};
+
+/**
+ * 处理图片加载错误
+ */
+const handleImageError = () => {
+  ElMessage.error("验证码加载失败");
+  // 将captchaImage设置为undefined而不是null
+  userStore.captchaImage = undefined;
+};
+
+/**
+ * 处理验证码图片加载成功
+ */
+const handleImageLoad = () => {
+  // 验证码图片加载成功
 };
 
 /**
@@ -170,6 +197,15 @@ watch(
     validateUsername();
   },
 );
+
+// 页面加载时获取验证码
+onMounted(async () => {
+  try {
+    await refreshQrcode();
+  } catch (error) {
+    ElMessage.error("初始化验证码失败，请手动刷新");
+  }
+});
 
 /**
  * 登录表单验证规则
@@ -207,8 +243,8 @@ const loginRules = {
       trigger: ["blur", "change"],
     },
     {
-      len: 6,
-      message: "验证码长度为6个字符",
+      min: 1,
+      message: "验证码至少为1个字符",
       trigger: ["blur", "change"],
     },
   ],
@@ -217,53 +253,45 @@ const loginRules = {
 /**
  * 处理登录请求（带防抖）
  */
-const handleLogin = debounce(async () => {
+const handleLogin = async () => {
+  // 如果正在加载，则不执行登录
+  if (loading.value) return;
   try {
     // 表单验证
     await loginFormRef.value?.validate();
-
     loading.value = true;
     isLoginDisabled.value = true;
-
+    console.log("登录请求", loginForm);
     // 调用用户store的登录方法
     await userStore.login({
-      ...loginForm,
-      uuid: qrcodeUuid.value,
+      username: loginForm.username,
+      password: loginForm.password,
+      code: loginForm.code,
+      uuid: userStore.captchaUuid,
     });
-
-    // 登录成功，重置计数和状态
-    loginCount.value = 0;
-
-    // 跳转到首页或重定向页面
-    const redirect = router.currentRoute.value.query.redirect;
-    if (redirect) {
-      router.push(redirect as string);
-    } else {
-      router.push("/");
-    }
-  } catch (error: unknown) {
-    // 登录失败处理
-    loginCount.value++;
-
-    // 超过3次失败，清空表单
-    if (loginCount.value >= 3) {
-      loginForm.username = "";
-      loginForm.password = "";
-      loginForm.code = "";
-      ElMessage.warning("登录失败次数过多，请重新输入");
-    }
+    // 登录成功，跳转到重定向路径或首页
+    router.push({ name: "home" });
+  } catch (error) {
+    // 捕获登录错误
+    console.error("登录错误:", error);
+    const errorMsg = error?.code?.[0] || error?.message || "登录失败，请重试";
+    ElMessage.error(errorMsg);
   } finally {
     loading.value = false;
     isLoginDisabled.value = false;
   }
-});
+};
 
 /**
- * 组件挂载时执行
+ * 组件挂载时获取验证码
  */
 onMounted(async () => {
-  // 初始化加载二维码
-  refreshQrcode();
+  try {
+    await userStore.refreshCaptcha();
+  } catch (error) {
+    console.error("初始化验证码失败:", error);
+    ElMessage.error("初始化验证码失败");
+  }
 });
 
 /**
@@ -346,13 +374,20 @@ const goToForgotPassword = () => {
   box-shadow: 0 4px 15px rgba(102, 126, 234, 0.3);
 }
 
-.login-btn:hover {
+.login-btn:hover:not(:disabled) {
   transform: translateY(-2px);
   box-shadow: 0 6px 20px rgba(102, 126, 234, 0.4);
 }
 
-.login-btn:active {
+.login-btn:active:not(:disabled) {
   transform: translateY(0);
+}
+
+.login-btn:disabled {
+  opacity: 0.7;
+  cursor: not-allowed;
+  transform: none;
+  box-shadow: 0 4px 15px rgba(102, 126, 234, 0.3);
 }
 
 .additional-links {
@@ -436,6 +471,42 @@ const goToForgotPassword = () => {
   color: #909399;
   margin-top: 5px;
   font-family: monospace;
+}
+
+.qrcode-error-tip {
+  font-size: 12px;
+  color: #f56c6c;
+  margin-top: 5px;
+}
+
+.qrcode-error {
+  border-color: #f56c6c !important;
+}
+
+.qrcode-error-message {
+  width: 100%;
+  height: 100%;
+  display: flex;
+  justify-content: center;
+  align-items: center;
+  background-color: #f5f7fa;
+  color: #909399;
+  font-size: 12px;
+  border-radius: 4px;
+}
+
+.debug-info {
+  position: absolute;
+  top: 10px;
+  right: 10px;
+  background: rgba(0, 0, 0, 0.7);
+  color: white;
+  padding: 5px;
+  border-radius: 4px;
+  font-size: 10px;
+  font-family: monospace;
+  z-index: 1000;
+  display: none;
 }
 
 /* 响应式设计 */

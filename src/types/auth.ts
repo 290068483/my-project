@@ -87,7 +87,7 @@ export interface Role {
  * 权限检查选项
  */
 export interface PermissionOptions {
-  mode?: "and" | "or"; // 多个权限的检查模式：all(且) 或 any(或)
+  mode?: "and" | "or"; // 多个权限的检查模式：all(且) 或 or(或)
   roles?: string[]; // 角色检查
   permissions?: string[]; // 权限检查
 }

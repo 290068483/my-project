@@ -30,7 +30,7 @@ export interface SimpleRequestMethodConfig extends AxiosRequestConfig {
 /**
  * API 响应格式
  */
-export interface ApiResponse<T = any> {
+export interface ApiResponse<T = unknown> {
   code: number;
   message: string;
   data: T;

@@ -43,6 +43,8 @@ export function getCaptchaImage(): Promise<CaptchaResponse> {
     withToken: false,
     timeout: 10000,
     silentError: false,
+    transformResponse: false,
+    returnFullResponse: false
   });
 }
 
@@ -92,7 +94,7 @@ export function logout(): Promise<LogoutResponse> {
  * 忘记密码 - 发送重置验证码
  * @param identifier 邮箱或手机号
  * @param type 类型：email 或 phone
- * @returns Promise<ApiResponse<any>>
+ * @returns Promise<ApiResponse<unknown>>
  */
 export function sendResetCode(identifier: string, type: "email" | "phone"): Promise<ApiResponse<unknown>> {
   return request.post(
@@ -133,7 +135,7 @@ export function verifyResetCode(
  * 重置密码
  * @param resetToken 重置令牌
  * @param newPassword 新密码
- * @returns Promise<ApiResponse<any>>
+ * @returns Promise<ApiResponse<unknown>>
  */
 export function resetPassword(resetToken: string, newPassword: string): Promise<ApiResponse<unknown>> {
   return request.post(
@@ -151,7 +153,7 @@ export function resetPassword(resetToken: string, newPassword: string): Promise<
 /**
  * 用户注册
  * @param registerData 注册数据
- * @returns Promise<ApiResponse<any>>
+ * @returns Promise<ApiResponse<unknown>>
  */
 export function register(registerData: {
   username: string;

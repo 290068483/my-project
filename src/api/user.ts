@@ -262,12 +262,12 @@ export function changeUserStatus(
  * 查询用户授权角色
  * RuoYi标准接口：/system/user/authRole/{userId}
  * @param userId 用户ID
- * @returns Promise<{ code: number; msg: string; data: any }>
+ * @returns Promise<{ code: number; msg: string; data: unknown }>
  */
 export function getAuthRole(userId: number): Promise<{
   code: number;
   msg: string;
-  data: any;
+  data: unknown;
 }> {
   return request.get(`/system/user/authRole/${userId}`, undefined, {
     timeout: 10000,

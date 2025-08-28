@@ -33,15 +33,15 @@ interface UserState {
   // 注册状态
   registerStatus: RegisterStatus;
   registerError: string | null;
-  // 验证码状态
-  smsCodeCooldown: number; // 短信验证码倒计时
-  emailCodeCooldown: number; // 邮箱验证码倒计时
-  // 刷新令牌
-  refreshToken: string | null;
   // 用户权限和路由
   permissions: string[];
   roles: string[];
   routers: RouterInfo[];
+  // 刷新令牌
+  refreshToken: string | null;
+  // 验证码冷却时间
+  smsCodeCooldown: number;
+  emailCodeCooldown: number;
 }
 
 // 定义登录参数接口（保持向后兼容）
@@ -139,15 +139,12 @@ export const useUserStore = defineStore("user", {
     // 刷新令牌
     refreshToken: getStoredRefreshToken(),
     // 权限和路由
-    permissions: [],
-    roles: [],
-    routers: [],
+    permissions: [] as string[],
+    roles: [] as string[],
+    routers: [] as RouterInfo[],
   }),
 
   getters: {
-    // 获取用户信息
-    getUserInfo: (state: UserState) => state.userInfo,
-
     // 获取用户角色
     getUserRole: (state: UserState) => state.userInfo?.role || null,
 
@@ -172,23 +169,78 @@ export const useUserStore = defineStore("user", {
     hasRole: (state: UserState) => (role: string) => {
       return state.roles.includes(role);
     },
+
+    // 检查用户是否具有特定权限
+    isHasPermission:
+      (state: UserState) =>
+      (permission: string): boolean => {
+        // 如果没有设置权限，则默认允许访问
+        if (!state.permissions || state.permissions.length === 0) {
+          return true;
+        }
+
+        // 检查是否具有指定权限
+        return state.permissions.includes(permission);
+      },
+
+    // 检查用户是否具有任意一个权限
+    hasAnyPermission:
+      (state: UserState) =>
+      (permissions: string[]): boolean => {
+        // 如果没有设置权限，则默认允许访问
+        if (!state.permissions || state.permissions.length === 0) {
+          return true;
+        }
+
+        // 检查是否具有任意一个权限
+        return permissions.some((permission) => state.permissions.includes(permission));
+      },
+
+    // 检查用户是否具有特定角色
+    hasRoleCheck:
+      (state: UserState) =>
+      (role: string): boolean => {
+        // 如果没有设置角色，则默认允许访问
+        if (!state.roles || state.roles.length === 0) {
+          return true;
+        }
+
+        // 检查是否具有指定角色
+        return state.roles.includes(role);
+      },
+
+    // 检查用户是否具有任意一个角色
+    hasAnyRole:
+      (state: UserState) =>
+      (roles: string[]): boolean => {
+        // 如果没有设置角色，则默认允许访问
+        if (!state.roles || state.roles.length === 0) {
+          return true;
+        }
+
+        // 检查是否具有任意一个角色
+        return roles.some((role) => state.roles.includes(role));
+      },
   },
 
   actions: {
     // 获取验证码
     async getCaptcha(): Promise<void> {
       try {
-        const response: CaptchaResponse = await getCaptchaImage();
+        // 获取验证码数据
+        const captchaData: CaptchaResponse = await getCaptchaImage();
 
-        if (response.code === 200) {
-          this.captchaUuid = response.data.uuid;
-          this.captchaImage = `data:image/gif;base64,${response.data.img}`;
-          this.captchaTimestamp = Date.now();
-        } else {
-          throw new Error(response.msg || "获取验证码失败");
+        // 确保响应数据有效
+        if (!captchaData || !captchaData.data.uuid || !captchaData.data.img) {
+          console.error("验证码数据无效:", captchaData);
+          throw new Error("验证码数据无效");
         }
+
+        // 设置验证码数据
+        this.captchaUuid = captchaData.data.uuid;
+        this.captchaImage = captchaData.data.img;
+        this.captchaTimestamp = Date.now();
       } catch (error: unknown) {
-        console.error("获取验证码失败:", error);
         ElMessage.error("获取验证码失败，请重试");
         throw error;
       }
@@ -206,19 +258,31 @@ export const useUserStore = defineStore("user", {
         this.loginError = null;
 
         const response: LoginResponse = await login(loginData);
+        // 检查响应是否包含code字段，如果没有可能是直接返回了数据
+        // 如果响应对象有token字段且没有code字段，则认为是成功响应
+        const hasCode = response.hasOwnProperty("code");
+        const hasToken = response.hasOwnProperty("token") || (response.data && response.data.hasOwnProperty("token"));
+        const code = hasCode ? response.code : hasToken ? 200 : 500;
 
-        if (response.code === 200) {
+        if (code === 200 || (!hasCode && hasToken)) {
+          // 确保正确获取token和用户信息
+          let token: string | undefined, userInfo: UserInfo | undefined;
+
+          // 从不同可能的位置获取token
+          if (response.data && response.data.token) {
+            token = response.data.token;
+            userInfo = response.data.userInfo;
+          }
+
+          if (!token) {
+            throw new Error("登录响应中未找到token");
+          }
+
           // 保存认证信息
-          this.token = response.data.token;
-          this.userInfo = response.data.userInfo;
+          this.token = token;
+          this.userInfo = userInfo || null;
           this.isLoggedIn = true;
           this.loginStatus = "success";
-
-          // 保存刷新令牌（如果有）
-          if (response.data.refreshToken) {
-            this.refreshToken = response.data.refreshToken;
-            setStoredRefreshToken(this.refreshToken);
-          }
 
           // 持久化存储
           setStoredToken(this.token);
@@ -229,12 +293,18 @@ export const useUserStore = defineStore("user", {
           this.captchaImage = null;
           this.captchaTimestamp = null;
 
+          // 重置验证码冷却时间
+          this.smsCodeCooldown = 0;
+          this.emailCodeCooldown = 0;
+
           // 初始化用户数据（获取权限和路由）
           try {
             await this.initializeUserData();
+            console.log("✅ 用户权限和路由初始化成功");
           } catch (error) {
-            console.warn("初始化用户数据失败:", error);
+            console.warn("🔍 用户权限和路由初始化失败:", error);
             // 不阻断登录流程，可以在后续才获取
+            // 可以考虑在用户访问需要权限的页面时再次尝试获取
           }
 
           ElMessage.success("登录成功");
@@ -242,10 +312,14 @@ export const useUserStore = defineStore("user", {
         } else {
           this.loginStatus = "error";
           // 登录失败，可能需要刷新验证码
-          if (response.code === 460 || response.code === 461) {
+          if (code === 460 || code === 461) {
             await this.refreshCaptcha();
           }
-          throw new Error(response.msg || "登录失败");
+          throw new Error(
+            (response as unknown as { msg?: string; message?: string }).msg ||
+              (response as unknown as { msg?: string; message?: string }).message ||
+              "登录失败",
+          );
         }
 
         return response;
@@ -311,15 +385,34 @@ export const useUserStore = defineStore("user", {
         const response: UserInfoResponse = await getInfo();
 
         if (response.code === 200) {
-          this.userInfo = response.data.user;
-          this.permissions = response.data.permissions;
-          this.roles = response.data.roles;
+          // 确保响应数据结构正确
+          const userData = response.data || {};
+
+          // 提取用户信息
+          this.userInfo = userData.user || null;
+
+          // 提取权限和角色，确保是数组类型
+          this.permissions = Array.isArray(userData.permissions)
+            ? userData.permissions
+            : userData.permissions
+              ? [userData.permissions]
+              : [];
+
+          this.roles = Array.isArray(userData.roles) ? userData.roles : userData.roles ? [userData.roles] : [];
 
           // 持久化存储
           setStoredUserInfo(this.userInfo);
+
           console.log("✅ 用户信息获取成功");
+
+          // 记录获取到的权限和角色
+          console.log("🔑 权限:", this.permissions);
+          console.log("👥 角色:", this.roles);
         } else {
-          throw new Error(response.msg || "获取用户信息失败");
+          // 处理非200响应
+          const errorMsg = response.msg || `获取用户信息失败 (状态码: ${response.code})`;
+          console.error("❌ 获取用户信息失败:", errorMsg);
+          throw new Error(errorMsg);
         }
       } catch (error: unknown) {
         console.warn("🔍 获取用户信息失败:", error);
@@ -331,15 +424,18 @@ export const useUserStore = defineStore("user", {
           return;
         }
 
-        // 如果Token无效，可能需要重新登录
+        // 处理认证错误
         if (this.isUnauthorizedError(error)) {
           console.log("🔑 Token已过期，需要重新登录");
-          // 不立即跳转，给用户一个提示
-          this.logout();
-          // router.push("/login");
+          await this.logout();
         }
 
-        // 不在这里抛出错误，避免阻止页面加载
+        // 处理其他错误
+        const errorMsg = error instanceof Error ? error.message : "未知错误";
+        console.error("🚨 获取用户信息时发生错误:", errorMsg);
+
+        // 重新抛出错误，让调用方能够处理
+        throw error;
       }
     },
 
@@ -348,21 +444,56 @@ export const useUserStore = defineStore("user", {
       try {
         const response: RoutersResponse = await getRouters();
 
+        // 记录完整的路由响应数据，用于调试
+        console.log("📡 收到路由响应:", response);
+
         if (response.code === 200) {
-          this.routers = response.data;
+          // 确保响应数据结构正确
+          if (response.data && Array.isArray(response.data)) {
+            this.routers = response.data;
+            console.log("✅ 路由信息解析成功:", {
+              totalRoutes: response.data.length,
+              routes: response.data,
+            });
+          } else {
+            // 处理数据结构异常的情况
+            console.warn("⚠️ 路由数据结构异常，使用空数组作为默认值");
+            this.routers = [];
+            throw new Error("路由数据结构异常");
+          }
         } else {
-          throw new Error(response.msg || "获取路由信息失败");
+          // 处理非200响应
+          const errorMsg = response.msg || `获取路由信息失败 (状态码: ${response.code})`;
+          console.error("❌ 获取路由信息失败:", errorMsg);
+          throw new Error(errorMsg);
         }
       } catch (error) {
-        console.error("获取路由信息失败:", error);
-        throw error;
+        console.error("🚨 获取路由信息失败:", error);
+        // 即使获取路由失败，也不应该阻止登录流程
+        this.routers = [];
+
+        // 可以选择不抛出错误，只记录错误信息
+        // 如果需要保持原有行为，可以抛出错误
+        // throw error;
+
+        // 添加用户友好的提示
+        ElMessage.error("部分功能可能受限，路由信息加载失败");
       }
     },
 
     // 初始化用户信息（登录后调用）
     async initializeUserData(): Promise<void> {
       try {
-        await Promise.all([this.fetchUserInfo(), this.fetchRouters()]);
+        // 获取用户信息（包括权限和角色）
+        await this.fetchUserInfo();
+
+        // 获取用户可访问的路由菜单
+        await this.fetchRouters();
+
+        console.log("✅ 用户权限和路由信息初始化完成");
+        console.log("🔑 用户权限:", this.permissions);
+        console.log("👥 用户角色:", this.roles);
+        console.log("🧭 路由菜单:", this.routers);
       } catch (error) {
         console.error("初始化用户数据失败:", error);
         throw error;
@@ -527,8 +658,10 @@ export const useUserStore = defineStore("user", {
           setStoredToken(this.token);
           setStoredUserInfo(this.userInfo);
           this.smsCodeCooldown = 0;
+          this.emailCodeCooldown = 0;
 
           ElMessage.success("登录成功");
+          router.push("/home");
         } else {
           this.loginStatus = "error";
           this.loginError = response.msg || "登录失败";
@@ -545,53 +678,37 @@ export const useUserStore = defineStore("user", {
       }
     },
 
-    // 发送登录短信验证码（功能已简化）
-    async sendLoginSmsCode(phone: string): Promise<void> {
-      try {
-        if (this.smsCodeCooldown > 0) {
-          ElMessage.warning(`请等待 ${this.smsCodeCooldown} 秒后再试`);
-          return;
-        }
-
-        // 简单的手机号格式验证
-        const phoneRegex = /^1[3-9]\d{9}$/;
-        if (!phoneRegex.test(phone)) {
-          ElMessage.error("请输入正确的手机号码");
-          throw new Error("手机号格式不正确");
-        }
-
-        console.log(`🧪 [短信验证码] 短信发送功能已简化，模拟发送到: ${phone}`);
-        console.log("💡 [提示] 短信验证码发送现在集成在登录流程中统一处理");
-
-        ElMessage.success("验证码发送功能已集成到登录流程中");
-        this.startSmsCodeCooldown();
-      } catch (error: unknown) {
-        console.error("发送登录短信失败:", error);
-        const errorMessage = this.getErrorMessage(error);
-        ElMessage.error(errorMessage);
-        throw error;
+    // 检查用户是否具有特定权限
+    hasPermissionCheck(permission: string): boolean {
+      // 如果没有设置权限，则默认允许访问
+      if (!this.permissions || this.permissions.length === 0) {
+        return true;
       }
+
+      // 检查是否具有指定权限
+      return this.permissions.includes(permission);
     },
 
-    // 倒计时相关方法
-    startSmsCodeCooldown(duration: number = 60): void {
-      this.smsCodeCooldown = duration;
-      const timer = setInterval(() => {
-        this.smsCodeCooldown--;
-        if (this.smsCodeCooldown <= 0) {
-          clearInterval(timer);
-        }
-      }, 1000);
+    // 检查用户是否具有任意一个权限
+    hasAnyPermissionCheck(permissions: string[]): boolean {
+      // 如果没有设置权限，则默认允许访问
+      if (!this.permissions || this.permissions.length === 0) {
+        return true;
+      }
+
+      // 检查是否具有任意一个权限
+      return permissions.some((permission) => this.permissions.includes(permission));
     },
 
-    startEmailCodeCooldown(duration: number = 60): void {
-      this.emailCodeCooldown = duration;
-      const timer = setInterval(() => {
-        this.emailCodeCooldown--;
-        if (this.emailCodeCooldown <= 0) {
-          clearInterval(timer);
-        }
-      }, 1000);
+    // 检查用户是否具有任意一个角色
+    hasAnyRoleCheck(roles: string[]): boolean {
+      // 如果没有设置角色，则默认允许访问
+      if (!this.roles || this.roles.length === 0) {
+        return true;
+      }
+
+      // 检查是否具有任意一个角色
+      return roles.some((role) => this.roles.includes(role));
     },
   },
 });

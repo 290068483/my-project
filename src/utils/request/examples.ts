@@ -119,7 +119,7 @@ export async function downloadFile(fileId: string, filename: string) {
 /**
  * 导出Excel
  */
-export async function exportUsers(params: any) {
+export async function exportUsers(params: unknown) {
   return request.download("/users/export", "users.xlsx", {
     params,
     showLoading: true,
@@ -159,7 +159,7 @@ export async function loadDashboardData() {
 /**
  * 串行批量创建用户
  */
-export async function createUsersSequence(usersData: any[]) {
+export async function createUsersSequence(usersData: unknown[]) {
   const requests = usersData.map((userData) => ({
     method: "POST" as const,
     url: "/users",
@@ -172,7 +172,7 @@ export async function createUsersSequence(usersData: any[]) {
 /**
  * 限制并发数的批量请求
  */
-export async function batchUpdateUsers(updates: Array<{ id: number; data: any }>) {
+export async function batchUpdateUsers(updates: Array<{ id: number; data: unknown }>) {
   const requests = updates.map(({ id, data }) => ({
     method: "PUT" as const,
     url: `/users/${id}`,
@@ -294,11 +294,11 @@ export async function getTypedUserList(): Promise<ApiResponse<User[]>> {
 /**
  * 带错误处理的用户创建
  */
-export async function createUserWithErrorHandling(userData: any) {
+export async function createUserWithErrorHandling(userData: unknown) {
   try {
     const user = await request.post("/users", userData);
     return { success: true, data: user };
-  } catch (error: any) {
+  } catch (error: unknown) {
     // 根据错误类型进行不同处理
     if (error.status === 422) {
       return { success: false, message: "数据验证失败", errors: error.response?.data?.errors };
@@ -347,7 +347,7 @@ export async function login(credentials: { username: string; password: string; c
 /**
  * 分页获取用户列表
  */
-export async function getPaginatedUsers(page: number = 1, pageSize: number = 10, filters?: any) {
+export async function getPaginatedUsers(page: number = 1, pageSize: number = 10, filters?: unknown) {
   return request.get(
     "/users",
     {

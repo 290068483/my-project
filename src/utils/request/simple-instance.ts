@@ -163,8 +163,8 @@ export function createSimpleAxiosInstance(config: SimpleRequestConfig): AxiosIns
       }
 
       const customError = new Error(errorMessage);
-      (customError as any).status = error.response?.status;
-      (customError as any).response = error.response;
+      (customError as { status?: number }).status = error.response?.status;
+      (customError as { response: unknown }).response = error.response;
 
       return Promise.reject(customError);
     },

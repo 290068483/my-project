@@ -3,7 +3,7 @@ import type { AxiosRequestConfig, AxiosResponse, AxiosProgressEvent } from "axio
 /**
  * 通用API响应格式
  */
-export interface ApiResponse<T = any> {
+export interface ApiResponse<T = unknown> {
   code: number;
   message: string;
   data: T;
@@ -58,11 +58,11 @@ export interface RequestMethodConfig extends BaseRequestConfig {
 
   // 请求数据
   url: string;
-  data?: any;
-  params?: any;
+  data?: unknown;
+  params?: unknown;
 
   // 自定义头部
-  headers?: Record<string, any>;
+  headers?: Record<string, unknown>;
 
   // 文件上传/下载
   onUploadProgress?: (progressEvent: AxiosProgressEvent) => void;
@@ -107,7 +107,7 @@ export interface ErrorHandlingConfig {
   retry?: {
     times: number;
     delay: number;
-    condition?: (error: any) => boolean;
+    condition?: (error: unknown) => boolean;
   };
 }
 
@@ -118,7 +118,7 @@ export interface RequestError extends Error {
   code?: number;
   status?: number;
   response?: AxiosResponse;
-  request?: any;
+  request?: unknown;
   config?: AxiosRequestConfig;
   isAxiosError: boolean;
 }
@@ -129,11 +129,11 @@ export interface RequestError extends Error {
 export interface InterceptorConfig {
   request?: {
     onFulfilled?: (config: AxiosRequestConfig) => AxiosRequestConfig | Promise<AxiosRequestConfig>;
-    onRejected?: (error: any) => any;
+    onRejected?: (error: unknown) => unknown;
   };
   response?: {
     onFulfilled?: (response: AxiosResponse) => AxiosResponse | Promise<AxiosResponse>;
-    onRejected?: (error: any) => any;
+    onRejected?: (error: unknown) => unknown;
   };
 }
 

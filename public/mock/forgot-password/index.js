@@ -1,5 +1,5 @@
 // 导入用户数据
-const users = require('../auth').users;
+import { users } from '../auth';
 
 // 模拟数据库存储重置密码令牌
 const resetTokens = [];
@@ -49,6 +49,6 @@ function handleForgotPassword(req) {
 }
 
 // 导出处理函数
-module.exports = {
+export {
   handleForgotPassword
 };

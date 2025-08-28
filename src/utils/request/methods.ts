@@ -20,7 +20,7 @@ export class RequestManager {
    * @param config 请求配置
    * @returns Promise
    */
-  async request<T = any>(config: RequestMethodConfig): Promise<T> {
+  async request<T = unknown>(config: RequestMethodConfig): Promise<T> {
     const finalConfig = mergeConfig(this.config, config);
 
     // 缓存处理
@@ -66,7 +66,7 @@ export class RequestManager {
    * @param config 配置选项
    * @returns Promise
    */
-  async get<T = any>(url: string, params?: any, config?: Partial<RequestMethodConfig>): Promise<T> {
+  async get<T = unknown>(url: string, params?: unknown, config?: Partial<RequestMethodConfig>): Promise<T> {
     return this.request<T>({
       method: "GET",
       url,
@@ -82,7 +82,7 @@ export class RequestManager {
    * @param config 配置选项
    * @returns Promise
    */
-  async post<T = any>(url: string, data?: any, config?: Partial<RequestMethodConfig>): Promise<T> {
+  async post<T = unknown>(url: string, data?: unknown, config?: Partial<RequestMethodConfig>): Promise<T> {
     return this.request<T>({
       method: "POST",
       url,
@@ -98,7 +98,7 @@ export class RequestManager {
    * @param config 配置选项
    * @returns Promise
    */
-  async put<T = any>(url: string, data?: any, config?: Partial<RequestMethodConfig>): Promise<T> {
+  async put<T = unknown>(url: string, data?: unknown, config?: Partial<RequestMethodConfig>): Promise<T> {
     return this.request<T>({
       method: "PUT",
       url,
@@ -114,7 +114,7 @@ export class RequestManager {
    * @param config 配置选项
    * @returns Promise
    */
-  async delete<T = any>(url: string, params?: any, config?: Partial<RequestMethodConfig>): Promise<T> {
+  async delete<T = unknown>(url: string, params?: unknown, config?: Partial<RequestMethodConfig>): Promise<T> {
     return this.request<T>({
       method: "DELETE",
       url,
@@ -130,7 +130,7 @@ export class RequestManager {
    * @param config 配置选项
    * @returns Promise
    */
-  async patch<T = any>(url: string, data?: any, config?: Partial<RequestMethodConfig>): Promise<T> {
+  async patch<T = unknown>(url: string, data?: unknown, config?: Partial<RequestMethodConfig>): Promise<T> {
     return this.request<T>({
       method: "PATCH",
       url,
@@ -146,7 +146,7 @@ export class RequestManager {
    * @param config 上传配置
    * @returns Promise
    */
-  async upload<T = any>(url: string, file: File | FormData, config?: UploadConfig): Promise<T> {
+  async upload<T = unknown>(url: string, file: File | FormData, config?: UploadConfig): Promise<T> {
     let formData: FormData;
 
     if (file instanceof FormData) {
@@ -231,7 +231,7 @@ export class RequestManager {
    * @param requests 请求配置数组
    * @returns Promise
    */
-  async concurrent<T = any>(requests: RequestMethodConfig[]): Promise<T[]> {
+  async concurrent<T = unknown>(requests: RequestMethodConfig[]): Promise<T[]> {
     const promises = requests.map((config) => this.request<T>(config));
     return Promise.all(promises);
   }
@@ -242,7 +242,7 @@ export class RequestManager {
    * @param concurrency 并发数
    * @returns Promise
    */
-  async queue<T = any>(requests: RequestMethodConfig[], concurrency: number = 1): Promise<T[]> {
+  async queue<T = unknown>(requests: RequestMethodConfig[], concurrency: number = 1): Promise<T[]> {
     const results: T[] = [];
     const executing: Promise<void>[] = [];
 
@@ -255,7 +255,7 @@ export class RequestManager {
 
       if (executing.length >= concurrency) {
         await Promise.race(executing);
-        const completedIndex = executing.findIndex((p) => p === promise || (p as any).resolved);
+        const completedIndex = executing.findIndex((p) => p === promise || (p as { resolved?: boolean }).resolved);
         if (completedIndex !== -1) {
           executing.splice(completedIndex, 1);
         }
@@ -272,7 +272,7 @@ export class RequestManager {
    * @param cacheType 缓存类型
    * @returns 缓存数据或null
    */
-  private getFromCache(key: string, cacheType: boolean | string): any | null {
+  private getFromCache(key: string, cacheType: boolean | string): unknown | null {
     switch (cacheType) {
       case "memory":
         return memoryCache.get(key);
@@ -292,7 +292,7 @@ export class RequestManager {
    * @param cacheType 缓存类型
    * @param ttl 过期时间
    */
-  private setToCache(key: string, data: any, cacheType: boolean | string, ttl: number = 5 * 60 * 1000): void {
+  private setToCache(key: string, data: unknown, cacheType: boolean | string, ttl: number = 5 * 60 * 1000): void {
     switch (cacheType) {
       case "memory":
         memoryCache.set(key, data, ttl);

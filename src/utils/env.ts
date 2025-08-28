@@ -33,19 +33,19 @@ export const getEnv = (): EnvVariables => {
 
 // 导出日志函数，根据环境配置输出不同级别的日志
 export const logger = {
-  debug: (message: string, ...args: any[]) => {
+  debug: (message: string, ...args: unknown[]) => {
     const { VITE_DEBUG } = getEnv();
     if (VITE_DEBUG) {
       console.debug(`[DEBUG] ${message}`, ...args);
     }
   },
-  info: (message: string, ...args: any[]) => {
+  info: (message: string, ...args: unknown[]) => {
     console.info(`[INFO] ${message}`, ...args);
   },
-  warn: (message: string, ...args: any[]) => {
+  warn: (message: string, ...args: unknown[]) => {
     console.warn(`[WARN] ${message}`, ...args);
   },
-  error: (message: string, ...args: any[]) => {
+  error: (message: string, ...args: unknown[]) => {
     console.error(`[ERROR] ${message}`, ...args);
   },
 };

@@ -75,15 +75,6 @@ export function createAxiosInstance(config: CreateRequestConfig): AxiosInstance 
         showLoading(config.loadingText);
       }
 
-      // 请求日志
-      if (process.env.NODE_ENV === "development") {
-        console.log("🚀 Request:", {
-          method: requestConfig.method?.toUpperCase(),
-          url: requestConfig.url,
-          data: requestConfig.data,
-          params: requestConfig.params,
-        });
-      }
 
       return requestConfig;
     },
@@ -107,17 +98,6 @@ export function createAxiosInstance(config: CreateRequestConfig): AxiosInstance 
         hideLoading();
       }
 
-      // 响应日志
-      if (process.env.NODE_ENV === "development") {
-        console.log("✅ Response:", {
-          status: response.status,
-          data: response.data,
-          config: {
-            method: response.config.method?.toUpperCase(),
-            url: response.config.url,
-          },
-        });
-      }
 
       const { data } = response;
 

@@ -22,45 +22,45 @@ export const simpleRequest = {
   /**
    * 通用请求方法
    */
-  request: <T = any>(config: SimpleRequestMethodConfig): Promise<T> => defaultSimpleRequest.request<T>(config),
+  request: <T = unknown>(config: SimpleRequestMethodConfig): Promise<T> => defaultSimpleRequest.request<T>(config),
 
   /**
    * GET请求
    */
-  get: <T = any>(url: string, params?: Record<string, any>, config?: Partial<SimpleRequestMethodConfig>): Promise<T> =>
+  get: <T = unknown>(url: string, params?: Record<string, unknown>, config?: Partial<SimpleRequestMethodConfig>): Promise<T> =>
     defaultSimpleRequest.get<T>(url, params, config),
 
   /**
    * POST请求
    */
-  post: <T = any>(url: string, data?: any, config?: Partial<SimpleRequestMethodConfig>): Promise<T> =>
+  post: <T = unknown>(url: string, data?: unknown, config?: Partial<SimpleRequestMethodConfig>): Promise<T> =>
     defaultSimpleRequest.post<T>(url, data, config),
 
   /**
    * PUT请求
    */
-  put: <T = any>(url: string, data?: any, config?: Partial<SimpleRequestMethodConfig>): Promise<T> =>
+  put: <T = unknown>(url: string, data?: unknown, config?: Partial<SimpleRequestMethodConfig>): Promise<T> =>
     defaultSimpleRequest.put<T>(url, data, config),
 
   /**
    * DELETE请求
    */
-  delete: <T = any>(
+  delete: <T = unknown>(
     url: string,
-    params?: Record<string, any>,
+    params?: Record<string, unknown>,
     config?: Partial<SimpleRequestMethodConfig>,
   ): Promise<T> => defaultSimpleRequest.delete<T>(url, params, config),
 
   /**
    * PATCH请求
    */
-  patch: <T = any>(url: string, data?: any, config?: Partial<SimpleRequestMethodConfig>): Promise<T> =>
+  patch: <T = unknown>(url: string, data?: unknown, config?: Partial<SimpleRequestMethodConfig>): Promise<T> =>
     defaultSimpleRequest.patch<T>(url, data, config),
 
   /**
    * 文件上传
    */
-  upload: <T = any>(url: string, file: File | FormData, config?: Partial<SimpleRequestMethodConfig>): Promise<T> =>
+  upload: <T = unknown>(url: string, file: File | FormData, config?: Partial<SimpleRequestMethodConfig>): Promise<T> =>
     defaultSimpleRequest.upload<T>(url, file, config),
 
   /**
@@ -72,13 +72,13 @@ export const simpleRequest = {
   /**
    * 并发请求
    */
-  concurrent: <T = any>(requests: SimpleRequestMethodConfig[]): Promise<T[]> =>
+  concurrent: <T = unknown>(requests: SimpleRequestMethodConfig[]): Promise<T[]> =>
     defaultSimpleRequest.concurrent<T>(requests),
 
   /**
    * 串行队列请求
    */
-  queue: <T = any>(requests: SimpleRequestMethodConfig[], concurrency?: number): Promise<T[]> =>
+  queue: <T = unknown>(requests: SimpleRequestMethodConfig[], concurrency?: number): Promise<T[]> =>
     defaultSimpleRequest.queue<T>(requests, concurrency),
 };
 

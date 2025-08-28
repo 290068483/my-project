@@ -1,8 +1,8 @@
 // 防抖函数
-function debounce<T extends (...args: any[]) => any>(fn: T, delay: number = 300): T {
+function debounce<T extends (...args: unknown[]) => unknown>(fn: T, delay: number = 300): T {
   let timer: number | null = null;
 
-  return function (this: any, ...args: any[]) {
+  return function (this: unknown, ...args: unknown[]) {
     if (timer) clearTimeout(timer);
     timer = window.setTimeout(() => {
       fn.apply(this, args);
@@ -11,11 +11,11 @@ function debounce<T extends (...args: any[]) => any>(fn: T, delay: number = 300)
 }
 
 // 节流函数
-function throttle<T extends (...args: any[]) => any>(fn: T, interval: number = 300): T {
+function throttle<T extends (...args: unknown[]) => unknown>(fn: T, interval: number = 300): T {
   let lastTime = 0;
   let timer: number | null = null;
 
-  return function (this: any, ...args: any[]) {
+  return function (this: unknown, ...args: unknown[]) {
     const nowTime = Date.now();
     const remaining = interval - (nowTime - lastTime);
 

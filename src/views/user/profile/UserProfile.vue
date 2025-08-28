@@ -230,6 +230,7 @@
 
 <script setup lang="ts">
 import { ref, reactive, onMounted } from "vue";
+import { uploadAvatar, updateUserInfo } from "@/api/user";
 import { useUserStore } from "@/stores/user";
 import type { UploadFile, UploadRawFile } from "element-plus";
 import { ElMessage } from "element-plus";
@@ -259,6 +260,7 @@ const userStore = useUserStore();
 const isEditing = ref(false);
 const avatarDialogVisible = ref(false);
 const tempAvatar = ref("");
+const tempAvatarFile = ref<File | null>(null); // 存储选中的头像文件
 const tempAvatarUrl = ref(""); // 用于存储创建的ObjectURL
 const updatingAvatar = ref(false);
 const updatingInfo = ref(false);
@@ -363,7 +365,8 @@ const handleAvatarChange = (file: UploadFile) => {
   if (tempAvatarUrl.value) {
     URL.revokeObjectURL(tempAvatarUrl.value);
   }
-  // 创建临时预览URL
+  // 保存文件对象并创建临时预览URL
+  tempAvatarFile.value = file.raw!;
   tempAvatarUrl.value = URL.createObjectURL(file.raw!);
   tempAvatar.value = tempAvatarUrl.value;
 };
@@ -374,21 +377,31 @@ const confirmUpdateAvatar = async () => {
 
   updatingAvatar.value = true;
 
-  // 模拟上传过程
-  setTimeout(() => {
-    // 更新store中的用户头像
-    userStore.updateUserAvatar(tempAvatar.value);
-
-    updatingAvatar.value = false;
-    avatarDialogVisible.value = false;
-    // 释放URL并清空引用
-    if (tempAvatarUrl.value) {
-      URL.revokeObjectURL(tempAvatarUrl.value);
+  try {
+    // 使用el-upload组件中的文件
+    const response = await uploadAvatar(tempAvatarFile.value);
+    if (response.code === 200) {
+      // 更新store中的用户头像
+      userStore.updateUserAvatar(response.data.url);
+      updatingAvatar.value = false;
+      avatarDialogVisible.value = false;
+      ElMessage.success("头像更新成功");
+    } else {
+      updatingAvatar.value = false;
+      ElMessage.error(response.msg || "头像上传失败");
     }
-    tempAvatar.value = "";
-    tempAvatarUrl.value = "";
-    ElMessage.success("头像更新成功");
-  }, 500);
+  } catch (error) {
+    updatingAvatar.value = false;
+    console.error("头像上传失败:", error);
+    ElMessage.error("头像上传失败，请重试");
+  }
+
+  // 释放URL并清空引用
+  if (tempAvatarUrl.value) {
+    URL.revokeObjectURL(tempAvatarUrl.value);
+  }
+  tempAvatar.value = "";
+  tempAvatarUrl.value = "";
 };
 
 // 处理头像对话框关闭
@@ -421,14 +434,24 @@ const saveEditInfo = async () => {
     await editFormRef.value.validate();
     updatingInfo.value = true;
 
-    // 模拟保存过程
-    setTimeout(() => {
-      // 更新store中的用户信息
-      userStore.updateUserInfo({ ...editForm });
-      updatingInfo.value = false;
-      isEditing.value = false;
-      ElMessage.success("用户信息更新成功");
-    }, 500);
+    import { updateUserInfo } from "@/api/user";
+
+    // 实际API调用保存用户信息
+    try {
+      const response = await updateUserInfo(editForm);
+      if (response.code === 200) {
+        // 更新store中的用户信息
+        userStore.updateUserInfo({ ...editForm });
+        updatingInfo.value = false;
+        isEditing.value = false;
+        ElMessage.success("用户信息更新成功");
+      } else {
+        ElMessage.error(response.msg || "用户信息更新失败");
+      }
+    } catch (error) {
+      console.error("用户信息更新失败:", error);
+      ElMessage.error("用户信息更新失败，请重试");
+    }
   } catch (error) {
     console.error("表单验证失败:", error);
   }

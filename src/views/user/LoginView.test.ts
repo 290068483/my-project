@@ -40,8 +40,8 @@ vi.mock("@/utils/debounce", () => ({
 }));
 
 describe("LoginView 验证码功能测试", () => {
-  let wrapper: any;
-  let userStore: any;
+  let wrapper: VueWrapper;
+  let userStore: UserStore;
 
   beforeEach(() => {
     // 创建新的 Pinia 实例

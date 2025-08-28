@@ -1,6 +1,6 @@
 // 导入用户数据和重置令牌
-const users = require('../auth').users;
-const resetTokens = require('../forgot-password').resetTokens;
+const users = import('../auth').users;
+const resetTokens = import('../forgot-password').resetTokens;
 
 // 处理重置密码请求
 function handleResetPassword(req) {

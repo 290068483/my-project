@@ -6,7 +6,7 @@ import type { VueWrapper } from "@vue/test-utils";
 
 // Mock Element Plus Message
 vi.mock("element-plus", async (importOriginal) => {
-  const actual = (await importOriginal()) as any;
+  const actual = await importOriginal();
   return {
     ...actual,
     ElMessage: vi.fn(),

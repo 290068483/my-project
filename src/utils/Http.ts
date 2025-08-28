@@ -96,16 +96,16 @@ http.interceptors.response.use(
 
 // 旧版本封装请求方法（保持兼容性）
 const legacyHttp = {
-  get<T>(url: string, params?: any, config?: AxiosRequestConfig): Promise<T> {
+  get<T>(url: string, params?: unknown, config?: AxiosRequestConfig): Promise<T> {
     return http.get(url, { params, ...config });
   },
-  post<T>(url: string, data?: any, config?: AxiosRequestConfig): Promise<T> {
+  post<T>(url: string, data?: unknown, config?: AxiosRequestConfig): Promise<T> {
     return http.post(url, data, config);
   },
-  put<T>(url: string, data?: any, config?: AxiosRequestConfig): Promise<T> {
+  put<T>(url: string, data?: unknown, config?: AxiosRequestConfig): Promise<T> {
     return http.put(url, data, config);
   },
-  delete<T>(url: string, params?: any, config?: AxiosRequestConfig): Promise<T> {
+  delete<T>(url: string, params?: unknown, config?: AxiosRequestConfig): Promise<T> {
     return http.delete(url, { params, ...config });
   },
 };

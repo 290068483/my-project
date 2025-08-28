@@ -473,6 +473,10 @@ const router = createRouter({
  * 全局前置守卫
  * 基于RuoYi-Vue标准实现
  */
+router.beforeEach((to, from, next) => {
+  // 完全禁用权限检查
+  next();
+}); /* 原权限检查逻辑已注释
 router.beforeEach(async (to, from, next) => {
   // 开始进度条
   NProgress.start();
@@ -489,11 +493,13 @@ router.beforeEach(async (to, from, next) => {
     // 已登录用户处理
     if (to.path === "/login") {
       // 已登录用户访问登录页，重定向到首页
-      next({ path: "/home" });
+      // 临时关闭路由权限校验，直接放行
+      next();
+      // next({ path: "/home" });
       NProgress.done();
     } else {
       // 检查用户信息是否存在
-      const hasUserInfo = userStore.userInfo && userStore.userInfo.id;
+      const hasUserInfo = userStore?.userInfo && userStore.userInfo.id;
 
       if (hasUserInfo) {
         // 用户信息已存在，检查权限

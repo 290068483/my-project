@@ -27,14 +27,14 @@ export function generateCacheKey(config: RequestMethodConfig): string {
  * 内存缓存管理
  */
 class MemoryCache {
-  private cache = new Map<string, { data: any; expires: number }>();
+  private cache = new Map<string, { data: unknown; expires: number }>();
 
-  set(key: string, data: any, ttl: number = 5 * 60 * 1000): void {
+  set(key: string, data: unknown, ttl: number = 5 * 60 * 1000): void {
     const expires = Date.now() + ttl;
     this.cache.set(key, { data, expires });
   }
 
-  get(key: string): any | null {
+  get(key: string): unknown | null {
     const item = this.cache.get(key);
     if (!item) return null;
     
@@ -81,7 +81,7 @@ export class StorageCache {
     return `${this.prefix}${key}`;
   }
 
-  set(key: string, data: any, ttl: number = 5 * 60 * 1000): void {
+  set(key: string, data: unknown, ttl: number = 5 * 60 * 1000): void {
     try {
       const expires = Date.now() + ttl;
       const item = { data, expires };
@@ -91,7 +91,7 @@ export class StorageCache {
     }
   }
 
-  get(key: string): any | null {
+  get(key: string): unknown | null {
     try {
       const itemStr = this.storage.getItem(this.getKey(key));
       if (!itemStr) return null;
@@ -197,15 +197,15 @@ export function deepClone<T>(obj: T): T {
   }
 
   if (obj instanceof Date) {
-    return new Date(obj.getTime()) as any;
+    return new Date(obj.getTime());
   }
 
   if (obj instanceof Array) {
-    return obj.map(item => deepClone(item)) as any;
+    return obj.map(item => deepClone(item));
   }
 
   if (typeof obj === 'object') {
-    const clonedObj = {} as any;
+    const clonedObj: Record<string, unknown> = {};
     for (const key in obj) {
       if (obj.hasOwnProperty(key)) {
         clonedObj[key] = deepClone(obj[key]);
@@ -222,7 +222,7 @@ export function deepClone<T>(obj: T): T {
  * @param value 要检查的值
  * @returns 是否为空
  */
-export function isEmpty(value: any): boolean {
+export function isEmpty(value: unknown): boolean {
   return value === null || value === undefined || value === '';
 }
 

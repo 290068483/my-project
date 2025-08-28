@@ -42,7 +42,7 @@ export class ApiTester {
 
         const result = await login(testCase.data as LoginRequest);
         console.log(`✅ [登录测试] 响应成功:`, result);
-      } catch (error: any) {
+      } catch (error: unknown) {
         console.log(`❌ [登录测试] 响应失败:`, {
           message: error.message,
           status: error.response?.status,
@@ -92,7 +92,7 @@ export class ApiTester {
 
         const result = await register(testCase.data as RegisterRequest);
         console.log(`✅ [注册测试] 响应成功:`, result);
-      } catch (error: any) {
+      } catch (error: unknown) {
         console.log(`❌ [注册测试] 响应失败:`, {
           message: error.message,
           status: error.response?.status,
@@ -167,7 +167,7 @@ export class ApiTester {
       const result = await login(loginData);
       console.log(`✅ [快速登录测试] 登录成功:`, result);
       return result;
-    } catch (error: any) {
+    } catch (error: unknown) {
       console.log(`❌ [快速登录测试] 登录失败:`, {
         message: error.message,
         status: error.response?.status,
@@ -201,7 +201,7 @@ export class ApiTester {
       const result = await register(registerData);
       console.log(`✅ [快速注册测试] 注册成功:`, result);
       return result;
-    } catch (error: any) {
+    } catch (error: unknown) {
       console.log(`❌ [快速注册测试] 注册失败:`, {
         message: error.message,
         status: error.response?.status,
@@ -222,8 +222,8 @@ declare global {
     testLogin: () => Promise<void>;
     testRegister: () => Promise<void>;
     testAll: () => Promise<void>;
-    quickLogin: (username?: string, password?: string) => Promise<any>;
-    quickRegister: (username?: string) => Promise<any>;
+    quickLogin: (username?: string, password?: string) => Promise<unknown>;
+    quickRegister: (username?: string) => Promise<unknown>;
   }
 }
 

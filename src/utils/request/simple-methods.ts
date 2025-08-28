@@ -36,9 +36,9 @@ export class SimpleRequestManager {
   /**
    * GET 请求
    */
-  async get<T = any>(
+  async get<T = unknown>(
     url: string,
-    params?: Record<string, any>,
+    params?: Record<string, unknown>,
     config?: Partial<SimpleRequestMethodConfig>,
   ): Promise<T> {
     return this.request<T>({
@@ -52,7 +52,7 @@ export class SimpleRequestManager {
   /**
    * POST 请求
    */
-  async post<T = any>(url: string, data?: any, config?: Partial<SimpleRequestMethodConfig>): Promise<T> {
+  async post<T = unknown>(url: string, data?: unknown, config?: Partial<SimpleRequestMethodConfig>): Promise<T> {
     return this.request<T>({
       method: "POST",
       url,
@@ -64,7 +64,7 @@ export class SimpleRequestManager {
   /**
    * PUT 请求
    */
-  async put<T = any>(url: string, data?: any, config?: Partial<SimpleRequestMethodConfig>): Promise<T> {
+  async put<T = unknown>(url: string, data?: unknown, config?: Partial<SimpleRequestMethodConfig>): Promise<T> {
     return this.request<T>({
       method: "PUT",
       url,
@@ -76,9 +76,9 @@ export class SimpleRequestManager {
   /**
    * DELETE 请求
    */
-  async delete<T = any>(
+  async delete<T = unknown>(
     url: string,
-    params?: Record<string, any>,
+    params?: Record<string, unknown>,
     config?: Partial<SimpleRequestMethodConfig>,
   ): Promise<T> {
     return this.request<T>({
@@ -92,7 +92,7 @@ export class SimpleRequestManager {
   /**
    * PATCH 请求
    */
-  async patch<T = any>(url: string, data?: any, config?: Partial<SimpleRequestMethodConfig>): Promise<T> {
+  async patch<T = unknown>(url: string, data?: unknown, config?: Partial<SimpleRequestMethodConfig>): Promise<T> {
     return this.request<T>({
       method: "PATCH",
       url,
@@ -104,7 +104,7 @@ export class SimpleRequestManager {
   /**
    * 文件上传
    */
-  async upload<T = any>(url: string, file: File | FormData, config?: Partial<SimpleRequestMethodConfig>): Promise<T> {
+  async upload<T = unknown>(url: string, file: File | FormData, config?: Partial<SimpleRequestMethodConfig>): Promise<T> {
     let formData: FormData;
 
     if (file instanceof FormData) {
@@ -159,7 +159,7 @@ export class SimpleRequestManager {
   /**
    * 并发请求
    */
-  async concurrent<T = any>(requests: SimpleRequestMethodConfig[]): Promise<T[]> {
+  async concurrent<T = unknown>(requests: SimpleRequestMethodConfig[]): Promise<T[]> {
     const promises = requests.map((config) => this.request<T>(config));
     return await Promise.all(promises);
   }
@@ -167,7 +167,7 @@ export class SimpleRequestManager {
   /**
    * 串行请求（队列）
    */
-  async queue<T = any>(requests: SimpleRequestMethodConfig[], concurrency: number = 3): Promise<T[]> {
+  async queue<T = unknown>(requests: SimpleRequestMethodConfig[], concurrency: number = 3): Promise<T[]> {
     const results: T[] = [];
     const executing: Promise<void>[] = [];
 
@@ -226,21 +226,21 @@ export const batch = {
   /**
    * 并发执行多个请求
    */
-  concurrent: async <T = any>(manager: SimpleRequestManager, requests: SimpleRequestMethodConfig[]): Promise<T[]> => {
+  concurrent: async <T = unknown>(manager: SimpleRequestManager, requests: SimpleRequestMethodConfig[]): Promise<T[]> => {
     return manager.concurrent<T>(requests);
   },
 
   /**
    * 串行执行多个请求
    */
-  sequence: async <T = any>(manager: SimpleRequestManager, requests: SimpleRequestMethodConfig[]): Promise<T[]> => {
+  sequence: async <T = unknown>(manager: SimpleRequestManager, requests: SimpleRequestMethodConfig[]): Promise<T[]> => {
     return manager.queue<T>(requests, 1);
   },
 
   /**
    * 限制并发数的批量请求
    */
-  limited: async <T = any>(
+  limited: async <T = unknown>(
     manager: SimpleRequestManager,
     requests: SimpleRequestMethodConfig[],
     concurrency: number = 3,

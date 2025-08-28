@@ -196,7 +196,7 @@ export function getCaptchaConfig(): Promise<{
 
 /**
  * 获取滚动验证码
- * @returns Promise<{ code: number; msg: string; data: any }>
+ * @returns Promise<{ code: number; msg: string; data: unknown }>
  */
 export function getSlideCaptcha(): Promise<{
   code: number;

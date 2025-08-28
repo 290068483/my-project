@@ -89,7 +89,7 @@ describe("ForgotPassword.vue", () => {
     });
 
     // 手动触发验证逻辑
-    const component = wrapper.vm as any;
+    const component = wrapper.vm;
     component.form.email = "invalid-email";
 
     // 检查无效邮箱是否被验证（在实际组件中，这会在提交时触发）

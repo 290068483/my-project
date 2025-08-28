@@ -75,7 +75,7 @@ export class AuthUtils {
    * @param permissions 权限代码数组
    * @returns boolean
    */
-  static hasAnyPermission(permissions: string[]): boolean {
+  static hasPermission(permissions: string[]): boolean {
     const user = this.getCurrentUser();
     if (!user?.permissions) return false;
     return permissions.some((permission) => user.permissions.includes(permission));
@@ -97,7 +97,7 @@ export class AuthUtils {
    * @param roles 角色代码数组
    * @returns boolean
    */
-  static hasAnyRole(roles: string[]): boolean {
+  static hasRole(roles: string[]): boolean {
     const user = this.getCurrentUser();
     if (!user) return false;
     const userRoles = user.roles || [user.role];
@@ -124,8 +124,8 @@ export class AuthUtils {
   static checkPermission(options: { roles?: string[]; permissions?: string[]; mode?: "and" | "or" }): boolean {
     const { roles, permissions, mode = "and" } = options;
 
-    const hasRoleAccess = roles ? this.hasAnyRole(roles) : true;
-    const hasPermissionAccess = permissions ? this.hasAnyPermission(permissions) : true;
+    const hasRoleAccess = roles ? this.hasRole(roles) : true;
+    const hasPermissionAccess = permissions ? this.hasPermission(permissions) : true;
 
     if (mode === "or") {
       return hasRoleAccess || hasPermissionAccess;
@@ -334,9 +334,9 @@ export class AuthUtils {
   static createPermissionDirective(permissions: string[]) {
     return {
       mounted(el: HTMLElement) {
-        const hasAnyPermission = permissions.some((permission) => AuthUtils.hasPermission(permission));
+        const hasPermission = permissions.some((permission) => AuthUtils.hasPermission(permission));
 
-        if (!hasAnyPermission) {
+        if (!hasPermission) {
           el.style.display = "none";
         }
       },

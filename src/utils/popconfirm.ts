@@ -60,8 +60,8 @@ export default {
     };
 
     // 将处理函数添加到全局作用域
-    (window as any).handleConfirm = handleConfirm;
-    (window as any).handleCancel = handleCancel;
+    (window as { handleConfirm?: Function }).handleConfirm = handleConfirm;
+    (window as { handleCancel?: Function }).handleCancel = handleCancel;
   },
 
   updated(el: HTMLElement, binding: DirectiveBinding<PopconfirmProps>) {
@@ -77,7 +77,7 @@ export default {
     }
 
     // 清理全局处理函数
-    delete (window as any).handleConfirm;
-    delete (window as any).handleCancel;
+    delete (window as { handleConfirm?: Function }).handleConfirm;
+    delete (window as { handleCancel?: Function }).handleCancel;
   },
 } as Directive;

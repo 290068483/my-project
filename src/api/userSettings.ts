@@ -69,7 +69,7 @@ export interface PrivacySettings {
 export function updateUserProfile(data: UserProfileUpdateRequest): Promise<{
   code: number;
   msg: string;
-  data?: any;
+  data?: unknown;
 }> {
   return request.put("/user/profile", data);
 }

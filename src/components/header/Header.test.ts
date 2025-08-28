@@ -560,7 +560,7 @@ describe("Header.vue", () => {
 
     // 触发密码修改成功流程
     // 模拟密码修改表单验证通过
-    const component = wrapper.vm as any;
+    const component = wrapper.vm;
     component.pwdForm.oldPassword = "oldpassword";
     component.pwdForm.newPassword = "newpassword";
     component.pwdForm.confirmPassword = "newpassword";

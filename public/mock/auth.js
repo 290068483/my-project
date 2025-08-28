@@ -66,11 +66,11 @@ function handleLogin(req) {
 }
 
 // 导入其他认证相关处理函数
-const { handleForgotPassword } = require('./forgot-password');
-const { handleResetPassword } = require('./reset-password');
+import { handleForgotPassword } from './forgot-password';
+import { handleResetPassword } from './reset-password';
 
 // 导出处理函数
-module.exports = {
+export {
   handleLogin,
   handleForgotPassword,
   handleResetPassword,

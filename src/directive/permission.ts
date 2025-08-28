@@ -27,7 +27,7 @@ function checkPermission(value: string | string[] | PermissionOptions): boolean 
 
   // 处理字符串数组类型（多个权限，默认或关系）
   if (Array.isArray(value)) {
-    return AuthUtils.hasAnyPermission(value);
+    return AuthUtils.hasPermission(value);
   }
 
   // 处理对象类型（复杂权限配置）
@@ -39,13 +39,13 @@ function checkPermission(value: string | string[] | PermissionOptions): boolean 
 
     // 检查角色权限
     if (roles && roles.length > 0) {
-      hasRoleAccess = mode === "and" ? AuthUtils.hasAllRoles(roles) : AuthUtils.hasAnyRole(roles);
+      hasRoleAccess = mode === "and" ? AuthUtils.hasAllRoles(roles) : AuthUtils.hasRole(roles);
     }
 
     // 检查功能权限
     if (permissions && permissions.length > 0) {
       hasPermissionAccess =
-        mode === "and" ? AuthUtils.hasAllPermissions(permissions) : AuthUtils.hasAnyPermission(permissions);
+        mode === "and" ? AuthUtils.hasAllPermissions(permissions) : AuthUtils.hasPermission(permissions);
     }
 
     // 根据模式返回结果
@@ -118,7 +118,7 @@ const role: Directive = {
     if (typeof value === "string") {
       hasRole = AuthUtils.hasRole(value);
     } else if (Array.isArray(value)) {
-      hasRole = AuthUtils.hasAnyRole(value);
+      hasRole = AuthUtils.hasRole(value);
     }
 
     if (!hasRole) {
@@ -133,7 +133,7 @@ const role: Directive = {
     if (typeof value === "string") {
       hasRole = AuthUtils.hasRole(value);
     } else if (Array.isArray(value)) {
-      hasRole = AuthUtils.hasAnyRole(value);
+      hasRole = AuthUtils.hasRole(value);
     }
 
     if (!hasRole) {
