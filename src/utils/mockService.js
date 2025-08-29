@@ -55,7 +55,7 @@ function createPageResponse(rows = [], total = 0, code = 200, msg = "查询成�
 // Mock API 处理器
 export const mockHandlers = {
   // 登录
-  "POST /login": (req) => {
+  "POST /api/login": (req) => {
     const { username, password } = req.body || {};
 
     const user = mockUsers.find((u) => u.username === username && u.password === password);
@@ -79,7 +79,7 @@ export const mockHandlers = {
   },
 
   // 获取用户信息
-  "GET /getInfo": () => {
+  "GET /api/getInfo": () => {
     const user = mockUsers[0]; // 默认返回管理员信息
     return createResponse({
       user: {
@@ -95,7 +95,7 @@ export const mockHandlers = {
   },
 
   // 获取路由信息
-  "GET /getRouters": () => {
+  "GET /api/getRouters": () => {
     const mockRouters = [
       {
         name: "System",
@@ -124,12 +124,12 @@ export const mockHandlers = {
   },
 
   // 退出登录
-  "POST /logout": () => {
+  "POST /api/logout": () => {
     return createResponse(null, 200, "退出成功");
   },
 
   // 获取验证码
-  "GET /captchaImage": () => {
+  "GET /api/captchaImage": () => {
     return createResponse({
       uuid: "mock-uuid-" + Date.now(),
       img: "data:image/png;base64,iVBORw0KGgoAAAANSUhEUgAAAAEAAAABCAYAAAAfFcSJAAAADUlEQVR42mNkYPhfDwAChwGA60e6kgAAAABJRU5ErkJggg==",
@@ -137,12 +137,12 @@ export const mockHandlers = {
   },
 
   // 用户列表
-  "GET /system/user/list": () => {
+  "GET /api/system/user/list": () => {
     return createPageResponse(mockUsers, mockUsers.length);
   },
 
   // 服务器信息
-  "GET /monitor/server": () => {
+  "GET /api/monitor/server": () => {
     return createResponse({
       cpu: { cpuNum: 4, total: 25.5, sys: 10.2, used: 15.3, wait: 0.0, free: 74.5 },
       mem: { total: "8.00GB", used: "4.50GB", free: "3.50GB", usage: 56.25 },

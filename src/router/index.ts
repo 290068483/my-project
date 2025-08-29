@@ -98,7 +98,7 @@ const routes: Array<RouteRecordRaw> = [
         name: "profile",
         component: () => import("../views/user/profile/UserProfile.vue"),
         meta: {
-          requiresAuth: true,
+          requiresAuth: false,
           title: "个人信息",
         },
       },
@@ -107,7 +107,7 @@ const routes: Array<RouteRecordRaw> = [
         name: "SecuritySettings",
         component: () => import("../views/user/profile/SecuritySettings.vue"),
         meta: {
-          requiresAuth: true,
+          requiresAuth: false,
           title: "安全设置",
         },
       },
@@ -116,7 +116,7 @@ const routes: Array<RouteRecordRaw> = [
         name: "NotificationSettings",
         component: () => import("../views/user/profile/NotificationSettings.vue"),
         meta: {
-          requiresAuth: true,
+          requiresAuth: false,
           title: "通知设置",
         },
       },
@@ -125,7 +125,7 @@ const routes: Array<RouteRecordRaw> = [
         name: "DataManagement",
         component: () => import("../views/user/profile/DataManagement.vue"),
         meta: {
-          requiresAuth: true,
+          requiresAuth: false,
           title: "数据管理",
         },
       },
@@ -134,7 +134,7 @@ const routes: Array<RouteRecordRaw> = [
         name: "PermissionManagement",
         component: () => import("../views/user/profile/PermissionManagement.vue"),
         meta: {
-          requiresAuth: true,
+          requiresAuth: false,
           title: "权限管理",
         },
       },
@@ -308,7 +308,7 @@ const routes: Array<RouteRecordRaw> = [
         path: "system",
         name: "System",
         meta: {
-          requiresAuth: true,
+          requiresAuth: false,
           title: "系统管理",
           icon: "system",
           sort: 900,
@@ -320,7 +320,7 @@ const routes: Array<RouteRecordRaw> = [
             name: "SystemUser",
             component: () => import("../views/system/user/index.vue"),
             meta: {
-              requiresAuth: true,
+              requiresAuth: false,
               permissions: ["system:user:list"],
               title: "用户管理",
               icon: "user",
@@ -333,7 +333,7 @@ const routes: Array<RouteRecordRaw> = [
             name: "SystemRole",
             component: () => import("../views/system/role/index.vue"),
             meta: {
-              requiresAuth: true,
+              requiresAuth: false,
               permissions: ["system:role:list"],
               title: "角色管理",
               icon: "peoples",
@@ -346,7 +346,7 @@ const routes: Array<RouteRecordRaw> = [
             name: "SystemMenu",
             component: () => import("../views/system/menu/index.vue"),
             meta: {
-              requiresAuth: true,
+              requiresAuth: false,
               permissions: ["system:menu:list"],
               title: "菜单管理",
               icon: "tree-table",
@@ -359,7 +359,7 @@ const routes: Array<RouteRecordRaw> = [
             name: "SystemDept",
             component: () => import("../views/system/dept/index.vue"),
             meta: {
-              requiresAuth: true,
+              requiresAuth: false,
               permissions: ["system:dept:list"],
               title: "部门管理",
               icon: "tree",
@@ -372,7 +372,7 @@ const routes: Array<RouteRecordRaw> = [
             name: "SystemPost",
             component: () => import("../views/system/post/index.vue"),
             meta: {
-              requiresAuth: true,
+              requiresAuth: false,
               permissions: ["system:post:list"],
               title: "岗位管理",
               icon: "post",
@@ -473,10 +473,6 @@ const router = createRouter({
  * 全局前置守卫
  * 基于RuoYi-Vue标准实现
  */
-router.beforeEach((to, from, next) => {
-  // 完全禁用权限检查
-  next();
-}); /* 原权限检查逻辑已注释
 router.beforeEach(async (to, from, next) => {
   // 开始进度条
   NProgress.start();
@@ -489,49 +485,71 @@ router.beforeEach(async (to, from, next) => {
   const userStore = useUserStore();
   const hasToken = userStore.token;
 
+  console.log("路由守卫执行:", to.path);
+  console.log("是否有token:", !!hasToken);
+  console.log("token值:", hasToken);
+
   if (hasToken) {
     // 已登录用户处理
     if (to.path === "/login") {
       // 已登录用户访问登录页，重定向到首页
-      // 临时关闭路由权限校验，直接放行
-      next();
-      // next({ path: "/home" });
+      console.log("已登录用户访问登录页，重定向到首页");
+      next({ path: "/home" });
       NProgress.done();
     } else {
       // 检查用户信息是否存在
       const hasUserInfo = userStore?.userInfo && userStore.userInfo.id;
+      const hasPermissions = userStore.permissions && userStore.permissions.length > 0;
+      const hasRoles = userStore.roles && userStore.roles.length > 0;
+      const isDataInitialized = userStore.isDataInitialized;
 
-      if (hasUserInfo) {
+      console.log("路由守卫检查用户状态:");
+      console.log("- 用户信息存在:", !!hasUserInfo);
+      console.log("- 权限存在:", !!hasPermissions);
+      console.log("- 角色存在:", !!hasRoles);
+      console.log("- 数据已初始化:", isDataInitialized);
+
+      // 如果用户数据已初始化，或者基本信息、权限和角色都存在，则认为用户数据已准备就绪
+      if (isDataInitialized || (hasUserInfo && hasPermissions && hasRoles)) {
+        console.log("用户数据已准备就绪，检查权限");
         // 用户信息已存在，检查权限
         if (to.meta?.requiresAuth !== false) {
           // 需要认证的路由，检查权限
           const hasPermission = checkRoutePermission(to, userStore);
           if (hasPermission) {
+            console.log("权限检查通过，允许访问");
             next();
           } else {
+            console.log("权限检查失败，跳转到403页面");
             ElMessage.error("您没有访问此页面的权限");
             next({ path: "/403" });
             NProgress.done();
           }
         } else {
+          console.log("路由不需要认证，允许访问");
           next();
         }
       } else {
+        console.log("用户数据未准备就绪，需要获取用户信息");
         try {
           // 获取用户信息
           await userStore.fetchUserInfo();
+          console.log("用户信息获取完成");
 
           // 获取成功后检查权限
           if (to.meta?.requiresAuth !== false) {
             const hasPermission = checkRoutePermission(to, userStore);
             if (hasPermission) {
+              console.log("权限检查通过，允许访问");
               next();
             } else {
+              console.log("权限检查失败，跳转到403页面");
               ElMessage.error("您没有访问此页面的权限");
               next({ path: "/403" });
               NProgress.done();
             }
           } else {
+            console.log("路由不需要认证，允许访问");
             next();
           }
         } catch (error) {
@@ -539,19 +557,29 @@ router.beforeEach(async (to, from, next) => {
 
           // Token已过期或无效，清理状态并重定向到登录页
           userStore.logout();
-          ElMessage.error("登录状态已过期，请重新登录");
-          next({ path: "/login", query: { redirect: to.fullPath } });
+
+          // 只有在不是已经在登录页的情况下才显示错误消息和重定向
+          if (to.path !== "/login") {
+            ElMessage.error("登录状态已过期，请重新登录");
+            next({ path: "/login", query: { redirect: to.fullPath } });
+          } else {
+            next(); // 如果已经在登录页，则允许访问
+          }
+
           NProgress.done();
         }
       }
     }
   } else {
     // 未登录用户处理
+    console.log("用户未登录");
     if (whiteList.includes(to.path)) {
       // 在白名单中，直接放行
+      console.log("路径在白名单中，直接放行");
       next();
     } else {
       // 不在白名单中，重定向到登录页
+      console.log("路径不在白名单中，重定向到登录页");
       next({ path: "/login", query: { redirect: to.fullPath } });
       NProgress.done();
     }

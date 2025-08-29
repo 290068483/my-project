@@ -18,7 +18,7 @@ const baseConfig = {
   port: Number(import.meta.env.VITE_PORT) || 5173,
 
   // 是否启用Mock
-  useMock: false, // 暂时禁用Mock
+  useMock: import.meta.env.VITE_USE_MOCK === "true", // 正确读取环境变量
 
   // 是否开启调试模式
   debug: import.meta.env.VITE_DEBUG === "true",

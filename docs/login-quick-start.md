@@ -72,7 +72,7 @@ testRuoYiLogin();
 ```typescript
 // 路由meta配置示例
 meta: {
-  requiresAuth: true,           // 需要登录
+  requiresAuth: false,           // 需要登录
   permissions: ['user:view'],   // 需要权限
   roles: ['admin', 'user'],     // 需要角色
   title: "页面标题"

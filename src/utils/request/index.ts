@@ -1,5 +1,7 @@
 import axios from "axios";
 import type { AxiosInstance, AxiosRequestConfig, AxiosResponse, AxiosError, AxiosProgressEvent } from "axios";
+import appConfig from "@/config/index.js"; // 导入应用配置
+import { installMockInterceptor } from "../mockInterceptor.js"; // 添加Mock拦截器导入
 
 // ============================ 类型定义 ============================
 /**
@@ -164,8 +166,8 @@ export class RequestManager {
   private repeatChecker = new RepeatSubmitChecker();
 
   constructor(config: BaseRequestConfig = {}) {
-    // 获取环境变量中的API基础路径
-    const baseURL = import.meta.env.VITE_API_BASE_URL || "/api";
+    // 使用相对路径作为默认baseURL，让Vite代理处理
+    const baseURL = "/api";
 
     this.config = {
       baseURL: baseURL,
@@ -179,11 +181,18 @@ export class RequestManager {
       loadingText: "加载中...",
       preventRepeatSubmit: false,
       transformResponse: true,
+      useMock: appConfig.useMock, // 使用应用配置中的Mock设置
       ...config,
     };
 
     this.instance = this.createInstance();
     this.setupInterceptors();
+
+    // 安装Mock拦截器（如果启用Mock）
+    if (this.config.useMock !== false && import.meta.env.MODE === "development") {
+      console.log("安装Mock拦截器");
+      installMockInterceptor(this.instance);
+    }
   }
 
   /**
@@ -193,8 +202,8 @@ export class RequestManager {
     // 从配置中排除transformResponse和returnFullResponse，因为它们不是axios的配置项
     const { transformResponse, returnFullResponse, ...axiosConfig } = this.config;
 
-    // 获取环境变量中的API基础路径
-    const baseURL = import.meta.env.VITE_API_BASE_URL || this.config.baseURL || "/api";
+    // 使用相对路径作为baseURL，让Vite代理处理
+    const baseURL = "/api";
 
     console.log("创建axios实例，baseURL:", baseURL);
 
@@ -237,13 +246,26 @@ export class RequestManager {
     // 请求拦截器
     this.instance.interceptors.request.use(
       (config) => {
+        console.log("请求拦截器 - 原始配置:", config);
+
         // 添加Token
         if (this.config.withToken) {
           const token = this.getToken(); // 需要实现获取token的逻辑
+          console.log("请求拦截器 - Token:", token);
+
           if (token) {
             config.headers = config.headers || {};
-            config.headers[this.config.tokenKey!] = `${this.config.tokenPrefix} ${token}`;
+
+            // 确保token包含Bearer前缀
+            const fullToken = token.startsWith("Bearer ") ? token : `Bearer ${token}`;
+
+            config.headers[this.config.tokenKey!] = fullToken;
+            console.log("请求拦截器 - 添加Token后的headers:", config.headers);
+          } else {
+            console.log("请求拦截器 - 未找到Token");
           }
+        } else {
+          console.log("请求拦截器 - 配置为不携带Token");
         }
 
         // 重复提交检查
@@ -259,6 +281,7 @@ export class RequestManager {
 
         // 显示加载
         showLoading();
+        console.log("请求拦截器 - 最终配置:", config);
         return config;
       },
       (error) => {
@@ -322,6 +345,12 @@ export class RequestManager {
   private formatError = (error: AxiosError): RequestError => {
     console.error("请求错误详情:", error);
 
+    // 检查是否是Mock响应错误，如果是则不进行格式化
+    if (error && typeof error === "object" && "isMockResponse" in error && error.isMockResponse) {
+      // 重新抛出Mock响应错误，让响应拦截器处理
+      return error as unknown as RequestError;
+    }
+
     const requestError = new Error(error.message) as RequestError;
     requestError.isAxiosError = true;
     requestError.config = error.config;
@@ -383,8 +412,35 @@ export class RequestManager {
    * 获取Token（需要根据实际项目实现）
    */
   private getToken(): string | null {
-    // 示例：从localStorage获取
-    return localStorage.getItem("token") || null;
+    try {
+      // 优先从localStorage获取
+      let token = localStorage.getItem("token");
+      console.log("从localStorage获取token:", token);
+
+      // 如果localStorage中没有，尝试从sessionStorage获取
+      if (!token) {
+        token = sessionStorage.getItem("token");
+        console.log("从sessionStorage获取token:", token);
+      }
+
+      // 如果仍然没有token，尝试从其他可能的位置获取
+      if (!token) {
+        // 检查是否有其他可能的token存储位置
+        token = localStorage.getItem("access_token") || sessionStorage.getItem("access_token");
+        console.log("从其他位置获取token:", token);
+      }
+
+      // 如果token包含Bearer前缀，去除前缀
+      if (token && token.startsWith("Bearer ")) {
+        token = token.substring(7);
+      }
+
+      // 确保返回的token是字符串类型
+      return token && typeof token === "string" ? token : null;
+    } catch (error) {
+      console.warn("获取token失败:", error);
+      return null;
+    }
   }
 
   /**
@@ -486,6 +542,9 @@ export class RequestManager {
   ): Promise<T> {
     console.log("发起GET请求:", { url, params, config });
 
+    // 合并配置，确保默认携带token
+    const mergedConfig = { ...this.config, ...config };
+
     // 从配置中排除我们的自定义属性，因为它们不是axios的配置项
     const {
       withToken: _withToken,
@@ -504,12 +563,23 @@ export class RequestManager {
       retry: _retry,
       retryDelay: _retryDelay,
       ...axiosConfig
-    } = config || {};
+    } = mergedConfig || {};
 
     try {
       const response = await this.instance.get(url, { params, ...axiosConfig });
       console.log("GET请求成功，响应:", response);
-      return response.data as T;
+
+      // 根据配置决定返回什么数据
+      if (mergedConfig.transformResponse && !mergedConfig.returnFullResponse) {
+        // 如果需要转换响应且不返回完整响应，则返回response.data
+        return response.data as T;
+      } else if (mergedConfig.returnFullResponse) {
+        // 如果需要返回完整响应，则返回整个response对象
+        return response as T;
+      } else {
+        // 默认情况返回response.data
+        return response.data as T;
+      }
     } catch (error) {
       console.error("GET请求失败:", error);
       const formattedError = this.formatError(error as AxiosError);
@@ -520,7 +590,9 @@ export class RequestManager {
    * POST请求
    */
   post<T = unknown>(url: string, data?: unknown, config?: Partial<RequestMethodConfig>): Promise<T> {
-    return this.request<T>({ ...config, method: "POST", url, data });
+    // 对于登录请求，确保返回完整的响应以便正确处理
+    const finalConfig = url === "/login" ? { ...config, transformResponse: false, returnFullResponse: true } : config;
+    return this.request<T>({ ...finalConfig, method: "POST", url, data });
   }
 
   /**

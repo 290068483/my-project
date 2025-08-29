@@ -55,8 +55,11 @@ export function getCaptchaImage(): Promise<CaptchaResponse> {
  * @returns Promise<UserInfoResponse>
  */
 export function getInfo(): Promise<UserInfoResponse> {
-  return request.get("/getInfo", undefined, {
+  return request.request<UserInfoResponse>({
+    method: "GET",
+    url: "/getInfo",
     timeout: 15000,
+    withToken: true, // 明确指定需要携带token
   });
 }
 
@@ -66,7 +69,9 @@ export function getInfo(): Promise<UserInfoResponse> {
  * @returns Promise<RoutersResponse>
  */
 export function getRouters(): Promise<RoutersResponse> {
-  return request.get("/getRouters", undefined, {
+  return request.request<RoutersResponse>({
+    method: "GET",
+    url: "/getRouters",
     timeout: 15000,
   });
 }

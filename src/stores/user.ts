@@ -42,6 +42,10 @@ interface UserState {
   // 验证码冷却时间
   smsCodeCooldown: number;
   emailCodeCooldown: number;
+  // 数据初始化状态
+  isDataInitialized: boolean;
+  // 数据初始化进行中的Promise
+  dataInitializationPromise: Promise<void> | null;
 }
 
 // 定义登录参数接口（保持向后兼容）
@@ -76,8 +80,11 @@ const setStoredToken = (token: string | null): void => {
   try {
     if (token) {
       localStorage.setItem("token", token);
+      // 同时存储到sessionStorage作为备份
+      sessionStorage.setItem("token", token);
     } else {
       localStorage.removeItem("token");
+      sessionStorage.removeItem("token");
     }
   } catch (error) {
     console.warn("Failed to set token in localStorage:", error);
@@ -118,6 +125,63 @@ const setStoredRefreshToken = (refreshToken: string | null): void => {
   }
 };
 
+// 新增：权限相关工具函数
+const getStoredPermissions = (): string[] => {
+  try {
+    const permissionsStr = localStorage.getItem("user-permissions");
+    return permissionsStr ? JSON.parse(permissionsStr) : [];
+  } catch (error) {
+    console.warn("Failed to get permissions from localStorage:", error);
+    return [];
+  }
+};
+
+const setStoredPermissions = (permissions: string[]): void => {
+  try {
+    localStorage.setItem("user-permissions", JSON.stringify(permissions));
+  } catch (error) {
+    console.warn("Failed to set permissions in localStorage:", error);
+  }
+};
+
+// 新增：角色相关工具函数
+const getStoredRoles = (): string[] => {
+  try {
+    const rolesStr = localStorage.getItem("user-roles");
+    return rolesStr ? JSON.parse(rolesStr) : [];
+  } catch (error) {
+    console.warn("Failed to get roles from localStorage:", error);
+    return [];
+  }
+};
+
+const setStoredRoles = (roles: string[]): void => {
+  try {
+    localStorage.setItem("user-roles", JSON.stringify(roles));
+  } catch (error) {
+    console.warn("Failed to set roles in localStorage:", error);
+  }
+};
+
+// 新增：路由相关工具函数
+const getStoredRouters = (): RouterInfo[] => {
+  try {
+    const routersStr = localStorage.getItem("user-routers");
+    return routersStr ? JSON.parse(routersStr) : [];
+  } catch (error) {
+    console.warn("Failed to get routers from localStorage:", error);
+    return [];
+  }
+};
+
+const setStoredRouters = (routers: RouterInfo[]): void => {
+  try {
+    localStorage.setItem("user-routers", JSON.stringify(routers));
+  } catch (error) {
+    console.warn("Failed to set routers in localStorage:", error);
+  }
+};
+
 export const useUserStore = defineStore("user", {
   state: (): UserState => ({
     token: getStoredToken(),
@@ -139,9 +203,13 @@ export const useUserStore = defineStore("user", {
     // 刷新令牌
     refreshToken: getStoredRefreshToken(),
     // 权限和路由
-    permissions: [] as string[],
-    roles: [] as string[],
-    routers: [] as RouterInfo[],
+    permissions: getStoredPermissions(),
+    roles: getStoredRoles(),
+    routers: getStoredRouters(),
+    // 数据初始化状态
+    isDataInitialized: false,
+    // 数据初始化进行中的Promise
+    dataInitializationPromise: null,
   }),
 
   getters: {
@@ -314,69 +382,33 @@ export const useUserStore = defineStore("user", {
         this.loginError = null;
 
         const response: LoginResponse = await login(loginData);
-        // 检查响应是否包含code字段，如果没有可能是直接返回了数据
-        // 如果响应对象有token字段且没有code字段，则认为是成功响应
-        const hasCode = response.hasOwnProperty("code");
-        const hasToken = response.hasOwnProperty("token") || (response.data && response.data.hasOwnProperty("token"));
-        const code = hasCode ? response.code : hasToken ? 200 : 500;
+        console.log("登录响应:", response);
 
-        if (code === 200 || (!hasCode && hasToken)) {
-          // 确保正确获取token和用户信息
-          let token: string | undefined, userInfo: UserInfo | undefined;
-
-          // 从不同可能的位置获取token
-          if (response.data && response.data.token) {
-            token = response.data.token;
-            console.log("✅ 获取token成功", token);
-            userInfo = response.data.userInfo;
-          }
-
-          if (!token) {
-            throw new Error("登录响应中未找到token");
-          }
-
-          // 保存认证信息
+        // 检查响应是否包含token
+        const token = this.extractTokenFromResponse(response);
+        if (token) {
+          // 存储token
           this.token = token;
-          this.userInfo = userInfo || null;
+          setStoredToken(token);
           this.isLoggedIn = true;
-          this.loginStatus = "success";
 
-          // 持久化存储
-          setStoredToken(this.token);
-          setStoredUserInfo(this.userInfo);
-
-          // 清空验证码状态
-          this.captchaUuid = null;
-          this.captchaImage = null;
-          this.captchaTimestamp = null;
-
-          // 重置验证码冷却时间
-          this.smsCodeCooldown = 0;
-          this.emailCodeCooldown = 0;
-
-          // 初始化用户数据（获取权限和路由）
-          try {
-            await this.initializeUserData();
-            console.log("✅ 用户权限和路由初始化成功");
-          } catch (error) {
-            console.warn("🔍 用户权限和路由初始化失败:", error);
-            // 不阻断登录流程，可以在后续才获取
-            // 可以考虑在用户访问需要权限的页面时再次尝试获取
-          }
-
+          // 登录成功后立即跳转到首页
           ElMessage.success("登录成功");
-          router.push("/home");
+          setTimeout(() => {
+            router.push("/home");
+          }, 300);
+
+          // 在后台初始化用户数据（权限、角色、路由等）
+          this.initializeUserData()
+            .then(() => {
+              console.log("✅ 用户权限和路由信息初始化完成");
+            })
+            .catch((error) => {
+              console.error("初始化用户数据失败:", error);
+              ElMessage.warning("用户信息加载失败，部分功能可能受限");
+            });
         } else {
-          this.loginStatus = "error";
-          // 登录失败，可能需要刷新验证码
-          if (code === 460 || code === 461) {
-            await this.refreshCaptcha();
-          }
-          throw new Error(
-            (response as unknown as { msg?: string; message?: string }).msg ||
-              (response as unknown as { msg?: string; message?: string }).message ||
-              "登录失败",
-          );
+          throw new Error("登录响应中未找到token");
         }
 
         return response;
@@ -388,21 +420,11 @@ export const useUserStore = defineStore("user", {
         // 处理特定错误码
         const errorMessage = this.getErrorMessage(error);
         ElMessage.error(errorMessage);
-
         throw error;
+      } finally {
+        this.smsCodeCooldown = 1;
+        this.emailCodeCooldown = 1;
       }
-    },
-
-    // 兼容旧版本登录方法
-    async loginLegacy(loginParams: LoginParams): Promise<LoginResponse> {
-      const loginData: LoginRequest = {
-        username: loginParams.username,
-        password: loginParams.password,
-        code: loginParams.code || "",
-        uuid: loginParams.uuid || this.captchaUuid || "",
-      };
-
-      return await this.login(loginData);
     },
 
     // 用户登出
@@ -439,11 +461,14 @@ export const useUserStore = defineStore("user", {
     // 获取用户详细信息（含权限和角色）
     async fetchUserInfo(): Promise<void> {
       try {
+        console.log("开始获取用户信息...");
         const response: UserInfoResponse = await getInfo();
+        console.log("获取用户信息响应:", response);
 
         if (response.code === 200) {
           // 确保响应数据结构正确
           const userData = response.data || {};
+          console.log("用户数据结构:", userData);
 
           // 提取用户信息
           this.userInfo = userData.user || null;
@@ -459,15 +484,16 @@ export const useUserStore = defineStore("user", {
 
           // 持久化存储
           setStoredUserInfo(this.userInfo);
+          setStoredPermissions(this.permissions);
+          setStoredRoles(this.roles);
 
           console.log("✅ 用户信息获取成功");
-
-          // 记录获取到的权限和角色
+          console.log("🔑 用户信息:", this.userInfo);
           console.log("🔑 权限:", this.permissions);
           console.log("👥 角色:", this.roles);
         } else {
           // 处理非200响应
-          const errorMsg = response.msg || `获取用户信息失败 (状态码: ${response.code})`;
+          const errorMsg = response.msg || response.message || `获取用户信息失败 (状态码: ${response.code})`;
           console.error("❌ 获取用户信息失败:", errorMsg);
           throw new Error(errorMsg);
         }
@@ -481,10 +507,15 @@ export const useUserStore = defineStore("user", {
           return;
         }
 
-        // 处理认证错误
+        // 检查是否是401未授权错误
         if (this.isUnauthorizedError(error)) {
           console.log("🔑 Token已过期，需要重新登录");
-          await this.logout();
+          // 只在token确实过期时才登出
+          if (this.token) {
+            ElMessage.error("登录已过期，请重新登录");
+            await this.logout();
+          }
+          throw new Error("登录已过期，请重新登录");
         }
 
         // 处理其他错误
@@ -508,6 +539,8 @@ export const useUserStore = defineStore("user", {
           // 确保响应数据结构正确
           if (response.data && Array.isArray(response.data)) {
             this.routers = response.data;
+            // 持久化存储路由信息
+            this.setStoredRouters(this.routers);
             console.log("✅ 路由信息解析成功:", {
               totalRoutes: response.data.length,
               routes: response.data,
@@ -516,6 +549,7 @@ export const useUserStore = defineStore("user", {
             // 处理数据结构异常的情况
             console.warn("⚠️ 路由数据结构异常，使用空数组作为默认值");
             this.routers = [];
+            this.setStoredRouters(this.routers);
             throw new Error("路由数据结构异常");
           }
         } else {
@@ -528,6 +562,7 @@ export const useUserStore = defineStore("user", {
         console.error("🚨 获取路由信息失败:", error);
         // 即使获取路由失败，也不应该阻止登录流程
         this.routers = [];
+        this.setStoredRouters(this.routers);
 
         // 可以选择不抛出错误，只记录错误信息
         // 如果需要保持原有行为，可以抛出错误
@@ -540,12 +575,61 @@ export const useUserStore = defineStore("user", {
 
     // 初始化用户信息（登录后调用）
     async initializeUserData(): Promise<void> {
-      try {
-        // 获取用户信息（包括权限和角色）
-        await this.fetchUserInfo();
+      // 如果已经有一个初始化正在进行，则返回该Promise
+      if (this.dataInitializationPromise) {
+        console.log("✅ 已有数据初始化正在进行，等待其完成");
+        return this.dataInitializationPromise;
+      }
 
-        // 获取用户可访问的路由菜单
-        await this.fetchRouters();
+      // 如果数据已经初始化，则直接返回
+      if (this.isDataInitialized) {
+        console.log("✅ 用户数据已初始化，跳过重复初始化");
+        return Promise.resolve();
+      }
+
+      // 创建新的初始化Promise
+      this.dataInitializationPromise = this._performDataInitialization();
+      try {
+        await this.dataInitializationPromise;
+      } finally {
+        // 初始化完成后清除Promise引用
+        this.dataInitializationPromise = null;
+      }
+    },
+
+    // 实际执行数据初始化的方法
+    async _performDataInitialization(): Promise<void> {
+      try {
+        console.log("开始并行获取用户权限和路由信息...");
+        console.log("当前数据初始化状态:", this.isDataInitialized);
+        console.log("当前用户信息:", this.userInfo);
+        console.log("当前权限:", this.permissions);
+        console.log("当前角色:", this.roles);
+
+        // 并行获取用户信息和路由信息，提高性能
+        console.log("开始并行请求用户信息和路由信息...");
+        const [userInfoResult, routersResult] = await Promise.allSettled([this.fetchUserInfo(), this.fetchRouters()]);
+
+        // 处理用户信息获取结果
+        if (userInfoResult.status === "fulfilled") {
+          console.log("✅ 用户信息获取成功");
+        } else {
+          console.error("❌ 用户信息获取失败:", userInfoResult.reason);
+          throw userInfoResult.reason;
+        }
+
+        // 处理路由信息获取结果
+        if (routersResult.status === "fulfilled") {
+          console.log("✅ 路由信息获取成功");
+        } else {
+          console.warn("⚠️ 路由信息获取失败:", routersResult.reason);
+          // 路由信息获取失败不中断登录流程，但需要记录错误
+          ElMessage.warning("路由信息加载失败，部分功能可能受限");
+        }
+
+        // 标记数据已初始化
+        this.isDataInitialized = true;
+        console.log("数据初始化完成，标记为已初始化");
 
         console.log("✅ 用户权限和路由信息初始化完成");
         console.log("🔑 用户权限:", this.permissions);
@@ -553,6 +637,8 @@ export const useUserStore = defineStore("user", {
         console.log("🧭 路由菜单:", this.routers);
       } catch (error) {
         console.error("初始化用户数据失败:", error);
+        // 即使初始化失败，也不标记为已初始化，以便下次重试
+        this.isDataInitialized = false;
         throw error;
       }
     },
@@ -642,14 +728,70 @@ export const useUserStore = defineStore("user", {
 
     // 检查是否是未授权错误
     isUnauthorizedError(error: unknown): boolean {
-      if (error instanceof Error && "response" in error) {
-        const response = error.response as { status?: number };
-        return response?.status === 401;
+      // 检查是否是Error对象且有响应
+      if (error instanceof Error) {
+        // 检查Axios错误
+        if ("response" in error && error.response) {
+          const response = error.response as { status?: number };
+          return response?.status === 401;
+        }
+
+        // 检查是否有状态码属性
+        if ("status" in error && typeof error.status === "number") {
+          return (error as { status: number }).status === 401;
+        }
       }
+
+      // 检查是否是对象且有状态码
+      if (typeof error === "object" && error !== null) {
+        if ("status" in error && (error as { status?: number }).status === 401) {
+          return true;
+        }
+
+        // 检查响应中的状态码
+        if ("response" in error && typeof (error as { response?: object }).response === "object") {
+          const response = (error as { response?: { status?: number } }).response;
+          if (response && response.status === 401) {
+            return true;
+          }
+        }
+      }
+
       return false;
     },
 
     // ==== 新增方法 ====
+
+    // 提取登录响应中的token
+    extractTokenFromResponse(response: LoginResponse): string | null {
+      // 检查响应是否包含token
+      if (response?.data?.token) {
+        return response.data.token;
+      }
+
+      // 兼容旧版本响应格式
+      if ((response as any)?.token) {
+        return (response as any).token;
+      }
+
+      // 兼容嵌套data格式
+      if (response?.data?.data?.token) {
+        return response.data.data.token;
+      }
+
+      return null;
+    },
+
+    // 设置登录成功状态
+    setLoginSuccess(token: string): void {
+      // 存储token
+      this.token = token;
+      setStoredToken(token);
+      this.isLoggedIn = true;
+
+      // 初始化用户数据（权限、角色、路由等）
+      this.initializeUserData();
+    },
 
     // 检查用户是否具有特定权限
     hasPermissionCheck(permission: string): boolean {
@@ -682,6 +824,38 @@ export const useUserStore = defineStore("user", {
 
       // 检查是否具有任意一个角色
       return roles.some((role) => this.roles.includes(role));
+    },
+
+    // 新增：设置存储的权限
+    setStoredPermissions(permissions: string[]): void {
+      this.permissions = permissions;
+      setStoredPermissions(permissions);
+    },
+
+    // 新增：设置存储的角色
+    setStoredRoles(roles: string[]): void {
+      this.roles = roles;
+      setStoredRoles(roles);
+    },
+
+    // 新增：设置存储的路由
+    setStoredRouters(routers: RouterInfo[]): void {
+      this.routers = routers;
+      setStoredRouters(routers);
+    },
+
+    // 新增：清除所有存储的数据
+    clearAllStoredData(): void {
+      try {
+        localStorage.removeItem("token");
+        localStorage.removeItem("user-info");
+        localStorage.removeItem("refresh-token");
+        localStorage.removeItem("user-permissions");
+        localStorage.removeItem("user-roles");
+        localStorage.removeItem("user-routers");
+      } catch (error) {
+        console.warn("Failed to clear stored data:", error);
+      }
     },
   },
 });

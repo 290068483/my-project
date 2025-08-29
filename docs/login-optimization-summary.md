@@ -221,7 +221,7 @@ VUE_APP_EMAIL_ENABLED = true;
 ```typescript
 // 路由meta中配置权限
 meta: {
-  requiresAuth: true,
+  requiresAuth: false,
   permissions: ['user:view'],
   roles: ['admin', 'user']
 }

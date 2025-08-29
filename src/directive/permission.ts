@@ -180,6 +180,4 @@ export { permission, permissionShow, role, checkPermission };
  *    <div v-role="'admin'">管理员专用内容</div>
  *    <div v-role="['admin', 'manager']">管理员或经理可见</div>
  *
- * 5. 显示/隐藏（不移除DOM）：
- *    <div v-permission-show="'user:view'">用户信息</div>
  */

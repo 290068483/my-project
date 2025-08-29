@@ -5,7 +5,9 @@
     <el-card class="login-card">
       <template #header>
         <div class="card-header">
-          <el-icon class="header-icon"><Lock /></el-icon>
+          <el-icon class="header-icon">
+            <Lock />
+          </el-icon>
           <span class="header-text">蓝岸管理系统</span>
         </div>
       </template>
@@ -254,15 +256,24 @@ const handleLogin = async () => {
     loading.value = true;
     isLoginDisabled.value = true;
     console.log("登录请求", loginForm);
+
+    // 确保验证码UUID存在
+    const uuid = userStore.captchaUuid;
+    if (!uuid) {
+      ElMessage.error("验证码信息丢失，请刷新验证码");
+      return;
+    }
+
     // 调用用户store的登录方法
     await userStore.login({
       username: loginForm.username,
       password: loginForm.password,
       code: loginForm.code,
-      uuid: userStore.captchaUuid,
+      uuid: uuid,
     });
-  } catch (error: any | undefined) {
+  } catch (error: any) {
     // 捕获登录错误
+    console.error("登录错误:", error);
     ElMessage.error(error?.message || "登录失败，请重试");
   } finally {
     loading.value = false;

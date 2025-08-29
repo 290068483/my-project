@@ -118,13 +118,25 @@ export interface LoginRequest {
  */
 export interface LoginResponse {
   code: number;
-  msg: string;
-  data: {
-    token: string;
-    expiresIn: number;
-    userInfo: UserInfo;
-    refreshToken?: string;
-  };
+  msg?: string;
+  message?: string;
+  data:
+    | {
+        token?: string;
+        expiresIn?: number;
+        userInfo?: UserInfo;
+        refreshToken?: string;
+        permissions?: string[];
+        roles?: string[] | null;
+      }
+    | {
+        data?: {
+          token: string;
+          expiresIn: number;
+          userInfo: UserInfo;
+          refreshToken?: string;
+        };
+      };
 }
 
 /**
