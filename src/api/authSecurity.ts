@@ -3,7 +3,7 @@
  * 提供密码策略、账户锁定、安全检查等功能
  */
 
-import { request } from "@/utils/request";
+import request from "@/utils/request/index";
 
 /**
  * 密码策略接口

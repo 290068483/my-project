@@ -3,7 +3,7 @@
  * 基于 RuoYi 架构设计，符合API接口文档规范
  */
 
-import { request } from "@/utils/request";
+import request from "@/utils/request/index";
 import type {
   SystemConfig,
   ConfigQueryParams,

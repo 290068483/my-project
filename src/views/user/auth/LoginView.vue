@@ -41,11 +41,11 @@
             <div
               class="qrcode-container"
               @click="refreshQrcode"
-              :class="{ 'qrcode-hover': isHovered, 'qrcode-error': !userStore?.captcha?.image }"
+              :class="{ 'qrcode-hover': isHovered, 'qrcode-error': !userStore?.captchaImage }"
               @mouseenter="isHovered = true"
               @mouseleave="isHovered = false">
               <!-- 显示验证码图片或错误提示 -->
-              <template v-if="userStore?.captcha?.image">
+              <template v-if="userStore?.captchaImage">
                 <img
                   :src="userStore.captchaImage"
                   alt="二维码验证码"
@@ -64,7 +64,7 @@
               </template>
             </div>
           </div>
-          <div v-if="!userStore?.captcha?.image" class="qrcode-error-tip">验证码加载失败，请点击刷新</div>
+          <div v-if="!userStore?.captchaImage" class="qrcode-error-tip">验证码加载失败，请点击刷新</div>
         </el-form-item>
         <el-form-item label="密码" prop="password" class="password-form-item">
           <el-input
@@ -100,6 +100,8 @@ import { Lock, Refresh } from "@element-plus/icons-vue";
 import { useRouter } from "vue-router";
 // 导入用户Store
 import { useUserStore } from "@/stores/user";
+// 导入防抖函数
+import { debounce } from "@/utils/debounce";
 // 导入类型定义
 import type { LoginRequest } from "@/types/auth";
 
@@ -120,7 +122,6 @@ const loginForm = reactive<LoginRequest>({
   username: "",
   password: "",
   code: "",
-  uuid: "",
 });
 
 // 状态管理
@@ -148,23 +149,27 @@ const refreshQrcode = async () => {
   try {
     isRefreshing.value = true;
 
-    // 调用用户Store的刷新验证码方法
-    await userStore.refreshCaptcha();
+    // 先清空现有验证码，避免显示旧数据
+    userStore.captchaImage = null;
+
+    await userStore.getCaptcha();
+
+    // 验证码获取成功
   } catch (error: any) {
-    console.error("刷新验证码失败:", error);
     ElMessage.error("验证码刷新失败，请重试");
   } finally {
-    isRefreshing.value = false;
+    // 延迟重置刷新状态，让用户能看到旋转动画
+    setTimeout(() => {
+      isRefreshing.value = false;
+    }, 500);
   }
 };
 
 /**
- * 处理图片加载错误
+ * 处理验证码图片加载错误
  */
 const handleImageError = () => {
-  ElMessage.error("验证码加载失败");
-  // 将captchaImage设置为undefined而不是null
-  userStore.captchaImage = undefined;
+  userStore.captchaImage = null;
 };
 
 /**
@@ -283,14 +288,15 @@ const handleLogin = async () => {
 };
 
 /**
- * 组件挂载时获取验证码
+ * 组件挂载时执行
  */
 onMounted(async () => {
   try {
-    await userStore.refreshCaptcha();
+    // 初始化加载二维码
+    await refreshQrcode();
   } catch (error) {
-    console.error("初始化验证码失败:", error);
-    ElMessage.error("初始化验证码失败");
+    console.error("验证码加载失败:", error);
+    ElMessage.error("验证码初始化失败，请手动刷新");
   }
 });
 

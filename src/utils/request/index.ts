@@ -1,160 +1,108 @@
 import { createAxiosInstance } from "./instance";
-import { RequestManager } from "./methods";
-import { createConfig, defaultConfig } from "./config";
-import type { CreateRequestConfig, RequestMethodConfig, UploadConfig, DownloadConfig, ApiResponse } from "./types";
+import axios, { type AxiosInstance, type InternalAxiosRequestConfig, type AxiosResponse, type AxiosError } from "axios";
+import { ElMessage } from "element-plus";
+import { useUserStore } from "@/stores/user";
+import router from "@/router";
 
-/**
- * 创建请求实例
- * @param customConfig 自定义配置
- * @returns 请求管理器实例
- */
-export function createRequest(customConfig?: Partial<CreateRequestConfig>): RequestManager {
-  const config = createConfig(customConfig);
-  const axiosInstance = createAxiosInstance(config);
-  return new RequestManager(axiosInstance, config);
-}
+// 创建 axios 实例
+const requestInstance: AxiosInstance = axios.create({
+  baseURL: import.meta.env.VITE_API_BASE_URL || "/api",
+  timeout: 10000,
+  headers: {
+    "Content-Type": "application/json;charset=utf-8",
+  },
+});
 
-// 创建默认请求实例
-const defaultRequest = createRequest();
+// 请求拦截器
+requestInstance.interceptors.request.use(
+  (config: InternalAxiosRequestConfig) => {
+    const userStore = useUserStore();
+    // 如果有token，添加到请求头
+    if (userStore.token) {
+      config.headers.set("Authorization", `Bearer ${userStore.token}`);
+    }
+    return config;
+  },
+  (error: AxiosError) => {
+    // 请求错误处理
+    ElMessage.error("请求参数错误");
+    return Promise.reject(error);
+  },
+);
 
-/**
- * 默认请求方法
- */
-export const request = {
-  /**
-   * 通用请求方法
-   */
-  request: <T = unknown>(config: RequestMethodConfig): Promise<T> => defaultRequest.request<T>(config),
+// 响应拦截器
+requestInstance.interceptors.response.use(
+  (response: AxiosResponse) => {
+    // 直接返回data给调用者
+    const { data } = response;
 
-  /**
-   * GET请求
-   */
-  get: <T = unknown>(url: string, params?: unknown, config?: Partial<RequestMethodConfig>): Promise<T> =>
-    defaultRequest.get<T>(url, params, config),
+    // 这里可以根据后端实际状态码处理
+    // 示例：假设后端约定 200 为成功，其他为错误
+    if (data.code !== 200 && data.code !== undefined) {
+      ElMessage.error(data.msg || "操作失败");
+      return Promise.reject(data);
+    }
 
-  /**
-   * POST请求
-   */
-  post: <T = unknown>(url: string, data?: unknown, config?: Partial<RequestMethodConfig>): Promise<T> =>
-    defaultRequest.post<T>(url, data, config),
+    return data;
+  },
+  (error: AxiosError) => {
+    // 响应错误处理
+    const status = error.response?.status;
+    const userStore = useUserStore();
 
-  /**
-   * PUT请求
-   */
-  put: <T = unknown>(url: string, data?: unknown, config?: Partial<RequestMethodConfig>): Promise<T> =>
-    defaultRequest.put<T>(url, data, config),
+    // 避免重复弹出错误消息
+    if (error.message !== "Canceled") {
+      switch (status) {
+        case 401:
+          // 未授权，需要重新登录
+          ElMessage.error("登录已过期，请重新登录");
+          userStore.logout();
+          router.push("/login");
+          break;
+        case 403:
+          ElMessage.error("没有操作权限");
+          break;
+        case 404:
+          ElMessage.error("请求地址不存在");
+          break;
+        case 500:
+          ElMessage.error("服务器内部错误");
+          break;
+        default:
+          ElMessage.error("请求失败，请稍后重试");
+      }
+    }
 
-  /**
-   * DELETE请求
-   */
-  delete: <T = unknown>(url: string, params?: unknown, config?: Partial<RequestMethodConfig>): Promise<T> =>
-    defaultRequest.delete<T>(url, params, config),
+    return Promise.reject(error);
+  },
+);
 
-  /**
-   * PATCH请求
-   */
-  patch: <T = unknown>(url: string, data?: unknown, config?: Partial<RequestMethodConfig>): Promise<T> =>
-    defaultRequest.patch<T>(url, data, config),
+// 封装常用请求方法
+export const http = {
+  get<T = unknown>(url: string, config?: InternalAxiosRequestConfig): Promise<T> {
+    return requestInstance.get(url, config);
+  },
 
-  /**
-   * 文件上传
-   */
-  upload: <T = unknown>(url: string, file: File | FormData, config?: UploadConfig): Promise<T> =>
-    defaultRequest.upload<T>(url, file, config),
+  post<T = unknown>(url: string, data?: unknown, config?: InternalAxiosRequestConfig): Promise<T> {
+    return requestInstance.post(url, data, config);
+  },
 
-  /**
-   * 文件下载
-   */
-  download: (url: string, filename?: string, config?: DownloadConfig): Promise<void> =>
-    defaultRequest.download(url, filename, config),
+  put<T = unknown>(url: string, data?: unknown, config?: InternalAxiosRequestConfig): Promise<T> {
+    return requestInstance.put(url, data, config);
+  },
 
-  /**
-   * 并发请求
-   */
-  concurrent: <T = unknown>(requests: RequestMethodConfig[]): Promise<T[]> => defaultRequest.concurrent<T>(requests),
+  delete<T = unknown>(url: string, config?: InternalAxiosRequestConfig): Promise<T> {
+    return requestInstance.delete(url, config);
+  },
 
-  /**
-   * 串行队列请求
-   */
-  queue: <T = unknown>(requests: RequestMethodConfig[], concurrency?: number): Promise<T[]> =>
-    defaultRequest.queue<T>(requests, concurrency),
+  // 上传文件
+  upload<T = unknown>(url: string, data: FormData, config?: InternalAxiosRequestConfig): Promise<T> {
+    return requestInstance.post(url, data, {
+      headers: { "Content-Type": "multipart/form-data" },
+      ...config,
+    });
+  },
 };
 
-// 默认导出（向后兼容）
-export default request;
-
-// 兼容旧版本API (保持与原Http.ts的兼容)
-export const legacyRequest = {
-  get: request.get,
-  post: request.post,
-  put: request.put,
-  delete: request.delete,
-};
-
-// 类型导出
-export type { ApiResponse, CreateRequestConfig, RequestMethodConfig, UploadConfig, DownloadConfig };
-
-// 工具导出
-export { RequestManager };
-export { defaultConfig } from "./config";
-
-/**
- * 快捷方法
- */
-
-/**
- * 创建API请求方法（带类型支持）
- * @param baseURL API基础路径
- * @param config 额外配置
- * @returns 请求实例
- */
-export function createAPI(baseURL: string, config?: Partial<CreateRequestConfig>) {
-  return createRequest({
-    baseURL,
-    ...config,
-  });
-}
-
-/**
- * 创建文件上传方法
- * @param uploadURL 上传地址
- * @param config 上传配置
- * @returns 上传方法
- */
-export function createUploader(uploadURL: string, config?: UploadConfig) {
-  return (file: File | FormData, customConfig?: UploadConfig) => {
-    return request.upload(uploadURL, file, { ...config, ...customConfig });
-  };
-}
-
-/**
- * 创建文件下载方法
- * @param downloadURL 下载地址
- * @param config 下载配置
- * @returns 下载方法
- */
-export function createDownloader(downloadURL: string, config?: DownloadConfig) {
-  return (filename?: string, customConfig?: DownloadConfig) => {
-    return request.download(downloadURL, filename, { ...config, ...customConfig });
-  };
-}
-
-/**
- * 批量请求方法
- */
-export const batch = {
-  /**
-   * 并发执行多个请求
-   */
-  concurrent: request.concurrent,
-
-  /**
-   * 串行执行多个请求
-   */
-  sequence: (requests: RequestMethodConfig[]) => request.queue(requests, 1),
-
-  /**
-   * 限制并发数的批量请求
-   */
-  limited: request.queue,
-};
+// 默认导出request实例
+export default requestInstance;

@@ -3,7 +3,7 @@
  * 基于RuoYi架构设计，符合API接口文档规范
  */
 
-import { request } from "@/utils/request";
+import request from "@/utils/request/index";
 import type {
   LoginRequest,
   LoginResponse,
@@ -30,6 +30,7 @@ export function login(loginData: LoginRequest): Promise<LoginResponse> {
     loadingText: "登录中...",
     timeout: 30000, // 增加超时时间
     silentError: false, // 登录错误需要显示
+    transformResponse: false,
   });
 }
 
@@ -44,7 +45,7 @@ export function getCaptchaImage(): Promise<CaptchaResponse> {
     timeout: 10000,
     silentError: false,
     transformResponse: false,
-    returnFullResponse: false
+    returnFullResponse: false,
   });
 }
 
@@ -57,6 +58,7 @@ export function getInfo(): Promise<UserInfoResponse> {
   return request.get("/getInfo", undefined, {
     timeout: 15000,
     silentError: true, // 用户信息获取失败时静默处理
+    transformResponse: false,
   });
 }
 
@@ -69,6 +71,7 @@ export function getRouters(): Promise<RoutersResponse> {
   return request.get("/getRouters", undefined, {
     timeout: 15000,
     silentError: true, // 路由获取失败时静默处理
+    transformResponse: false,
   });
 }
 
@@ -84,6 +87,7 @@ export function logout(): Promise<LogoutResponse> {
     {
       timeout: 10000,
       silentError: true, // 退出登录失败时静默处理
+      transformResponse: false,
     },
   );
 }
@@ -105,6 +109,7 @@ export function sendResetCode(identifier: string, type: "email" | "phone"): Prom
       showLoading: true,
       loadingText: "发送中...",
       timeout: 30000,
+      transformResponse: false,
     },
   );
 }
@@ -127,6 +132,7 @@ export function verifyResetCode(
     {
       withToken: false,
       timeout: 15000,
+      transformResponse: false,
     },
   );
 }
@@ -144,6 +150,7 @@ export function resetPassword(resetToken: string, newPassword: string): Promise<
     {
       withToken: false,
       timeout: 15000,
+      transformResponse: false,
     },
   );
 }
@@ -168,6 +175,7 @@ export function register(registerData: {
     showLoading: true,
     loadingText: "注册中...",
     timeout: 30000,
+    transformResponse: false,
   });
 }
 
@@ -181,6 +189,7 @@ export function checkUsername(username: string): Promise<ApiResponse<{ available
     withToken: false,
     timeout: 10000,
     silentError: true,
+    transformResponse: false,
   });
 }
 

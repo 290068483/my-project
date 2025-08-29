@@ -230,12 +230,12 @@
 
 <script setup lang="ts">
 import { ref, reactive, onMounted } from "vue";
-import { uploadAvatar, updateUserInfo } from "@/api/user";
+import { uploadAvatar } from "@/api/user";
 import { useUserStore } from "@/stores/user";
 import type { UploadFile, UploadRawFile } from "element-plus";
 import { ElMessage } from "element-plus";
 import type { FormRules, FormInstance } from "element-plus";
-
+import { updateUserInfo } from "@/api/user";
 export interface UserInfo {
   name?: string;
   department?: string;
@@ -433,8 +433,6 @@ const saveEditInfo = async () => {
   try {
     await editFormRef.value.validate();
     updatingInfo.value = true;
-
-    import { updateUserInfo } from "@/api/user";
 
     // 实际API调用保存用户信息
     try {
