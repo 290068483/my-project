@@ -1,4 +1,4 @@
-import request from "@/utils/request/index.ts";
+import { request } from "@/utils/request/index.ts";
 import type { RegisterRequest, RegisterResponse } from "@/types/auth";
 
 /**

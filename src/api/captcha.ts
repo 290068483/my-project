@@ -3,7 +3,7 @@
  * 基于RuoYi-Vue标准实现，支持多种验证码类型
  */
 
-import request from "@/utils/request/index";
+import { request } from "@/utils/request/index";
 import type { CaptchaResponse } from "@/types/auth";
 
 // ==================== 图形验证码 ====================

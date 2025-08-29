@@ -3,7 +3,7 @@
  * 基于RuoYi-Vue标准实现
  */
 
-import request from "@/utils/request/index";
+import { request } from "@/utils/request/index";
 import type { UserInfoResponse, LogoutResponse, UserInfo } from "@/types/auth";
 
 /**

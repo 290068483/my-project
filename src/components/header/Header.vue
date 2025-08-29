@@ -1,5 +1,5 @@
 <template name="AppHeader">
-  <div class="header-container bg-white border-b border-gray-200 shadow-sm sticky top-0 z-50">
+  <nav class="header-container bg-white border-b border-gray-200 shadow-sm sticky top-0 z-50">
     <!-- 顶部导航栏 -->
     <div
       class="nav-bar flex flex-col sm:flex-row items-center justify-between px-4 sm:px-6 py-2 bg-gradient-to-r shadow-md">
@@ -120,7 +120,7 @@
         <!-- 用户信息 -->
       </div>
     </div>
-  </div>
+  </nav>
   <div class="clearfix"></div>
 
   <!-- 修改密码对话框 -->
@@ -346,7 +346,7 @@ const handleLogout = () => {
 // 设置当前日期
 onMounted(() => {
   // 初始化用户信息
-  userStore.initUserInfo();
+  userStore.initializeUserData();
 });
 </script>
 

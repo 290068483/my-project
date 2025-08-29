@@ -51,8 +51,7 @@
                   alt="二维码验证码"
                   class="qrcode-image"
                   :class="{ 'qrcode-refreshing': isRefreshing }"
-                  @error="handleImageError"
-                  @load="handleImageLoad" />
+                  @error="handleImageError" />
                 <div class="refresh-indicator">
                   <el-icon :size="16" :class="{ 'rotate-icon': isRefreshing }">
                     <Refresh />
@@ -64,7 +63,6 @@
               </template>
             </div>
           </div>
-          <div v-if="!userStore?.captchaImage" class="qrcode-error-tip">验证码加载失败，请点击刷新</div>
         </el-form-item>
         <el-form-item label="密码" prop="password" class="password-form-item">
           <el-input
@@ -100,8 +98,7 @@ import { Lock, Refresh } from "@element-plus/icons-vue";
 import { useRouter } from "vue-router";
 // 导入用户Store
 import { useUserStore } from "@/stores/user";
-// 导入防抖函数
-import { debounce } from "@/utils/debounce";
+
 // 导入类型定义
 import type { LoginRequest } from "@/types/auth";
 
@@ -129,7 +126,6 @@ const isRefreshing = ref(false);
 const isHovered = ref(false);
 const loading = ref(false);
 const isLoginDisabled = ref(false);
-const loginCount = ref(0);
 
 // 计算表单是否有效
 const isFormValid = computed(() => {
@@ -148,15 +144,13 @@ const isFormValid = computed(() => {
 const refreshQrcode = async () => {
   try {
     isRefreshing.value = true;
-
     // 先清空现有验证码，避免显示旧数据
     userStore.captchaImage = null;
-
     await userStore.getCaptcha();
-
     // 验证码获取成功
   } catch (error: any) {
-    ElMessage.error("验证码刷新失败，请重试");
+    console.error("验证码刷新失败:", error);
+    ElMessage.error(error?.message || "验证码刷新失败，请重试");
   } finally {
     // 延迟重置刷新状态，让用户能看到旋转动画
     setTimeout(() => {
@@ -170,13 +164,6 @@ const refreshQrcode = async () => {
  */
 const handleImageError = () => {
   userStore.captchaImage = null;
-};
-
-/**
- * 处理验证码图片加载成功
- */
-const handleImageLoad = () => {
-  // 验证码图片加载成功
 };
 
 /**
@@ -274,31 +261,14 @@ const handleLogin = async () => {
       code: loginForm.code,
       uuid: userStore.captchaUuid,
     });
-    // 登录成功，跳转到重定向路径或首页
-    router.push({ name: "home" });
-  } catch (error) {
+  } catch (error: any | undefined) {
     // 捕获登录错误
-    console.error("登录错误:", error);
-    const errorMsg = error?.code?.[0] || error?.message || "登录失败，请重试";
-    ElMessage.error(errorMsg);
+    ElMessage.error(error?.message || "登录失败，请重试");
   } finally {
     loading.value = false;
     isLoginDisabled.value = false;
   }
 };
-
-/**
- * 组件挂载时执行
- */
-onMounted(async () => {
-  try {
-    // 初始化加载二维码
-    await refreshQrcode();
-  } catch (error) {
-    console.error("验证码加载失败:", error);
-    ElMessage.error("验证码初始化失败，请手动刷新");
-  }
-});
 
 /**
  * 跳转到注册页面

@@ -3,7 +3,7 @@
  * 用于个人资料管理、安全设置、数据导出等功能
  */
 
-import request from "@/utils/request/index";
+import { request } from "@/utils/request/index";
 import type { UserInfo } from "@/types/auth";
 
 /**

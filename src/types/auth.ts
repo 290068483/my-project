@@ -98,10 +98,10 @@ export interface PermissionOptions {
  */
 export interface LoginRequest {
   // 用户名登录
-  username?: string;
-  password?: string;
-  code?: string;
-  uuid?: string;
+  username?: string | null;
+  password?: string | null;
+  code?: string | null;
+  uuid?: string | null;
 
   // 手机号登录
   phone?: string;

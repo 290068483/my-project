@@ -227,21 +227,77 @@ export const useUserStore = defineStore("user", {
     // 获取验证码
     async getCaptcha(): Promise<void> {
       try {
+        console.log("开始获取验证码...");
         // 获取验证码数据
-        const captchaData: CaptchaResponse = await getCaptchaImage();
+        const captchaData: unknown = await getCaptchaImage();
+        console.log("获取到的验证码数据类型:", typeof captchaData);
+        console.log("获取到的验证码数据是否为undefined:", captchaData === undefined);
+        console.log("获取到的验证码数据是否为null:", captchaData === null);
+        console.log("获取到的验证码数据:", captchaData);
+
+        // 检查响应是否为undefined或null
+        if (captchaData === undefined || captchaData === null) {
+          console.error("验证码接口返回空数据");
+          throw new Error("验证码接口返回空数据");
+        }
+
+        // 检查响应是否是AxiosResponse对象（当returnFullResponse为true时）
+        let responseData: unknown;
+        if (typeof captchaData === "object" && captchaData !== null && "data" in captchaData) {
+          // 如果是完整的响应对象，提取data部分
+          responseData = (captchaData as { data: unknown }).data;
+        } else {
+          // 如果是直接的数据对象
+          responseData = captchaData;
+        }
+
+        // 确保responseData是对象且不为null
+        if (typeof responseData !== "object" || responseData === null) {
+          console.error("验证码数据格式错误:", responseData);
+          throw new Error("验证码数据格式错误");
+        }
+
+        // 检查响应数据是否包含必需的字段
+        if (!("img" in responseData) || !("uuid" in responseData)) {
+          console.error("验证码数据缺少必需字段:", responseData);
+          throw new Error("验证码数据格式错误：缺少必需字段");
+        }
+
+        // 类型断言为验证码数据对象
+        const captchaResponseData = responseData as { img: string; uuid: string };
 
         // 确保响应数据有效
-        if (!captchaData || !captchaData.data.uuid || !captchaData.data.img) {
-          console.error("验证码数据无效:", captchaData);
+        if (!captchaResponseData.uuid || !captchaResponseData.img) {
+          console.error("验证码数据无效:", responseData);
           throw new Error("验证码数据无效");
         }
 
         // 设置验证码数据
-        this.captchaUuid = captchaData.data.uuid;
-        this.captchaImage = captchaData.data.img;
+        this.captchaUuid = captchaResponseData.uuid;
+        this.captchaImage = captchaResponseData.img;
         this.captchaTimestamp = Date.now();
+        console.log("验证码获取成功");
       } catch (error: unknown) {
-        ElMessage.error("获取验证码失败，请重试");
+        console.error("获取验证码失败:", error);
+        // 提供更具体的错误信息
+        let errorMessage = "获取验证码失败，请重试";
+        if (error instanceof Error) {
+          // 如果是网络错误，提供更友好的提示
+          if (error.message.includes("网络") || error.message.includes("Network")) {
+            errorMessage = "网络连接失败，请检查网络设置";
+          } else if (error.message.includes("配置")) {
+            errorMessage = "请求配置错误，请联系技术支持";
+          } else if (error.message.includes("空数据")) {
+            errorMessage = "验证码服务暂时不可用，请稍后重试";
+          } else if (error.message.includes("数据无效")) {
+            errorMessage = "验证码数据格式错误，请联系技术支持";
+          } else if (error.message.includes("缺少必需字段")) {
+            errorMessage = "验证码数据格式错误，请联系技术支持";
+          } else {
+            errorMessage = error.message;
+          }
+        }
+        ElMessage.error(errorMessage);
         throw error;
       }
     },
@@ -251,7 +307,7 @@ export const useUserStore = defineStore("user", {
       await this.getCaptcha();
     },
 
-    // 用户登录（新版本，支持验证码）
+    // 用户登录
     async login(loginData: LoginRequest): Promise<LoginResponse> {
       try {
         this.loginStatus = "loading";
@@ -271,6 +327,7 @@ export const useUserStore = defineStore("user", {
           // 从不同可能的位置获取token
           if (response.data && response.data.token) {
             token = response.data.token;
+            console.log("✅ 获取token成功", token);
             userInfo = response.data.userInfo;
           }
 
@@ -500,26 +557,6 @@ export const useUserStore = defineStore("user", {
       }
     },
 
-    // 初始化用户信息
-    initUserInfo(): void {
-      try {
-        const token = getStoredToken();
-        const userInfo = getStoredUserInfo();
-
-        if (token && userInfo) {
-          this.token = token;
-          this.userInfo = userInfo;
-          this.isLoggedIn = true;
-          console.log("👤 初始化用户信息成功:", userInfo);
-        } else {
-          console.log("👤 未找到本地用户信息");
-        }
-      } catch (error) {
-        console.warn("🚨 初始化用户信息失败:", error);
-        // 即使初始化失败，也不阻止页面加载
-      }
-    },
-
     // 更新用户信息
     updateUserInfo(userInfo: UserInfo): void {
       this.userInfo = userInfo;
@@ -560,21 +597,6 @@ export const useUserStore = defineStore("user", {
       }
 
       return true; // 默认返回可用，实际检查在后端进行
-    },
-
-    // 发送注册验证码（功能已简化）
-    async sendRegisterVerificationCode(phone: string): Promise<void> {
-      console.log(`🧪 [验证码发送] 验证码发送功能已简化，模拟发送到: ${phone}`);
-      console.log("💡 [提示] 验证码发送现在集成在登录/注册流程中统一处理");
-
-      // 简单的手机号格式验证
-      const phoneRegex = /^1[3-9]\d{9}$/;
-      if (!phoneRegex.test(phone)) {
-        ElMessage.error("请输入正确的手机号码");
-        throw new Error("手机号格式不正确");
-      }
-
-      ElMessage.success("验证码发送功能已集成到注册流程中");
     },
 
     // 错误消息处理
@@ -628,55 +650,6 @@ export const useUserStore = defineStore("user", {
     },
 
     // ==== 新增方法 ====
-
-    // 手机号登录（功能已简化，使用统一登录方法）
-    async loginWithPhoneNumber(phoneData: { phone: string; code: string }): Promise<LoginResponse> {
-      try {
-        this.loginStatus = "loading";
-        this.loginError = null;
-
-        // 使用统一登录方法，传入手机号登录数据
-        const loginData: LoginRequest = {
-          phone: phoneData.phone,
-          code: phoneData.code,
-          loginType: "phone",
-        };
-
-        const response: LoginResponse = await login(loginData);
-
-        if (response.code === 200) {
-          this.token = response.data.token;
-          this.userInfo = response.data.userInfo;
-          this.isLoggedIn = true;
-          this.loginStatus = "success";
-
-          if (response.data.refreshToken) {
-            this.refreshToken = response.data.refreshToken;
-            setStoredRefreshToken(this.refreshToken);
-          }
-
-          setStoredToken(this.token);
-          setStoredUserInfo(this.userInfo);
-          this.smsCodeCooldown = 0;
-          this.emailCodeCooldown = 0;
-
-          ElMessage.success("登录成功");
-          router.push("/home");
-        } else {
-          this.loginStatus = "error";
-          this.loginError = response.msg || "登录失败";
-          throw new Error(response.msg || "登录失败");
-        }
-
-        return response;
-      } catch (error: unknown) {
-        this.loginStatus = "error";
-        this.loginError = this.getErrorMessage(error);
-        console.error("手机号登录失败:", error);
-        ElMessage.error(this.loginError);
-        throw error;
-      }
-    },
 
     // 检查用户是否具有特定权限
     hasPermissionCheck(permission: string): boolean {

@@ -3,7 +3,7 @@
  * 基于API测试指南中提到的接口规范
  */
 
-import request from "@/utils/request/index";
+import { request } from "@/utils/request/index";
 import type { ApiResponse } from "@/types/api";
 
 // ==================== 验证请求参数类型定义 ====================

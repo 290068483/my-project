@@ -163,7 +163,7 @@ const strengthAnalysis = computed(() => {
   }
 
   // 包含特殊字符
-  if (/[!@#$%^&*()_+\-=\[\]{};':"\\|,.<>\/?]/.test(password)) {
+  if (/[!@#$%^&*()_+\-=[\]{};':"\\|,.<>/?]/.test(password)) {
     score += 15;
   } else if (config.value.requireSpecialChars) {
     suggestions.push("包含至少一个特殊字符");
@@ -173,7 +173,7 @@ const strengthAnalysis = computed(() => {
   const hasUpper = /[A-Z]/.test(password);
   const hasLower = /[a-z]/.test(password);
   const hasNumbers = /\d/.test(password);
-  const hasSpecial = /[!@#$%^&*()_+\-=\[\]{};':"\\|,.<>\/?]/.test(password);
+  const hasSpecial = /[!@#$%^&*()_+\-=[\]{};':"\\|,.<>/?]/.test(password);
   const diversity = [hasUpper, hasLower, hasNumbers, hasSpecial].filter(Boolean).length;
 
   if (diversity >= 3) {
@@ -266,7 +266,7 @@ const requirements = computed(() => {
       text: "包含数字",
     },
     special: {
-      met: !config.value.requireSpecialChars || /[!@#$%^&*()_+\-=\[\]{};':"\\|,.<>\/?]/.test(password),
+      met: !config.value.requireSpecialChars || /[!@#$%^&*()_+\-=[\]{};':"\\|,.<>/?]/.test(password),
       text: "包含特殊字符",
     },
   };

@@ -306,7 +306,6 @@ const apiRequest = createRequest({
   timeout: 15000,
   withToken: true,
   showLoading: true,
-  transformResponse: true,
 });
 
 // 使用自定义实例
