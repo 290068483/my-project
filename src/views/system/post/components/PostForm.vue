@@ -11,56 +11,28 @@
       :rules="rules"
       label-width="80px">
       <el-row :gutter="20">
-        <el-col :span="24" v-if="formData.parentId !== 0">
-          <el-form-item label="上级部门" prop="parentId">
-            <el-tree-select
-              v-model="formData.parentId"
-              :data="deptOptions"
-              :props="{ value: 'deptId', label: 'deptName', children: 'children' }"
-              value-key="deptId"
-              placeholder="选择上级部门"
-              check-strictly />
+        <el-col :span="12">
+          <el-form-item label="岗位编码" prop="postCode">
+            <el-input v-model="formData.postCode" placeholder="请输入岗位编码" />
+          </el-form-item>
+        </el-col>
+        
+        <el-col :span="12">
+          <el-form-item label="岗位名称" prop="postName">
+            <el-input v-model="formData.postName" placeholder="请输入岗位名称" />
           </el-form-item>
         </el-col>
       </el-row>
       
       <el-row :gutter="20">
         <el-col :span="12">
-          <el-form-item label="部门名称" prop="deptName">
-            <el-input v-model="formData.deptName" placeholder="请输入部门名称" />
+          <el-form-item label="显示顺序" prop="postSort">
+            <el-input-number v-model="formData.postSort" controls-position="right" :min="0" />
           </el-form-item>
         </el-col>
         
         <el-col :span="12">
-          <el-form-item label="显示排序" prop="orderNum">
-            <el-input-number v-model="formData.orderNum" controls-position="right" :min="0" />
-          </el-form-item>
-        </el-col>
-      </el-row>
-      
-      <el-row :gutter="20">
-        <el-col :span="12">
-          <el-form-item label="负责人" prop="leader">
-            <el-input v-model="formData.leader" placeholder="请输入负责人" maxlength="20" />
-          </el-form-item>
-        </el-col>
-        
-        <el-col :span="12">
-          <el-form-item label="联系电话" prop="phone">
-            <el-input v-model="formData.phone" placeholder="请输入联系电话" maxlength="11" />
-          </el-form-item>
-        </el-col>
-      </el-row>
-      
-      <el-row :gutter="20">
-        <el-col :span="12">
-          <el-form-item label="邮箱" prop="email">
-            <el-input v-model="formData.email" placeholder="请输入邮箱" maxlength="50" />
-          </el-form-item>
-        </el-col>
-        
-        <el-col :span="12">
-          <el-form-item label="部门状态">
+          <el-form-item label="岗位状态" prop="status">
             <el-radio-group v-model="formData.status">
               <el-radio
                 v-for="dict in statusOptions"
@@ -69,6 +41,14 @@
                 {{ dict.label }}
               </el-radio>
             </el-radio-group>
+          </el-form-item>
+        </el-col>
+      </el-row>
+      
+      <el-row :gutter="20">
+        <el-col :span="24">
+          <el-form-item label="备注" prop="remark">
+            <el-input v-model="formData.remark" type="textarea" placeholder="请输入内容" />
           </el-form-item>
         </el-col>
       </el-row>
@@ -87,7 +67,7 @@
 import { ref, reactive, computed, watch, defineEmits, defineProps } from 'vue'
 import { ElMessage, ElForm } from 'element-plus'
 import type { FormInstance, FormRules } from 'element-plus'
-import type { DeptForm } from '@/types/system/dept'
+import type { PostForm } from '@/types/system/post'
 
 // 定义属性
 const props = defineProps({
@@ -103,13 +83,9 @@ const props = defineProps({
     type: String as () => 'add' | 'edit',
     required: true
   },
-  deptData: {
-    type: Object as () => Partial<DeptForm>,
+  postData: {
+    type: Object as () => Partial<PostForm>,
     default: () => ({})
-  },
-  deptTree: {
-    type: Array as () => DeptForm[],
-    default: () => []
   }
 })
 
@@ -120,30 +96,25 @@ const emit = defineEmits(['update:modelValue', 'success'])
 const formRef = ref<FormInstance>()
 
 // 表单数据
-const formData = reactive<DeptForm>({
-  deptId: undefined,
-  parentId: 0,
-  deptName: '',
-  orderNum: 0,
-  leader: '',
-  phone: '',
-  email: '',
-  status: '0'
+const formData = reactive<PostForm>({
+  postId: undefined,
+  postCode: '',
+  postName: '',
+  postSort: 0,
+  status: '0',
+  remark: ''
 })
 
 // 表单规则
 const rules = reactive<FormRules>({
-  deptName: [
-    { required: true, message: '部门名称不能为空', trigger: 'blur' }
+  postCode: [
+    { required: true, message: '岗位编码不能为空', trigger: 'blur' }
   ],
-  orderNum: [
-    { required: true, message: '显示排序不能为空', trigger: 'blur' }
+  postName: [
+    { required: true, message: '岗位名称不能为空', trigger: 'blur' }
   ],
-  email: [
-    { type: 'email', message: '请输入正确的邮箱地址', trigger: ['blur', 'change'] }
-  ],
-  phone: [
-    { pattern: /^1[3|4|5|6|7|8|9][0-9]\d{8}$/, message: '请输入正确的手机号码', trigger: 'blur' }
+  postSort: [
+    { required: true, message: '岗位顺序不能为空', trigger: 'blur' }
   ]
 })
 
@@ -153,21 +124,14 @@ const statusOptions = [
   { value: '1', label: '停用' }
 ]
 
-// 部门选项
-const deptOptions = computed(() => {
-  const deptTree = [...props.deptTree]
-  const dept = { deptId: 0, deptName: '主部门', children: deptTree } as DeptForm
-  return [dept]
-})
-
 // 对话框可见性
 const dialogVisible = computed({
   get: () => props.modelValue,
   set: (value) => emit('update:modelValue', value)
 })
 
-// 监听部门数据变化
-watch(() => props.deptData, (newVal) => {
+// 监听岗位数据变化
+watch(() => props.postData, (newVal) => {
   if (newVal) {
     Object.assign(formData, newVal)
   }
@@ -202,14 +166,12 @@ const handleClose = () => {
 const resetForm = () => {
   formRef.value?.resetFields()
   Object.assign(formData, {
-    deptId: undefined,
-    parentId: 0,
-    deptName: '',
-    orderNum: 0,
-    leader: '',
-    phone: '',
-    email: '',
-    status: '0'
+    postId: undefined,
+    postCode: '',
+    postName: '',
+    postSort: 0,
+    status: '0',
+    remark: ''
   })
 }
 </script>

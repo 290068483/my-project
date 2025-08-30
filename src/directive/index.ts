@@ -1,16 +1,12 @@
 import type { App } from "vue";
-import { setupPermissionDirective } from "./permission";
+import { permission } from "./permission";
+import hasPermi from "./permission/hasPermi";
 
-/**
- * 安装所有指令
- * @param app Vue应用实例
- */
-export function setupDirectives(app: App): void {
-  // 安装权限指令
-  setupPermissionDirective(app);
-
-  // 可以在这里添加其他指令的安装
-  // setupOtherDirective(app)
+// 注册全局指令
+export function setupDirectives(app: App) {
+  // 注册权限指令
+  app.directive("permission", permission);
+  app.directive("hasPermi", hasPermi);
 }
 
 /**

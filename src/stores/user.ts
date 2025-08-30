@@ -317,6 +317,7 @@ export const useUserStore = defineStore("user", {
         } else {
           // 如果是直接的数据对象
           responseData = captchaData;
+          console.log("验证码数据:", responseData);
         }
 
         // 确保responseData是对象且不为null
@@ -342,9 +343,24 @@ export const useUserStore = defineStore("user", {
 
         // 设置验证码数据
         this.captchaUuid = captchaResponseData.uuid;
-        this.captchaImage = captchaResponseData.img;
+        // 检查img是否已经包含data:image前缀，如果包含则直接使用，否则添加前缀
+        if (captchaResponseData.img.startsWith("data:image")) {
+          this.captchaImage = captchaResponseData.img;
+        } else {
+          // 根据图片数据判断图片格式，如果以"/9j/"开头则是JPEG格式
+          const isJPEG = captchaResponseData.img.startsWith("/9j/");
+          this.captchaImage = isJPEG
+            ? `data:image/jpeg;base64,${captchaResponseData.img}`
+            : `data:image/gif;base64,${captchaResponseData.img}`;
+        }
         this.captchaTimestamp = Date.now();
-        console.log("验证码获取成功");
+        console.log("验证码获取成功:", {
+          uuid: this.captchaUuid,
+          image: this.captchaImage?.substring(0, 100) + "...",
+          imageLength: this.captchaImage?.length,
+          isJPEG: captchaResponseData.img.startsWith("/9j/"),
+          timestamp: this.captchaTimestamp,
+        });
       } catch (error: unknown) {
         console.error("获取验证码失败:", error);
         // 提供更具体的错误信息
@@ -765,18 +781,19 @@ export const useUserStore = defineStore("user", {
     // 提取登录响应中的token
     extractTokenFromResponse(response: LoginResponse): string | null {
       // 检查响应是否包含token
-      if (response?.data?.token) {
-        return response.data.token;
+      if (response && response.data) {
+        // 类型1: { data: { token: string, ... } }
+        if ('token' in response.data && response.data.token) {
+          return response.data.token;
+        }
+        // 类型2: { data: { data: { token: string, ... } } }
+        else if ('data' in response.data && response.data.data && typeof response.data.data === 'object' && 'token' in response.data.data) {
+          return (response.data.data as { token: string }).token;
+        }
       }
-
-      // 兼容旧版本响应格式
-      if ((response as any)?.token) {
-        return (response as any).token;
-      }
-
-      // 兼容嵌套data格式
-      if (response?.data?.data?.token) {
-        return response.data.data.token;
+      // 类型3: { token: string, ... } (直接在response中)
+      else if ('token' in response && (response as unknown as { token: string }).token) {
+        return (response as unknown as { token: string }).token;
       }
 
       return null;
@@ -826,6 +843,11 @@ export const useUserStore = defineStore("user", {
       return roles.some((role) => this.roles.includes(role));
     },
 
+    // 检查是否具有管理员角色
+    isAdmin(): boolean {
+      return this.roles.includes("admin");
+    },
+
     // 新增：设置存储的权限
     setStoredPermissions(permissions: string[]): void {
       this.permissions = permissions;
@@ -842,6 +864,18 @@ export const useUserStore = defineStore("user", {
     setStoredRouters(routers: RouterInfo[]): void {
       this.routers = routers;
       setStoredRouters(routers);
+    },
+
+    // 新增：重置用户密码
+    async resetUserPwd(userId: number, password: string): Promise<void> {
+      try {
+        // 调用API重置密码
+        const { resetUserPwd } = await import("@/api/system/user");
+        await resetUserPwd({ userId, password });
+      } catch (error) {
+        console.error("重置用户密码失败:", error);
+        throw error;
+      }
     },
 
     // 新增：清除所有存储的数据

@@ -29,6 +29,16 @@
             @blur="validateUsername" />
         </el-form-item>
 
+        <el-form-item label="密码" prop="password" class="password-form-item">
+          <el-input
+            v-model="loginForm.password"
+            type="password"
+            placeholder="请输入密码"
+            :disabled="isLoginDisabled"
+            size="small"
+            @keyup.enter="handleLogin" />
+        </el-form-item>
+
         <!-- 二维码验证码区域 -->
         <el-form-item label="验证码" prop="code" class="password-form-item">
           <div class="qrcode-captcha-wrapper">
@@ -37,7 +47,8 @@
               placeholder="请输入验证码"
               :disabled="isLoginDisabled"
               size="small"
-              class="captcha-input" />
+              class="captcha-input"
+              @keyup.enter="handleLogin" />
 
             <!-- 二维码图片，带点击刷新功能 -->
             <div
@@ -59,6 +70,10 @@
                     <Refresh />
                   </el-icon>
                 </div>
+                <!-- 调试信息 -->
+                <div v-if="false" style="position: absolute; bottom: 0; left: 0; background: rgba(0,0,0,0.7); color: white; font-size: 10px; padding: 2px;">
+                  UUID: {{ userStore.captchaUuid?.substring(0, 8) }}
+                </div>
               </template>
               <template v-else>
                 <div class="qrcode-error-message">点击刷新</div>
@@ -66,14 +81,12 @@
             </div>
           </div>
         </el-form-item>
-        <el-form-item label="密码" prop="password" class="password-form-item">
-          <el-input
-            v-model="loginForm.password"
-            type="password"
-            placeholder="请输入密码"
-            :disabled="isLoginDisabled"
-            size="small" />
+        
+        <!-- 记住密码 -->
+        <el-form-item style="margin-top: -10px;">
+          <el-checkbox v-model="loginForm.rememberMe" style="margin: 0;">记住密码</el-checkbox>
         </el-form-item>
+        
         <div class="form-footer">
           <el-button type="primary" size="large" class="login-btn" :loading="loading" native-type="submit">
             {{ loading ? "登录中..." : "登录" }}
@@ -91,18 +104,27 @@
 
 <script setup lang="ts">
 // 导入Vue相关API
-import { ref, reactive, onMounted, watch, computed } from "vue";
+import { ref, reactive, onMounted, watch } from "vue";
+
 // 导入Element Plus组件和消息提示
-import { ElMessage, ElForm } from "element-plus";
+import { ElMessage } from "element-plus";
+import type { FormInstance } from "element-plus";
+
 // 导入图标
 import { Lock, Refresh } from "@element-plus/icons-vue";
-// 导入路由相关API
+
+// 导入路由相关
 import { useRouter } from "vue-router";
-// 导入用户Store
+
+// 导入用户状态管理
 import { useUserStore } from "@/stores/user";
 
-// 导入类型定义
-import type { LoginRequest } from "@/types/auth";
+// 导入加密工具
+import { encrypt, decrypt } from "@/utils/jsencrypt";
+
+// 导入Cookies库
+import Cookies from "js-cookie";
+
 
 // 定义组件Props
 defineProps<{
@@ -115,12 +137,13 @@ const router = useRouter();
 // 用户Store实例
 const userStore = useUserStore();
 // 登录表单引用
-const loginFormRef = ref<InstanceType<typeof ElForm>>();
+const loginFormRef = ref<FormInstance>();
 // 登录表单数据
-const loginForm = reactive<LoginRequest>({
-  username: "",
-  password: "",
+const loginForm = reactive({
+  username: "admin",
+  password: "admin123",
   code: "",
+  rememberMe: false,
 });
 
 // 状态管理
@@ -130,7 +153,7 @@ const loading = ref(false);
 const isLoginDisabled = ref(false);
 
 // 计算表单是否有效
-const isFormValid = computed(() => {
+/* const isFormValid = computed(() => {
   return (
     loginForm.username &&
     loginForm.password &&
@@ -138,7 +161,7 @@ const isFormValid = computed(() => {
     loginForm.username.length >= 5 &&
     loginForm.code.length >= 1
   );
-});
+}); */
 
 /**
  * 刷新二维码
@@ -150,9 +173,20 @@ const refreshQrcode = async () => {
     userStore.captchaImage = null;
     await userStore.getCaptcha();
     // 验证码获取成功
-  } catch (error: any) {
+    console.log("验证码获取成功:", {
+      uuid: userStore.captchaUuid,
+    } /* satisfies { uuid: string | null; image: string; imageLength: number } */);
+  } catch (error: unknown) {
     console.error("验证码刷新失败:", error);
-    ElMessage.error(error?.message || "验证码刷新失败，请重试");
+    let errorMessage = "验证码刷新失败，请重试";
+    
+    if (error instanceof Error) {
+      errorMessage = error.message;
+    } else if (typeof error === 'string') {
+      errorMessage = error;
+    }
+    
+    ElMessage.error(errorMessage);
   } finally {
     // 延迟重置刷新状态，让用户能看到旋转动画
     setTimeout(() => {
@@ -171,9 +205,9 @@ const handleImageError = () => {
 /**
  * 验证用户名格式
  */
-const validateUsername = () => {
+const validateUsername = (): boolean => {
   // 检查用户名是否为空
-  if (!loginForm.username || loginForm.username.trim() === "") {
+  if (!loginForm.username || typeof loginForm.username !== 'string' || loginForm.username.trim() === "") {
     return false;
   }
 
@@ -192,14 +226,43 @@ watch(
   },
 );
 
-// 页面加载时获取验证码
+// 页面加载时获取验证码和Cookie中的用户名密码
 onMounted(async () => {
   try {
+    getCookie();
     await refreshQrcode();
   } catch (error) {
+    console.error("初始化验证码失败:", error);
     ElMessage.error("初始化验证码失败，请手动刷新");
   }
 });
+
+/**
+ * 获取Cookie中保存的用户名和密码
+ */
+const getCookie = () => {
+  const username = Cookies.get("username");
+  const password = Cookies.get("password");
+  const rememberMe = Cookies.get("rememberMe");
+  loginForm.username = username === undefined ? loginForm.username : username;
+  loginForm.password = password === undefined ? loginForm.password : decrypt(password);
+  loginForm.rememberMe = rememberMe === undefined ? false : Boolean(rememberMe === "true");
+};
+
+/**
+ * 设置Cookie保存用户名和密码
+ */
+const setCookie = () => {
+  if (loginForm.rememberMe) {
+    Cookies.set("username", loginForm.username, { expires: 30 });
+    Cookies.set("password", encrypt(loginForm.password), { expires: 30 });
+    Cookies.set("rememberMe", loginForm.rememberMe.toString(), { expires: 30 });
+  } else {
+    Cookies.remove("username");
+    Cookies.remove("password");
+    Cookies.remove("rememberMe");
+  }
+};
 
 /**
  * 登录表单验证规则
@@ -264,6 +327,9 @@ const handleLogin = async () => {
       return;
     }
 
+    // 设置Cookie保存用户名和密码
+    setCookie();
+
     // 调用用户store的登录方法
     await userStore.login({
       username: loginForm.username,
@@ -271,10 +337,10 @@ const handleLogin = async () => {
       code: loginForm.code,
       uuid: uuid,
     });
-  } catch (error: any) {
+  } catch (error) {
     // 捕获登录错误
     console.error("登录错误:", error);
-    ElMessage.error(error?.message || "登录失败，请重试");
+    ElMessage.error((error as Error)?.message || "登录失败，请重试");
   } finally {
     loading.value = false;
     isLoginDisabled.value = false;
@@ -294,6 +360,7 @@ const goToRegister = () => {
 const goToForgotPassword = () => {
   router.push("/forgot-password");
 };
+
 </script>
 
 <style scoped>

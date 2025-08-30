@@ -311,7 +311,7 @@ export class RequestManager {
           console.log("处理响应数据:", data);
 
           if (data.code === 200 || data.code === 0) {
-            return data.data;
+            return data;
           } else {
             const error = new Error(
               data.message || (data as unknown as { msg: string }).msg || "请求失败",
@@ -461,8 +461,6 @@ export class RequestManager {
    * 通用请求方法
    */
   async request<T = unknown>(config: RequestMethodConfig): Promise<T> {
-    console.log("发起请求:", config);
-
     const finalConfig: RequestMethodConfig = { ...this.config, ...config };
     console.log("最终配置:", finalConfig);
 
@@ -495,8 +493,6 @@ export class RequestManager {
         onUploadProgress: finalConfig.onUploadProgress,
         onDownloadProgress: finalConfig.onDownloadProgress,
       };
-
-      console.log("Axios请求配置:", axiosRequestConfig);
 
       const response = await this.instance.request(axiosRequestConfig);
 

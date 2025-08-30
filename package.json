@@ -28,6 +28,8 @@
     "echarts": "^6.0.0",
     "element-plus": "^2.10.7",
     "file-saver": "2.0.5",
+    "js-cookie": "^3.0.5",
+    "jsencrypt": "^3.5.4",
     "lodash": "^4.17.21",
     "lunar-javascript": "^1.7.3",
     "moment": "^2.30.1",
