@@ -2,7 +2,7 @@
   <nav class="header-container bg-white border-b border-gray-200 shadow-sm sticky top-0 z-50">
     <!-- 顶部导航栏 -->
     <div
-      class="nav-bar flex flex-col sm:flex-row items-center justify-between px-4 sm:px-6 py-2 bg-gradient-to-r shadow-md">
+      class="nav-bar flex flex-col sm:flex-row items-center justify-between px-4 sm:px-6 py-2 bg-gradient-to-r from-blue-500 to-blue-600 shadow-md">
       <!-- 头部导航菜单 -->
       <div
         class="nav-menu flex space-x-1 gap-1 justify-start overflow-x-auto hide-scrollbar sm:space-x-4 lg:overflow-visible w-full sm:w-auto"
@@ -92,14 +92,14 @@
                 class="border-2 border-blue-200"
                 :alt="userInfo?.name ? userInfo.name + '的头像' : '用户头像'"></el-avatar>
               <div class="ml-3 hidden lg:block">
-                <div class="text-sm font-medium text-gray-800">
+                <div class="text-sm font-medium text-white">
                   {{ userInfo?.name || "未登录" }}
                 </div>
-                <div class="text-xs text-gray-500">
+                <div class="text-xs text-blue-100">
                   {{ userInfo?.position || "暂无职位" }}
                 </div>
               </div>
-              <el-icon class="ml-1 text-gray-500 hidden lg:block">
+              <el-icon class="ml-1 text-blue-100 hidden lg:block">
                 <arrow-down />
               </el-icon>
             </div>
@@ -346,7 +346,6 @@ const handleLogout = () => {
 // 设置当前日期
 onMounted(() => {
   // 初始化用户信息
-  userStore.initializeUserData();
 });
 </script>
 
@@ -389,21 +388,22 @@ onMounted(() => {
 .dropdown-container {
   --el-dropdown-item-height: 30px;
 }
+
 /* 在你的样式文件中添加 */
 /* 基础高度设置 */
-::v-deep .el-dropdown-menu__item {
+:deep(.el-dropdown-menu__item) {
   height: 40px; /* 自定义高度 */
   line-height: 40px; /* 与高度保持一致，确保文字垂直居中 */
   padding: 0 20px; /* 可根据需要调整内边距 */
 }
 
 /* hover状态下的高度保持一致 */
-::v-deep .el-dropdown-menu__item:hover {
+:deep(.el-dropdown-menu__item:hover) {
   height: 40px;
 }
 
 /* 禁用状态也保持统一高度 */
-::v-deep .el-dropdown-menu__item.is-disabled {
+:deep(.el-dropdown-menu__item.is-disabled) {
   height: 40px;
   line-height: 40px;
 }

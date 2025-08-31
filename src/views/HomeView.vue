@@ -1,5 +1,5 @@
 <template>
-  <div class="home-container bg-[#d3ceca] min-h-screen min-w-full bg-neutral flex flex-col font-sans">
+  <div class="home-container bg-gray-200 min-h-screen w-full flex flex-col font-sans">
     <!-- 网络错误提示 -->
     <div v-if="hasNetworkError" class="network-warning bg-yellow-50 border-l-4 border-yellow-400 p-3 mb-4">
       <div class="flex items-center">
@@ -14,39 +14,31 @@
       </div>
     </div>
 
-    <!-- 加载状态 -->
-    <div v-if="!isComponentReady" class="loading-container flex items-center justify-center min-h-[400px]">
-      <div class="text-center">
-        <div class="animate-spin rounded-full h-12 w-12 border-b-2 border-blue-500 mx-auto mb-4"></div>
-        <p class="text-gray-600">正在加载页面...</p>
-      </div>
-    </div>
-
-    <!-- 主要内容 -->
-    <div v-show="isComponentReady" class="w-full px-4 sm:px-6 pt-6 sm:pt-8 pb-4 sm:pb-6 flex-grow">
+    <!-- 主要内容 (确保内容始终显示) -->
+    <div class="w-full px-4 sm:px-6 pt-6 sm:pt-8 pb-4 sm:pb-6 flex-grow">
       <!-- 用户信息和欢迎区域 -->
       <div
         class="user-info-area border-b border-gray-200 bg-white px-4 sm:px-6 py-3 sm:py-4 bg-gradient-to-r from-blue-50 to-gray-50 flex flex-col sm:flex-row flex-wrap items-center shadow-sm">
         <div class="user-details min-w-[300px] flex items-center space-x-3 sm:space-x-4 mb-2 sm:mb-0 w-full sm:w-auto">
           <div
-            class="user-avatar w-12 h-12 bg-primary rounded-full flex items-center justify-center text-white font-bold shadow-md border border-primary/20">
-            {{ userInfo.avatar }}
+            class="user-avatar w-12 h-12 bg-blue-500 rounded-full flex items-center justify-center text-white font-bold shadow-md border border-blue-200">
+            {{ userInfo.avatar ? "" : userInfo.name ? userInfo.name.charAt(0) : "U" }}
           </div>
           <div class="user-text">
-            <div class="user-info-grid">
-              <div class="info-label">姓名：</div>
+            <div class="user-info-grid grid grid-cols-2 gap-1">
+              <div class="info-label font-medium">姓名：</div>
               <div class="info-value">{{ userInfo.name }}</div>
-              <div class="info-label">所属部门：</div>
+              <div class="info-label font-medium">所属部门：</div>
               <div class="info-value">{{ userInfo.department }}</div>
-              <div class="info-label">职位：</div>
+              <div class="info-label font-medium">职位：</div>
               <div class="info-value">{{ userInfo.position }}</div>
             </div>
           </div>
         </div>
 
-        <div class="welcome-section text-right">
-          <h1 class="text-lg sm:text-xl font-bold text-primary">欢迎进入九素工作台</h1>
-          <div class="p-box flex item-center justify-center gap-5 pr-20">
+        <div class="welcome-section text-right flex-grow">
+          <h1 class="text-lg sm:text-xl font-bold text-blue-600">欢迎进入九素工作台</h1>
+          <div class="p-box flex items-center justify-center gap-5 pr-20">
             <p class="text-sm text-gray-500 mt-1">
               {{ getDate }}<text class="text-red-500">{{ getTime }}</text>
             </p>
@@ -70,7 +62,7 @@
       <div class="notification-area px-4 sm:px-6 py-2 sm:py-3 bg-white border-t border-gray-100">
         <el-carousel :interval="4000" type="card" height="130px" class="notification-carousel">
           <el-carousel-item
-            v-for="notification in homeStore.getNotifications"
+            v-for="notification in homeStore.getNotifications || []"
             :key="notification.id"
             class="notification-item-container">
             <div
@@ -97,12 +89,13 @@
           </el-carousel-item>
         </el-carousel>
       </div>
+
       <!-- 快捷信息区域 -->
-      <div class="quick-info gap-5 rounded-lg shadow-card">
+      <div class="quick-info gap-5 rounded-lg shadow-card flex flex-wrap py-4">
         <div
-          v-for="(card, index) in quickInfoCards"
+          v-for="(card, index) in quickInfoCards || []"
           :key="index"
-          class="info-card bg-[#3b3838] rounded-sm shadow-card p-4 border border-gray-100 hover:shadow-card-hover transition-all duration-300 flex item-center transform hover:-translate-y-1"
+          class="info-card bg-gray-800 rounded-sm shadow-card p-4 border border-gray-100 hover:shadow-card-hover transition-all duration-300 flex items-center transform hover:-translate-y-1"
           :class="card.bgColor">
           <svg class="w-5 h-5 text-white" fill="none" stroke="currentColor" viewBox="0 0 24 24">
             <path
@@ -111,63 +104,63 @@
               stroke-width="2"
               d="M9 5H7a2 2 0 00-2 2v12a2 2 0 002 2h10a2 2 0 002-2V7a2 2 0 00-2-2h-2M9 5a2 2 0 002 2h2a2 2 0 002-2M9 5a2 2 0 012-2h2a2 2 0 012 2m-3 7h3m-3 4h3m-6-4h.01M9 16h.01"></path>
           </svg>
-          <h3 class="text-sm font-semibold text-white">今日待处理事件<text class="text-red-500 pl-2">条</text></h3>
+          <h3 class="text-sm font-semibold text-white ml-2">今日待处理事件<text class="text-red-500 pl-2">条</text></h3>
         </div>
-        <div>
+        <div class="flex items-center">
           <el-button type="primary" size="medium" @click="handleButtonClick">录入新进度</el-button>
         </div>
       </div>
-      <!-- 数据表格区域 -->
-      <div class="data-tables grid grid-cols-1 lg:grid-cols-12 gap-6">
-        <!-- 待处理事件表格 -->
 
+      <!-- 数据表格区域 -->
+      <div class="data-tables grid grid-cols-1 lg:grid-cols-12 gap-6 mt-6">
+        <!-- 待处理事件表格 -->
         <div
           class="table-container bg-white rounded-lg shadow-sm border border-gray-100 overflow-hidden hover:shadow-md transition-shadow duration-300 lg:col-span-6">
           <div
-            class="table-header table-title bg-blue-50 px-4 py-2 border-b border-primary-dark flex justify-between items-center">
-            <h3 class="text-sm text-center mx-auto font-semibold">本人待处理的所有事项</h3>
-            <!-- <button class="text-xs text-white hover:text-blue-200 flex items-center">
-            <span>详情</span>
-            <svg class="w-3 h-3 ml-1" fill="none" stroke="currentColor" viewBox="0 0 24 24">
-              <path stroke-linecap="round" stroke-linejoin="round" stroke-width="2" d="M14 5l7 7m0 0l-7 7m7-7H3"></path>
-            </svg>
-          </button> -->
+            class="table-header table-title bg-blue-50 px-4 py-2 border-b border-blue-200 flex justify-between items-center">
+            <h3 class="text-sm text-center mx-auto font-semibold">{{ data1.title || "本人待处理的所有事项" }}</h3>
           </div>
           <!-- 表格 -->
-          <el-table
-            :data="data1.data"
-            style="width: 100%"
-            stripe
-            border
-            :default-sort="{ prop: 'id', order: 'descending' }"
-            @sort-change="sortBy">
-            <el-table-column prop="id" label="id:" width="80" align="center"></el-table-column>
-            <el-table-column prop="name" label="姓名：" width="80" align="center"></el-table-column>
-            <el-table-column prop="count" label="数量：" width="80" align="center"></el-table-column>
-            <el-table-column prop="details" label="详情："></el-table-column>
-          </el-table>
+          <div class="table-wrapper w-full overflow-x-auto">
+            <el-table
+              :data="data1.data || []"
+              style="width: 100%"
+              stripe
+              border
+              :default-sort="{ prop: 'id', order: 'descending' }"
+              @sort-change="sortBy"
+              class="w-full">
+              <el-table-column prop="id" label="ID" width="80" align="center"></el-table-column>
+              <el-table-column prop="name" label="姓名" width="120" align="center"></el-table-column>
+              <el-table-column prop="count" label="数量" width="100" align="center"></el-table-column>
+              <el-table-column prop="details" label="详情"></el-table-column>
+            </el-table>
+          </div>
         </div>
 
         <!-- 与本人关联事项表格 -->
         <div
           class="table-container rounded-lg shadow-sm border border-gray-100 overflow-hidden hover:shadow-md transition-shadow duration-300 lg:col-span-6">
           <div
-            class="table-header table-title bg-blue-50 px-4 py-2 border-b border-blue-100 flex justify-between items-center">
-            <h3 class="text-sm font-semibold">与本人关联的所有事项</h3>
+            class="table-header table-title bg-blue-50 px-4 py-2 border-b border-blue-200 flex justify-between items-center">
+            <h3 class="text-sm font-semibold">{{ data2.title || "与本人关联的所有事项" }}</h3>
           </div>
           <!-- 表格 -->
-          <el-table
-            :data="data2.data"
-            style="width: 100%"
-            stripe
-            border
-            :default-sort="{ prop: 'id', order: 'descending' }"
-            @sort-change="sortBy">
-            <el-table-column prop="id" label="id:" width="80" align="center"></el-table-column>
-            <el-table-column prop="name" label="姓名：" width="180" align="center"></el-table-column>
-            <el-table-column prop="count" label="数量：" width="180" align="center"></el-table-column>
-            <el-table-column prop="details" label="详情："></el-table-column>
-          </el-table>
+          <div class="table-wrapper w-full overflow-x-auto">
+            <el-table
+              :data="data2.data || []"
+              style="width: 100%"
+              stripe
+              border
+              :default-sort="{ prop: 'id', order: 'descending' }"
+              @sort-change="sortBy"
+              class="w-full">
+              <el-table-column prop="id" label="ID" width="80" align="center"></el-table-column>
+              <el-table-column prop="name" label="姓名" width="120" align="center"></el-table-column>
+              <el-table-column prop="count" label="数量" width="100" align="center"></el-table-column>
+              <el-table-column prop="details" label="详情"></el-table-column>
+            </el-table>
+          </div>
         </div>
       </div>
     </div>
@@ -175,7 +168,7 @@
 </template>
 
 <script setup lang="ts">
-import { ref, onMounted, computed, onErrorCaptured } from "vue";
+import { ref, onMounted, computed, onErrorCaptured, nextTick } from "vue";
 import { useUserStore } from "@/stores/user";
 import { useHomeStore } from "@/stores/home";
 import { getFullDateWithWeekday } from "@/utils/dateUtils";
@@ -197,7 +190,7 @@ export interface Announcement {
 }
 
 // 组件正常加载状态
-const isComponentReady = ref(false);
+const isComponentReady = ref(true); // 默认设置为true，确保内容始终显示
 const hasNetworkError = ref(false);
 
 // 使用stores
@@ -213,35 +206,145 @@ onErrorCaptured((error) => {
 
 onMounted(async () => {
   try {
-    // 初始化用户信息（在localStorage中有数据的话）
-    userStore.initUserInfo();
+    // 直接设置组件为准备就绪状态，确保内容可见
+    isComponentReady.value = true;
 
     // 尝试获取用户信息（如果有Token的话）
     if (userStore.token) {
       try {
-        await userStore.fetchUserInfo();
+        await userStore.getInfo(); // 使用正确的用户store方法
+        console.log("用户信息获取成功:", userStore.$state);
       } catch (error) {
         console.warn("🔍 获取用户信息失败，使用本地数据:", error);
         hasNetworkError.value = true;
       }
     }
+
+    // 确保homeStore有数据
+    if (!homeStore.getDate) {
+      // 初始化日期数据
+      homeStore.updateDate(moment().format("YYYY-MM-DD"));
+      homeStore.updateTime(moment().format("HH:mm:ss"));
+      homeStore.updateLunarDate("农历日期");
+      homeStore.updateWeekdays(moment().format("dddd"));
+    }
+
+    // 确保表格数据存在
+    if (!homeStore.getData1 || !homeStore.getData1.data || homeStore.getData1.data.length === 0) {
+      homeStore.data1 = {
+        title: "本人待处理的所有事项",
+        data: [
+          {
+            id: 1,
+            name: "示例任务1",
+            count: "任务描述1",
+            details: "2023-03-24",
+          },
+          {
+            id: 2,
+            name: "示例任务2",
+            count: "任务描述2",
+            details: "详细信息",
+          },
+        ],
+      };
+    }
+
+    if (!homeStore.getData2 || !homeStore.getData2.data || homeStore.getData2.data.length === 0) {
+      homeStore.data2 = {
+        title: "与本人关联的所有事项",
+        data: [
+          {
+            id: 1,
+            name: "关联任务1",
+            count: "关联描述1",
+            details: "2023-03-24",
+          },
+          {
+            id: 2,
+            name: "关联任务2",
+            count: "关联描述2",
+            details: "详细信息",
+          },
+        ],
+      };
+    }
+
+    console.log("HomeStore数据:", homeStore.$state);
+
+    // 强制更新组件
+    await nextTick();
   } catch (error) {
     console.error("🚨 初始化失败:", error);
     hasNetworkError.value = true;
-  } finally {
-    // 无论是否成功，都设置组件为准备就绪状态
+    // 即使出错也要确保组件可见
     isComponentReady.value = true;
   }
 });
 
+// 在组件创建时也初始化数据
+(() => {
+  // 确保homeStore有数据
+  if (!homeStore.getDate) {
+    // 初始化日期数据
+    homeStore.updateDate(moment().format("YYYY-MM-DD"));
+    homeStore.updateTime(moment().format("HH:mm:ss"));
+    homeStore.updateLunarDate("农历日期");
+    homeStore.updateWeekdays(moment().format("dddd"));
+  }
+
+  // 确保表格数据存在
+  if (!homeStore.getData1 || !homeStore.getData1.data || homeStore.getData1.data.length === 0) {
+    homeStore.data1 = {
+      title: "本人待处理的所有事项",
+      data: [
+        {
+          id: 1,
+          name: "示例任务1",
+          count: "任务描述1",
+          details: "2023-03-24",
+        },
+        {
+          id: 2,
+          name: "示例任务2",
+          count: "任务描述2",
+          details: "详细信息",
+        },
+      ],
+    };
+  }
+
+  if (!homeStore.getData2 || !homeStore.getData2.data || homeStore.getData2.data.length === 0) {
+    homeStore.data2 = {
+      title: "与本人关联的所有事项",
+      data: [
+        {
+          id: 1,
+          name: "关联任务1",
+          count: "关联描述1",
+          details: "2023-03-24",
+        },
+        {
+          id: 2,
+          name: "关联任务2",
+          count: "关联描述2",
+          details: "详细信息",
+        },
+      ],
+    };
+  }
+})();
+
 // 计算属性获取用户信息
 const userInfo = computed(() => {
-  const info = userStore.getUserInfo;
+  // 直接从userStore中获取用户信息
+  const userDetail = userStore.$state;
+
   return {
-    name: info?.name || info?.nickname || "未设置",
-    position: info?.position || "未设置",
-    department: info?.department || "未设置",
-    avatar: info?.avatar || DEFAULT_AVATAR,
+    name: userDetail.name || "未设置",
+    position: userDetail.position || "未设置",
+    department: userDetail.department || "未设置",
+    avatar: userDetail.avatar || DEFAULT_AVATAR,
   };
 });
 
@@ -270,8 +373,16 @@ const quickStats = computed(() => homeStore.getQuickStats);
 const pendingItems = computed(() => homeStore.getPendingItems);
 const relatedItems = computed(() => homeStore.getRelatedItems);
 const announcements = computed(() => homeStore.getAnnouncements);
-const data1 = computed(() => homeStore.getData1);
-const data2 = computed(() => homeStore.getData1);
+const data1 = computed(() => {
+  const d1 = homeStore.getData1 || { title: "本人待处理的所有事项", data: [] };
+  console.log("data1 computed:", d1);
+  return d1;
+});
+const data2 = computed(() => {
+  const d2 = homeStore.getData2 || { title: "与本人关联的所有事项", data: [] };
+  console.log("data2 computed:", d2);
+  return d2;
+});
 
 const showItemDetails = (name: string) => {
   homeStore.showItemDetails(name);
@@ -292,139 +403,3 @@ function sortBy(sortConfig: any) {
   console.log("排序配置:", sortConfig);
 }
 </script>
-
-<style scoped>
-/* 自定义滚动条样式 */
-.scrollbar-thin {
-  scrollbar-width: thin;
-}
-
-.scrollbar-thumb-gray-300 {
-  scrollbar-color: rgba(209, 213, 219, 0.5) transparent;
-}
-
-.scrollbar-track-gray-100 {
-  scrollbar-track-color: rgba(243, 244, 246, 0.5);
-}
-
-/* 响应式调整 */
-@media (max-width: 768px) {
-  .data-tables {
-    grid-template-columns: 1fr;
-  }
-}
-
-/* 鼠标悬停效果增强 */
-#pending-tasks-table tr:hover td:last-child span {
-  text-decoration: underline;
-  color: #2563eb;
-}
-
-.user-info-grid {
-  display: grid;
-  grid-template-columns: auto 1fr;
-  gap: 0 10px;
-}
-
-.info-label {
-  text-align: right;
-  padding-left: 15px;
-  color: #4b5563; /* text-gray-600 */
-  font-size: 0.875rem; /* text-sm */
-  white-space: nowrap;
-}
-
-.info-value {
-  text-align: left;
-  color: #1f2937; /* text-gray-800 */
-  font-size: 0.875rem; /* text-sm */
-  font-weight: 500;
-}
-.table-title {
-  width: 100%;
-  display: flex;
-  align-items: center;
-  justify-content: center;
-}
-.user-info-area,
-.user-info-area * {
-  font-weight: 500;
-}
-
-/* 轮播通知样式 */
-.notification-carousel :deep(.el-carousel__container) {
-  height: 130px;
-}
-
-.notification-carousel :deep(.el-carousel__item) {
-  width: calc(30% - 15px);
-  margin: 0 7.5px;
-}
-
-.notification-item-container {
-  display: flex;
-  align-items: center;
-  justify-content: center;
-  padding: 0;
-  width: 100%;
-}
-
-.notification-item {
-  width: 100%;
-  max-width: none;
-  height: 90px;
-  margin: 0;
-}
-
-.notification-content {
-  word-break: break-word;
-  display: -webkit-box;
-  -webkit-line-clamp: 2;
-  -webkit-box-orient: vertical;
-  overflow: hidden;
-}
-.text-right {
-  flex: 1;
-  text-align: center;
-  /* 文本右边缩进100px */
-  & > h1 {
-    padding-right: 100px;
-  }
-}
-/* 紧急程度背景色 */
-.notification-item.critical {
-  background: linear-gradient(to right, #fef2f2, #fff7ed);
-  border-color: #fecaca;
-}
-
-.notification-item.warning {
-  background: linear-gradient(to right, #fffbeb, #fef3c7);
-  border-color: #fde68a;
-}
-
-.notification-item.success {
-  background: linear-gradient(to right, #f0fdf4, #dcfce7);
-  border-color: #bbf7d0;
-}
-
-.notification-item.info {
-  background: linear-gradient(to right, #eff6ff, #dbeafe);
-  border-color: #bfdbfe;
-}
-.info-card {
-  padding: 2px 10px;
-  align-items: center;
-  padding-left: 10px;
-}
-.quick-info {
-  display: flex;
-  align-items: center;
-  margin: 10px 0;
-}
-
-@media (max-width: 768px) {
-  .text-right > h1 {
-    padding-right: 0;
-  }
-}
-</style>

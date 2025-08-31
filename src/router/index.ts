@@ -40,7 +40,7 @@ export const constantRoutes: Array<RouteRecordRaw> = [
       {
         path: "home",
         name: "Home",
-        component: () => import("../views/HomeView.vue"),
+        component: HomeView, // 直接使用已导入的组件
         meta: {
           requiresAuth: false,
           title: "首页",

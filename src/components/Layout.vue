@@ -1,7 +1,7 @@
 <template>
-  <div class="layout home-container min-h-screen min-w-full bg-neutral flex flex-col font-sans">
+  <div class="layout home-container min-h-screen min-w-full flex flex-col font-sans">
     <Header ref="headerRef" />
-    <div v-if="skeletonScreen" class="skeleton-screen fixed inset-0 z-50 flex flex-col bg-white/90">
+    <div v-if="skeletonScreen" class="skeleton-screen fixed inset-0 z-50 flex flex-col bg-white">
       <div class="skeleton-header h-16 sm:h-32 bg-gray-100 animate-pulse"></div>
       <div class="skeleton-content flex-1 p-6 space-y-4">
         <div class="h-6 w-1/4 bg-gray-100 rounded animate-pulse"></div>
@@ -11,83 +11,79 @@
       </div>
     </div>
     <main ref="mainRef" class="flex-1 p-4 sm:p-6 transition-all duration-300" :style="{ marginTop: mainMarginTop }">
-      <RouterView />
+      <Home />
     </main>
   </div>
-  <!-- <Footer /> -->
 </template>
 
 <script setup lang="ts">
 // 组件逻辑
 import Header from "@/components/header/Header.vue";
+import Home from "@/views/HomeView.vue";
 import { RouterView } from "vue-router";
 import { ref, onMounted, nextTick, onUnmounted, watch } from "vue";
-const loading = ref(true);
+const loading = ref(false); // 默认设置为false，避免骨架屏影响
 const mainRef = ref<HTMLDivElement | null>(null);
 const headerRef = ref<InstanceType<typeof Header>>();
 const mainMarginTop = ref("0");
 
 // 骨架屏 loading 逻辑
-const skeletonScreen = ref(true);
+const skeletonScreen = ref(false); // 默认设置为false，避免骨架屏影响
 
 // 监听loading状态变化
 watch(
   () => loading.value,
   (newVal) => {
     if (!newVal) {
-      // 移除骨架屏 - 设置为50秒后关闭
-      setTimeout(() => {
-        skeletonScreen.value = false;
-      }, 200);
+      // 移除骨架屏
+      skeletonScreen.value = false;
     }
   },
 );
 
-// 模拟数据加载，2秒后设置loading为false
+// 组件挂载时和窗口大小变化时更新main区域的margin-top
 onMounted(() => {
-  setTimeout(() => {
-    loading.value = false;
-  }, 200);
+  updateMainMarginTop();
 
-  // 组件挂载时和窗口大小变化时更新main区域的margin-top
-  onMounted(() => {
-    updateMainMarginTop();
+  // 监听窗口大小变化，重新计算margin-top
+  window.addEventListener("resize", updateMainMarginTop);
 
-    // 监听窗口大小变化，重新计算margin-top
-    window.addEventListener("resize", updateMainMarginTop);
-
-    // 监听headerRef的变化
-    watch(headerRef, () => {
-      nextTick(updateMainMarginTop);
-    });
+  // 监听headerRef的变化
+  watch(headerRef, () => {
+    nextTick(updateMainMarginTop);
   });
+});
 
-  // 更新main区域的margin-top
-  const updateMainMarginTop = () => {
-    if (headerRef.value && mainRef.value) {
-      // 获取header组件的根DOM元素
-      const headerElement = headerRef.value.$el;
+// 更新main区域的margin-top
+const updateMainMarginTop = () => {
+  if (headerRef.value && mainRef.value) {
+    // 获取header组件的根DOM元素
+    const headerElement = headerRef.value.$el;
 
-      // 确保header元素存在
-      if (!headerElement) return;
+    // 确保header元素存在
+    if (!headerElement) return;
 
-      // 获取header的实际高度
-      const headerHeight = headerElement.offsetHeight;
+    // 获取header的实际高度
+    const headerHeight = headerElement.offsetHeight;
 
-      // 设置main区域的margin-top
-      mainMarginTop.value = `${headerHeight + 1}px`;
+    // 设置main区域的margin-top
+    mainMarginTop.value = `${headerHeight + 1}px`;
 
-      // 设置CSS变量，供子组件使用
-      document.documentElement.style.setProperty("--header-height", `${headerHeight}px`);
+    // 设置CSS变量，供子组件使用
+    document.documentElement.style.setProperty("--header-height", `${headerHeight}px`);
 
-      // 确保mainRef的样式被正确应用
-      nextTick(() => {
-        if (mainRef.value) {
-          mainRef.value.style.marginTop = mainMarginTop.value;
-        }
-      });
-    }
-  };
+    // 确保mainRef的样式被正确应用
+    nextTick(() => {
+      if (mainRef.value) {
+        mainRef.value.style.marginTop = mainMarginTop.value;
+      }
+    });
+  }
+};
+
+// 清理事件监听器
+onUnmounted(() => {
+  window.removeEventListener("resize", updateMainMarginTop);
 });
 </script>
 <style scoped>

@@ -24,6 +24,8 @@ interface UserState {
   avatar: string;
   roles: string[];
   permissions: string[];
+  position: string; // 添加职位信息
+  department: string; // 添加部门信息
 }
 
 export const useUserStore = defineStore("user", {
@@ -33,6 +35,8 @@ export const useUserStore = defineStore("user", {
     avatar: "",
     roles: [],
     permissions: [],
+    position: "", // 添加职位信息
+    department: "", // 添加部门信息
   }),
 
   getters: {
@@ -45,6 +49,8 @@ export const useUserStore = defineStore("user", {
         avatar: state.avatar,
         roles: state.roles,
         permissions: state.permissions,
+        position: state.position,
+        department: state.department,
       };
     },
     getUserRole: (state) => {
@@ -146,8 +152,11 @@ export const useUserStore = defineStore("user", {
               this.permissions =
                 userData.permissions && Array.isArray(userData.permissions) ? [...userData.permissions] : [];
 
-              this.name = user.userName || user.nickName || "";
+              this.name = user.userName || user.nickName || user.name || "";
               this.avatar = avatar;
+              // 设置职位和部门信息
+              this.position = user.position || "";
+              this.department = user.department || "";
               resolve(responseData);
             } else {
               const errorMsg = responseData.msg || "获取用户信息失败";

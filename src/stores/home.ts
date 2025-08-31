@@ -95,9 +95,9 @@ export const useHomeStore = defineStore("home", {
       { name: "待处理", count: 4 },
       { name: "待跟踪", count: 3 },
     ] as Item[],
-    // tabe1数据
+    // table1数据
     data1: {
-      title: "本人嗲处理的所有事情",
+      title: "本人待处理的所有事项",
       data: [
         {
           id: 1,
@@ -108,25 +108,25 @@ export const useHomeStore = defineStore("home", {
         {
           id: 2,
           name: "待处理任务2",
-          count: "任务描述1",
-          details: "dsdfsdf水电费水电费",
+          count: "任务描述2",
+          details: "详细信息",
         },
       ],
     },
     data2: {
-      title: "本人嗲处理的所有事情",
+      title: "与本人关联的所有事项",
       data: [
         {
           id: 1,
-          name: "待处理任务1",
-          count: "任务描述1",
+          name: "关联任务1",
+          count: "关联描述1",
           details: "2023-03-24",
         },
         {
           id: 2,
-          name: "待处理任务2",
-          count: "任务描述1",
-          details: "dsdfsdf水电费水电费",
+          name: "关联任务2",
+          count: "关联描述2",
+          details: "详细信息",
         },
       ],
     },
