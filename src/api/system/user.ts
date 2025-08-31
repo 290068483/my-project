@@ -1,257 +1,224 @@
-/**
- * 系统用户管理 API
- * 基于 RuoYi 架构设计，符合API接口文档规范
- */
-
-import { request } from "@/utils/request/index";
-import type {
-  UserQueryParams,
-  UserForm,
-  UserPasswordForm,
-  UserProfileForm,
-  UserPasswordUpdateForm,
-  UserListResponse,
-  UserDetailResponse,
-  UserAuthResponse,
-  DeptTreeResponse,
-  RoleListResponse,
-  PostListResponse,
-  UserImportResponse,
-  UserAuthDetailResponse,
-} from "@/types/system/user";
-import type { ApiResponse } from "@/types/api";
-
-// ==================== 基本用户管理接口 ====================
+import request from "@/utils/request";
+import type { SystemUser, SystemUserQueryParams } from "@/types/system/user";
 
 /**
- * 分页查询用户列表
+ * 查询用户列表
  * @param params 查询参数
+ * @returns Promise<any>
  */
-export function listUser(params?: UserQueryParams): Promise<UserListResponse> {
-  return request.get("/system/user/list", { params });
+export function listUser(params?: SystemUserQueryParams) {
+  return request({
+    url: "/system/user/list",
+    method: "get",
+    params,
+  });
 }
 
 /**
- * 查询用户详细信息
+ * 查询用户详细
  * @param userId 用户ID
+ * @returns Promise<any>
  */
-export function getUser(userId?: number): Promise<UserDetailResponse> {
-  return request.get(`/system/user/${userId || ""}`);
+export function getUser(userId: number) {
+  return request({
+    url: `/system/user/${userId}`,
+    method: "get",
+  });
 }
 
 /**
  * 新增用户
- * @param data 用户信息
+ * @param data 用户数据
+ * @returns Promise<any>
  */
-export function addUser(data: UserForm): Promise<ApiResponse> {
-  return request.post("/system/user", data);
+export function addUser(data: any) {
+  return request({
+    url: "/system/user",
+    method: "post",
+    data,
+  });
 }
 
 /**
  * 修改用户
- * @param data 用户信息
+ * @param data 用户数据
+ * @returns Promise<any>
  */
-export function updateUser(data: UserForm): Promise<ApiResponse> {
-  return request.put("/system/user", data);
+export function updateUser(data: any) {
+  return request({
+    url: "/system/user",
+    method: "put",
+    data,
+  });
 }
 
 /**
  * 删除用户
- * @param userIds 用户ID列表
+ * @param userIds 用户ID或IDs数组
+ * @returns Promise<any>
  */
-export function delUser(userIds: number | number[]): Promise<ApiResponse> {
-  const ids = Array.isArray(userIds) ? userIds.join(",") : userIds;
-  return request.delete(`/system/user/${ids}`);
-}
-
-// ==================== 权限相关接口 ====================
-
-/**
- * 获取用户权限信息
- * @param userId 用户ID
- */
-export function getUserAuth(userId: number): Promise<UserAuthDetailResponse> {
-  return request.get(`/system/user/auth/${userId}`);
+export function delUser(userIds: number | number[]) {
+  const idsStr = Array.isArray(userIds) ? userIds.join(",") : userIds;
+  return request({
+    url: `/system/user/${idsStr}`,
+    method: "delete",
+  });
 }
 
 /**
- * 更新用户权限
- * @param data 权限数据
- */
-export function updateUserAuth(data: { userId: number; roleIds: number[] }): Promise<ApiResponse> {
-  return request.put("/system/user/auth", data);
-}
-
-/**
- * 重置用户密码
- * @param data 密码重置数据
- */
-export function resetUserPwd(data: UserPasswordForm): Promise<ApiResponse> {
-  return request.put("/system/user/resetPwd", data);
-}
-
-/**
- * 修改用户状态
- * @param data 状态数据
- */
-export function changeUserStatus(data: { userId: number; status: string }): Promise<ApiResponse> {
-  return request.put("/system/user/changeStatus", data);
-}
-
-// ==================== 个人信息管理接口 ====================
-
-/**
- * 获取个人信息
- */
-export function getUserProfile(): Promise<UserDetailResponse> {
-  return request.get("/system/user/profile");
-}
-
-/**
- * 修改个人信息
- * @param data 个人信息
- */
-export function updateUserProfile(data: UserProfileForm): Promise<ApiResponse> {
-  return request.put("/system/user/profile", data);
-}
-
-/**
- * 修改个人密码
- * @param data 密码数据
- */
-export function updateUserPwd(data: UserPasswordUpdateForm): Promise<ApiResponse> {
-  return request.put("/system/user/profile/updatePwd", data);
-}
-
-/**
- * 更新用户头像
- * @param file 头像文件
- */
-export function uploadAvatar(file: File): Promise<ApiResponse<{ imgUrl: string }>> {
-  const formData = new FormData();
-  formData.append("avatarfile", file);
-  return request.upload("/system/user/profile/avatar", formData);
-}
-
-// ==================== 辅助数据接口 ====================
-
-/**
- * 查询部门树选择
- */
-export function deptTreeSelect(): Promise<DeptTreeResponse> {
-  return request.get("/system/user/deptTree");
-}
-
-/**
- * 查询角色列表
- */
-export function listRole(): Promise<RoleListResponse> {
-  return request.get("/system/role/list");
-}
-
-/**
- * 查询岗位列表
- */
-export function listPost(): Promise<PostListResponse> {
-  return request.get("/system/post/list");
-}
-
-/**
- * 查询部门列表（树形结构）
- */
-export function listDept(): Promise<DeptTreeResponse> {
-  return request.get("/system/dept/list");
-}
-
-// ==================== 数据导入导出接口 ====================
-
-/**
- * 导入用户数据
- * @param file 文件数据
- * @param updateSupport 是否更新支持
- */
-export function importUser(file: File, updateSupport: boolean = false): Promise<UserImportResponse> {
-  const formData = new FormData();
-  formData.append("file", file);
-  formData.append("updateSupport", updateSupport.toString());
-
-  return request.upload("/system/user/importData", formData);
-}
-
-/**
- * 导出用户数据
+ * 导出用户
  * @param params 查询参数
+ * @returns Promise<any>
  */
-export function exportUser(params?: UserQueryParams): Promise<void> {
-  const filename = `用户列表_${new Date().getTime()}.xlsx`;
-  return request.download("/system/user/export", filename, { params });
+export function exportUser(params?: SystemUserQueryParams) {
+  return request({
+    url: "/system/user/export",
+    method: "get",
+    params,
+  });
+}
+
+/**
+ * 用户密码重置
+ * @param data 用户ID和新密码
+ * @returns Promise<any>
+ */
+export function resetUserPwd(data: { userId: number; password: string }) {
+  return request({
+    url: "/system/user/resetPwd",
+    method: "put",
+    data,
+  });
+}
+
+/**
+ * 用户状态修改
+ * @param userId 用户ID
+ * @param status 状态
+ * @returns Promise<any>
+ */
+export function changeUserStatus(userId: number, status: string) {
+  const data = { userId, status };
+  return request({
+    url: "/system/user/changeStatus",
+    method: "put",
+    data,
+  });
+}
+
+/**
+ * 查询用户个人信息
+ * @returns Promise<any>
+ */
+export function getUserProfile() {
+  return request({
+    url: "/system/user/profile",
+    method: "get",
+  });
+}
+
+/**
+ * 修改用户个人信息
+ * @param data 用户数据
+ * @returns Promise<any>
+ */
+export function updateUserProfile(data: any) {
+  return request({
+    url: "/system/user/profile",
+    method: "put",
+    data,
+  });
+}
+
+/**
+ * 用户密码重置
+ * @param oldPassword 旧密码
+ * @param newPassword 新密码
+ * @returns Promise<any>
+ */
+export function updateUserPwd(oldPassword: string, newPassword: string) {
+  const data = { oldPassword, newPassword };
+  return request({
+    url: "/system/user/profile/updatePwd",
+    method: "put",
+    data,
+  });
+}
+
+/**
+ * 用户头像上传
+ * @param data 头像文件
+ * @returns Promise<any>
+ */
+export function uploadAvatar(data: any) {
+  return request({
+    url: "/system/user/profile/avatar",
+    method: "post",
+    data,
+  });
 }
 
 /**
  * 下载用户导入模板
+ * @returns Promise<any>
  */
-export function importTemplate(): Promise<void> {
-  return request.download("/system/user/importTemplate", "用户导入模板.xlsx");
+export function importTemplate() {
+  return request({
+    url: "/system/user/importTemplate",
+    method: "get",
+  });
 }
 
 /**
- * 查询用户授权角色
- * @param userId 用户ID
+ * 校验用户名称唯一性
+ * @param params 查询参数
+ * @returns Promise<any>
  */
-export function getAuthRole(userId: number): Promise<UserAuthResponse> {
-  return request.get(`/system/user/authRole/${userId}`);
-}
-
-/**
- * 用户授权角色
- * @param data 授权数据
- */
-export function updateAuthRole(data: { userId: number; roleIds: string }): Promise<ApiResponse> {
-  return request.put("/system/user/authRole", data);
-}
-
-/**
- * 校验用户名唯一性
- * @param userName 用户名
- */
-export function checkUserNameUnique(userName: string): Promise<ApiResponse<boolean>> {
-  return request.get("/system/user/checkUserNameUnique", {
-    params: { userName },
+export function checkUserNameUnique(params: { userName: string; userId?: number }) {
+  return request({
+    url: "/system/user/checkUserNameUnique",
+    method: "get",
+    params,
   });
 }
 
 /**
  * 校验手机号唯一性
- * @param phonenumber 手机号
+ * @param params 查询参数
+ * @returns Promise<any>
  */
-export function checkPhoneUnique(phonenumber: string): Promise<ApiResponse<boolean>> {
-  return request.get("/system/user/checkPhoneUnique", {
-    params: { phonenumber },
+export function checkPhoneUnique(params: { phonenumber: string; userId?: number }) {
+  return request({
+    url: "/system/user/checkPhoneUnique",
+    method: "get",
+    params,
   });
 }
 
 /**
  * 校验邮箱唯一性
- * @param email 邮箱
+ * @param params 查询参数
+ * @returns Promise<any>
  */
-export function checkEmailUnique(email: string): Promise<ApiResponse<boolean>> {
-  return request.get("/system/user/checkEmailUnique", {
-    params: { email },
+export function checkEmailUnique(params: { email: string; userId?: number }) {
+  return request({
+    url: "/system/user/checkEmailUnique",
+    method: "get",
+    params,
   });
 }
 
 /**
- * 查询已分配用户角色列表
- * @param params 查询参数
+ * 批量修改用户状态
+ * @param userIds 用户ID数组
+ * @param status 状态
+ * @returns Promise<any>
  */
-export function allocatedUserList(params?: UserQueryParams): Promise<UserListResponse> {
-  return request.get("/system/user/list/allocated", { params });
-}
-
-/**
- * 查询未分配用户角色列表
- * @param params 查询参数
- */
-export function unallocatedUserList(params?: UserQueryParams): Promise<UserListResponse> {
-  return request.get("/system/user/list/unallocated", { params });
+export function batchChangeUserStatus(userIds: number[], status: string) {
+  const data = { userIds, status };
+  return request({
+    url: "/system/user/batchChangeStatus",
+    method: "put",
+    data,
+  });
 }

@@ -1,295 +1,237 @@
-/**
- * 用户相关API
- * 基于RuoYi-Vue标准实现
- */
-
-import { request } from "@/utils/request/index";
-import type { UserInfoResponse, LogoutResponse, UserInfo } from "@/types/auth";
+import request from "@/utils/request";
 
 /**
- * 获取用户详细信息
- * RuoYi标准接口：/getInfo
- * @returns Promise<UserInfoResponse>
+ * 获取用户个人信息
+ * @returns Promise<any>
  */
-export function getInfo(): Promise<UserInfoResponse> {
-  return request.get("/getInfo", undefined, {
-    timeout: 15000,
-    silentError: true, // 用户信息获取失败时静默处理
+export function getUserProfile() {
+  return request({
+    url: "/system/user/profile",
+    method: "get",
   });
 }
 
 /**
- * 退出登录
- * RuoYi标准接口：/logout
- * @returns Promise<LogoutResponse>
- */
-export function logout(): Promise<LogoutResponse> {
-  return request.post(
-    "/logout",
-    {},
-    {
-      timeout: 10000,
-      silentError: true, // 退出登录失败时静默处理
-    },
-  );
-}
-
-// ==================== 个人信息管理 ====================
-
-/**
- * 更新用户信息
- * RuoYi标准接口：/system/user/profile
+ * 修改用户个人信息
  * @param userInfo 用户信息
- * @returns Promise<{ code: number; msg: string; data?: unknown }>
+ * @returns Promise<any>
  */
-export function updateUserInfo(userInfo: Partial<UserInfo>): Promise<{
-  code: number;
-  msg: string;
-  data?: unknown;
-}> {
-  return request.put("/system/user/profile", userInfo, {
-    showLoading: true,
-    loadingText: "更新中...",
-    timeout: 15000,
+export function updateUserInfo(userInfo: any) {
+  return request({
+    url: "/system/user/profile",
+    method: "put",
+    data: userInfo,
   });
 }
 
 /**
- * 修改密码
- * RuoYi标准接口：/system/user/profile/updatePwd
+ * 修改用户密码
  * @param oldPassword 旧密码
  * @param newPassword 新密码
- * @returns Promise<{ code: number; msg: string }>
+ * @returns Promise<any>
  */
-export function changePassword(
-  oldPassword: string,
-  newPassword: string,
-): Promise<{
-  code: number;
-  msg: string;
-}> {
-  return request.put(
-    "/system/user/profile/updatePwd",
-    {
+export function updateUserPwd(oldPassword: string, newPassword: string) {
+  return request({
+    url: "/system/user/profile/updatePwd",
+    method: "put",
+    data: {
       oldPassword,
       newPassword,
     },
-    {
-      showLoading: true,
-      loadingText: "修改中...",
-      timeout: 15000,
-    },
-  );
+  });
 }
 
 /**
  * 上传用户头像
- * RuoYi标准接口：/system/user/profile/avatar
- * @param file 头像文件
- * @returns Promise<{ code: number; msg: string; data: { url: string } }>
+ * @param avatar 头像文件
+ * @returns Promise<any>
  */
-export function uploadAvatar(file: File): Promise<{
-  code: number;
-  msg: string;
-  data: { url: string };
-}> {
-  return request.upload("/system/user/profile/avatar", file, {
-    showLoading: true,
-    loadingText: "上传中...",
-    timeout: 60000,
+export function uploadAvatar(avatar: any) {
+  return request({
+    url: "/system/user/profile/avatar",
+    method: "post",
+    data: avatar,
   });
 }
 
-// ==================== 用户管理（管理员功能） ====================
-
 /**
- * 分页查询用户列表
- * RuoYi标准接口：/system/user/list
- * @param params 查询参数
- * @returns Promise<{ code: number; msg: string; rows: UserInfo[]; total: number }>
- */
-export function listUser(params: {
-  pageNum?: number;
-  pageSize?: number;
-  userName?: string;
-  phonenumber?: string;
-  status?: string;
-  deptId?: number;
-  beginTime?: string;
-  endTime?: string;
-}): Promise<{
-  code: number;
-  msg: string;
-  rows: UserInfo[];
-  total: number;
-}> {
-  return request.get(
-    "/system/user/list",
-    { params },
-    {
-      timeout: 15000,
-      silentError: true,
-    },
-  );
-}
-
-/**
- * 获取用户详细信息
- * RuoYi标准接口：/system/user/{userId}
+ * 查询用户详细
  * @param userId 用户ID
- * @returns Promise<{ code: number; msg: string; data: UserInfo }>
+ * @returns Promise<any>
  */
-export function getUser(userId: number): Promise<{
-  code: number;
-  msg: string;
-  data: UserInfo;
-}> {
-  return request.get(`/system/user/${userId}`, undefined, {
-    timeout: 10000,
+export function getUser(userId: number) {
+  return request({
+    url: `/system/user/${userId}`,
+    method: "get",
   });
 }
 
 /**
  * 新增用户
- * RuoYi标准接口：/system/user
  * @param userData 用户数据
- * @returns Promise<{ code: number; msg: string }>
+ * @returns Promise<any>
  */
-export function addUser(userData: Partial<UserInfo>): Promise<{
-  code: number;
-  msg: string;
-}> {
-  return request.post("/system/user", userData, {
-    showLoading: true,
-    loadingText: "新增中...",
-    timeout: 15000,
+export function addUser(userData: any) {
+  return request({
+    url: "/system/user",
+    method: "post",
+    data: userData,
   });
 }
 
 /**
  * 修改用户
- * RuoYi标准接口：/system/user
  * @param userData 用户数据
- * @returns Promise<{ code: number; msg: string }>
+ * @returns Promise<any>
  */
-export function updateUser(userData: Partial<UserInfo>): Promise<{
-  code: number;
-  msg: string;
-}> {
-  return request.put("/system/user", userData, {
-    showLoading: true,
-    loadingText: "修改中...",
-    timeout: 15000,
+export function updateUser(userData: any) {
+  return request({
+    url: "/system/user",
+    method: "put",
+    data: userData,
   });
 }
 
 /**
  * 删除用户
- * RuoYi标准接口：/system/user/{userIds}
  * @param userIds 用户ID数组
- * @returns Promise<{ code: number; msg: string }>
+ * @returns Promise<any>
  */
-export function delUser(userIds: number[]): Promise<{
-  code: number;
-  msg: string;
-}> {
-  return request.delete(`/system/user/${userIds.join(",")}`, undefined, {
-    showLoading: true,
-    loadingText: "删除中...",
-    timeout: 15000,
+export function delUser(userIds: number[]) {
+  return request({
+    url: `/system/user/${userIds.join(",")}`,
+    method: "delete",
   });
 }
 
 /**
- * 重置用户密码
- * RuoYi标准接口：/system/user/resetPwd
- * @param userId 用户ID
- * @param password 新密码
- * @returns Promise<{ code: number; msg: string }>
+ * 导出用户
+ * @param params 查询参数
+ * @returns Promise<any>
  */
-export function resetUserPwd(
-  userId: number,
-  password: string,
-): Promise<{
-  code: number;
-  msg: string;
-}> {
-  return request.put(
-    "/system/user/resetPwd",
-    {
-      userId,
-      password,
-    },
-    {
-      showLoading: true,
-      loadingText: "重置中...",
-      timeout: 15000,
-    },
-  );
-}
-
-/**
- * 修改用户状态
- * RuoYi标准接口：/system/user/changeStatus
- * @param userId 用户ID
- * @param status 状态
- * @returns Promise<{ code: number; msg: string }>
- */
-export function changeUserStatus(
-  userId: number,
-  status: string,
-): Promise<{
-  code: number;
-  msg: string;
-}> {
-  return request.put(
-    "/system/user/changeStatus",
-    {
-      userId,
-      status,
-    },
-    {
-      showLoading: true,
-      loadingText: "修改中...",
-      timeout: 10000,
-    },
-  );
-}
-
-// ==================== 用户授权 ====================
-
-/**
- * 查询用户授权角色
- * RuoYi标准接口：/system/user/authRole/{userId}
- * @param userId 用户ID
- * @returns Promise<{ code: number; msg: string; data: unknown }>
- */
-export function getAuthRole(userId: number): Promise<{
-  code: number;
-  msg: string;
-  data: unknown;
-}> {
-  return request.get(`/system/user/authRole/${userId}`, undefined, {
-    timeout: 10000,
+export function exportUser(params: any) {
+  return request({
+    url: "/system/user/export",
+    method: "get",
+    params,
   });
 }
 
 /**
- * 用户授权角色
- * RuoYi标准接口：/system/user/authRole
- * @param data 授权数据
- * @returns Promise<{ code: number; msg: string }>
+ * 查询用户角色
+ * @param userId 用户ID
+ * @returns Promise<any>
  */
-export function updateAuthRole(data: { userId: number; roleIds: string }): Promise<{
-  code: number;
-  msg: string;
-}> {
-  return request.put("/system/user/authRole", data, {
-    showLoading: true,
-    loadingText: "授权中...",
-    timeout: 15000,
+export function getUserRoles(userId: number) {
+  return request({
+    url: `/system/user/authRole/${userId}`,
+    method: "get",
   });
 }
 
-// 导出类型定义
-export type { UserInfoResponse, LogoutResponse, UserInfo } from "@/types/auth";
+/**
+ * 授权用户角色
+ * @param data 角色数据
+ * @returns Promise<any>
+ */
+export function authUserRoles(data: any) {
+  return request({
+    url: "/system/user/authRole",
+    method: "put",
+    data,
+  });
+}
+
+/**
+ * 查询用户登录日志
+ * @param params 查询参数
+ * @returns Promise<any>
+ */
+export function getLoginLogs(params: any) {
+  return request({
+    url: "/user/loginLogs",
+    method: "get",
+    params,
+  });
+}
+
+/**
+ * 导出用户数据
+ * @param type 导出类型
+ * @returns Promise<any>
+ */
+export function exportUserData(type: string) {
+  return request({
+    url: "/user/export-data",
+    method: "post",
+    data: { type },
+  });
+}
+
+/**
+ * 申请删除账户
+ * @param reason 删除原因
+ * @param password 密码
+ * @returns Promise<any>
+ */
+export function requestAccountDeletion(reason: string, password: string) {
+  return request({
+    url: "/user/request-deletion",
+    method: "post",
+    data: { reason, password },
+  });
+}
+
+/**
+ * 取消删除账户申请
+ * @param requestId 申请ID
+ * @returns Promise<any>
+ */
+export function cancelAccountDeletion(requestId: string) {
+  return request({
+    url: "/user/cancel-deletion",
+    method: "post",
+    data: { requestId },
+  });
+}
+
+/**
+ * 验证密码
+ * @param password 密码
+ * @returns Promise<any>
+ */
+export function verifyPassword(password: string) {
+  return request({
+    url: "/user/verify-password",
+    method: "post",
+    data: { password },
+  });
+}
+
+/**
+ * 设置两步验证
+ * @param method 验证方法
+ * @param enable 是否启用
+ * @returns Promise<any>
+ */
+export function setTwoFactorAuth(method: string, enable: boolean) {
+  return request({
+    url: "/user/two-factor-auth",
+    method: "post",
+    data: { method, enable },
+  });
+}
+
+/**
+ * 验证两步验证码
+ * @param code 验证码
+ * @param method 验证方法
+ * @returns Promise<any>
+ */
+export function verifyTwoFactorCode(code: string, method: string) {
+  return request({
+    url: "/user/verify-two-factor",
+    method: "post",
+    data: { code, method },
+  });
+}

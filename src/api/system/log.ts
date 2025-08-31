@@ -3,227 +3,129 @@
  * 基于 RuoYi 架构设计，符合API接口文档规范
  */
 
-import { request } from "@/utils/request/index";
-import type { ApiResponse, PageResponse } from "@/types/api";
-
-// ==================== 日志数据类型定义 ====================
+import request from "@/utils/request";
+import type { SystemLog, SystemLogQueryParams } from "@/types/system/log";
 
 /**
- * 操作日志接口
- */
-export interface OperLog {
-  /** 日志主键 */
-  operId?: number;
-  /** 模块标题 */
-  title?: string;
-  /** 业务类型 */
-  businessType?: number;
-  /** 方法名称 */
-  method?: string;
-  /** 请求方式 */
-  requestMethod?: string;
-  /** 操作类别 */
-  operatorType?: number;
-  /** 操作人员 */
-  operName?: string;
-  /** 部门名称 */
-  deptName?: string;
-  /** 请求URL */
-  operUrl?: string;
-  /** 主机地址 */
-  operIp?: string;
-  /** 操作地点 */
-  operLocation?: string;
-  /** 请求参数 */
-  operParam?: string;
-  /** 返回参数 */
-  jsonResult?: string;
-  /** 操作状态 */
-  status?: number;
-  /** 错误消息 */
-  errorMsg?: string;
-  /** 操作时间 */
-  operTime?: string;
-  /** 消耗时间 */
-  costTime?: number;
-}
-
-/**
- * 登录日志接口
- */
-export interface LoginInfo {
-  /** 访问ID */
-  infoId?: number;
-  /** 用户账号 */
-  userName?: string;
-  /** 登录IP地址 */
-  ipaddr?: string;
-  /** 登录地点 */
-  loginLocation?: string;
-  /** 浏览器类型 */
-  browser?: string;
-  /** 操作系统 */
-  os?: string;
-  /** 登录状态 */
-  status?: string;
-  /** 提示消息 */
-  msg?: string;
-  /** 访问时间 */
-  loginTime?: string;
-}
-
-/**
- * 操作日志查询参数
- */
-export interface OperLogQueryParams {
-  /** 页码 */
-  pageNum?: number;
-  /** 每页数量 */
-  pageSize?: number;
-  /** 系统模块 */
-  title?: string;
-  /** 操作人员 */
-  operName?: string;
-  /** 业务类型 */
-  businessType?: number;
-  /** 操作状态 */
-  status?: number;
-  /** 开始时间 */
-  beginTime?: string;
-  /** 结束时间 */
-  endTime?: string;
-}
-
-/**
- * 登录日志查询参数
- */
-export interface LoginInfoQueryParams {
-  /** 页码 */
-  pageNum?: number;
-  /** 每页数量 */
-  pageSize?: number;
-  /** 用户账号 */
-  userName?: string;
-  /** 登录IP地址 */
-  ipaddr?: string;
-  /** 登录状态 */
-  status?: string;
-  /** 开始时间 */
-  beginTime?: string;
-  /** 结束时间 */
-  endTime?: string;
-}
-
-// ==================== 响应类型定义 ====================
-
-/**
- * 操作日志列表响应
- */
-export interface OperLogListResponse extends ApiResponse<PageResponse<OperLog[]>> {
-  // RuoYi标准分页响应格式
-  code: number;
-  msg: string;
-}
-
-/**
- * 登录日志列表响应
- */
-export interface LoginInfoListResponse extends ApiResponse<PageResponse<LoginInfo[]>> {
-  // RuoYi标准分页响应格式
-  code: number;
-  msg: string;
-}
-
-// ==================== 操作日志管理接口 ====================
-
-/**
- * 分页查询操作日志列表
+ * 查询操作日志列表
  * @param params 查询参数
+ * @returns Promise<any>
  */
-export function listOperLog(params?: OperLogQueryParams): Promise<OperLogListResponse> {
-  return request.get("/monitor/operlog/list", { params });
+export function listOperLog(params?: SystemLogQueryParams) {
+  return request({
+    url: "/system/operLog/list",
+    method: "get",
+    params,
+  });
 }
 
 /**
- * 查询操作日志详细信息
+ * 查询操作日志详细
  * @param operId 操作日志ID
+ * @returns Promise<any>
  */
-export function getOperLog(operId: number): Promise<ApiResponse<OperLog>> {
-  return request.get(`/monitor/operlog/${operId}`);
+export function getOperLog(operId: number) {
+  return request({
+    url: `/system/operLog/${operId}`,
+    method: "get",
+  });
 }
 
 /**
  * 删除操作日志
- * @param operIds 操作日志ID列表
+ * @param operIds 操作日志ID或IDs数组
+ * @returns Promise<any>
  */
-export function delOperLog(operIds: number | number[]): Promise<ApiResponse> {
-  const ids = Array.isArray(operIds) ? operIds.join(",") : operIds;
-  return request.delete(`/monitor/operlog/${ids}`);
+export function delOperLog(operIds: number | number[]) {
+  const idsStr = Array.isArray(operIds) ? operIds.join(",") : operIds;
+  return request({
+    url: `/system/operLog/${idsStr}`,
+    method: "delete",
+  });
 }
 
 /**
  * 清空操作日志
+ * @returns Promise<any>
  */
-export function cleanOperLog(): Promise<ApiResponse> {
-  return request.delete("/monitor/operlog/clean");
+export function cleanOperLog() {
+  return request({
+    url: "/system/operLog/clean",
+    method: "delete",
+  });
 }
 
 /**
- * 导出操作日志数据
+ * 导出操作日志
  * @param params 查询参数
+ * @returns Promise<any>
  */
-export function exportOperLog(params?: OperLogQueryParams): Promise<void> {
-  const filename = `操作日志_${new Date().getTime()}.xlsx`;
-  return request.download("/monitor/operlog/export", filename, { params });
+export function exportOperLog(params?: SystemLogQueryParams) {
+  return request({
+    url: "/system/operLog/export",
+    method: "get",
+    params,
+  });
 }
 
-// ==================== 登录日志管理接口 ====================
-
 /**
- * 分页查询登录日志列表
+ * 查询登录日志列表
  * @param params 查询参数
+ * @returns Promise<any>
  */
-export function listLoginInfo(params?: LoginInfoQueryParams): Promise<LoginInfoListResponse> {
-  return request.get("/monitor/logininfor/list", { params });
+export function listLoginLog(params?: any) {
+  return request({
+    url: "/system/loginLog/list",
+    method: "get",
+    params,
+  });
 }
 
 /**
- * 查询登录日志详细信息
+ * 查询登录日志详细
  * @param infoId 登录日志ID
+ * @returns Promise<any>
  */
-export function getLoginInfo(infoId: number): Promise<ApiResponse<LoginInfo>> {
-  return request.get(`/monitor/logininfor/${infoId}`);
+export function getLoginLog(infoId: number) {
+  return request({
+    url: `/system/loginLog/${infoId}`,
+    method: "get",
+  });
 }
 
 /**
  * 删除登录日志
- * @param infoIds 登录日志ID列表
+ * @param infoIds 登录日志ID或IDs数组
+ * @returns Promise<any>
  */
-export function delLoginInfo(infoIds: number | number[]): Promise<ApiResponse> {
-  const ids = Array.isArray(infoIds) ? infoIds.join(",") : infoIds;
-  return request.delete(`/monitor/logininfor/${ids}`);
+export function delLoginLog(infoIds: number | number[]) {
+  const idsStr = Array.isArray(infoIds) ? infoIds.join(",") : infoIds;
+  return request({
+    url: `/system/loginLog/${idsStr}`,
+    method: "delete",
+  });
 }
 
 /**
  * 清空登录日志
+ * @returns Promise<any>
  */
-export function cleanLoginInfo(): Promise<ApiResponse> {
-  return request.delete("/monitor/logininfor/clean");
+export function cleanLoginLog() {
+  return request({
+    url: "/system/loginLog/clean",
+    method: "delete",
+  });
 }
 
 /**
- * 解锁用户登录状态
- * @param userName 用户名
- */
-export function unlockLoginInfo(userName: string): Promise<ApiResponse> {
-  return request.get(`/monitor/logininfor/unlock/${userName}`);
-}
-
-/**
- * 导出登录日志数据
+ * 导出登录日志
  * @param params 查询参数
+ * @returns Promise<any>
  */
-export function exportLoginInfo(params?: LoginInfoQueryParams): Promise<void> {
-  const filename = `登录日志_${new Date().getTime()}.xlsx`;
-  return request.download("/monitor/logininfor/export", filename, { params });
+export function exportLoginLog(params?: any) {
+  return request({
+    url: "/system/loginLog/export",
+    method: "get",
+    params,
+  });
 }

@@ -3,333 +3,186 @@
  * 提供密码策略、账户锁定、安全检查等功能
  */
 
-import { request } from "@/utils/request/index";
+import request from "@/utils/request";
+import type { ApiResponse } from "@/types/api";
+import type {
+  PasswordPolicy,
+  PasswordValidation,
+  SecurityStatus,
+  SecurityQuestion,
+  SecurityEvent,
+  LoginRiskAssessment,
+} from "@/types/authSecurity";
 
-/**
- * 密码策略接口
- */
-export interface PasswordPolicy {
-  minLength: number;
-  maxLength: number;
-  requireUppercase: boolean;
-  requireLowercase: boolean;
-  requireNumbers: boolean;
-  requireSpecialChars: boolean;
-  forbidCommonPasswords: boolean;
-  historyCount: number; // 历史密码检查数量
-  expiryDays: number; // 密码过期天数
-}
-
-/**
- * 账户安全状态接口
- */
-export interface AccountSecurityStatus {
-  isLocked: boolean;
-  lockReason?: string;
-  lockTime?: string;
-  unlockTime?: string;
-  failedAttempts: number;
-  maxFailedAttempts: number;
-  lastLoginTime?: string;
-  lastLoginIp?: string;
-  passwordExpired: boolean;
-  passwordExpiryDate?: string;
-  requirePasswordChange: boolean;
-}
-
-/**
- * 登录风险评估结果
- */
-export interface LoginRiskAssessment {
-  riskLevel: "low" | "medium" | "high";
-  riskFactors: string[];
-  requireAdditionalVerification: boolean;
-  recommendedActions: string[];
-}
-
-/**
- * 安全令牌接口
- */
-export interface SecurityToken {
-  token: string;
-  type: "email" | "sms" | "app";
-  expiresIn: number;
-  maxAttempts: number;
-}
+// ==================== 密码安全相关 ====================
 
 /**
  * 获取密码策略
+ * @returns Promise<ApiResponse<PasswordPolicy>>
  */
-export function getPasswordPolicy(): Promise<{
-  code: number;
-  msg: string;
-  data: PasswordPolicy;
-}> {
-  return request.get("/auth/password-policy");
+export function getPasswordPolicy(): Promise<ApiResponse<PasswordPolicy>> {
+  return request({
+    url: "/auth/password-policy",
+    method: "get",
+  });
 }
 
 /**
  * 验证密码强度
  * @param password 密码
+ * @returns Promise<ApiResponse<PasswordValidation>>
  */
-export function validatePasswordStrength(password: string): Promise<{
-  code: number;
-  msg: string;
-  data: {
-    score: number; // 0-100 分数
-    level: "weak" | "medium" | "strong" | "very_strong";
-    suggestions: string[];
-    isValid: boolean;
-  };
-}> {
-  return request.post("/auth/validate-password", { password });
+export function validatePassword(password: string): Promise<ApiResponse<PasswordValidation>> {
+  return request({
+    url: "/auth/validate-password",
+    method: "post",
+    data: { password },
+  });
 }
 
 /**
- * 检查密码是否在历史记录中
+ * 检查密码历史
  * @param password 密码
+ * @returns Promise<ApiResponse<PasswordValidation>>
  */
-export function checkPasswordHistory(password: string): Promise<{
-  code: number;
-  msg: string;
-  data: {
-    inHistory: boolean;
-    message: string;
-  };
-}> {
-  return request.post("/auth/check-password-history", { password });
+export function checkPasswordHistory(password: string): Promise<ApiResponse<PasswordValidation>> {
+  return request({
+    url: "/auth/check-password-history",
+    method: "post",
+    data: { password },
+  });
 }
+
+// ==================== 账户安全相关 ====================
 
 /**
  * 获取账户安全状态
+ * @returns Promise<ApiResponse<SecurityStatus>>
  */
-export function getAccountSecurityStatus(): Promise<{
-  code: number;
-  msg: string;
-  data: AccountSecurityStatus;
-}> {
-  return request.get("/auth/security-status");
+export function getSecurityStatus(): Promise<ApiResponse<SecurityStatus>> {
+  return request({
+    url: "/auth/security-status",
+    method: "get",
+  });
 }
 
 /**
  * 解锁账户
  * @param reason 解锁原因
  * @param verificationCode 验证码
+ * @returns Promise<ApiResponse<unknown>>
  */
-export function unlockAccount(
-  reason: string,
-  verificationCode: string,
-): Promise<{
-  code: number;
-  msg: string;
-}> {
-  return request.post("/auth/unlock-account", { reason, verificationCode });
+export function unlockAccount(reason: string, verificationCode: string): Promise<ApiResponse<unknown>> {
+  return request({
+    url: "/auth/unlock-account",
+    method: "post",
+    data: { reason, verificationCode },
+  });
 }
 
 /**
- * 登录风险评估
+ * 评估登录风险
  * @param loginData 登录数据
+ * @returns Promise<ApiResponse<LoginRiskAssessment>>
  */
 export function assessLoginRisk(loginData: {
   username: string;
-  ip: string;
-  userAgent: string;
-  location?: string;
-}): Promise<{
-  code: number;
-  msg: string;
-  data: LoginRiskAssessment;
-}> {
-  return request.post("/auth/assess-login-risk", loginData);
+  password: string;
+  ip?: string;
+  userAgent?: string;
+}): Promise<ApiResponse<LoginRiskAssessment>> {
+  return request({
+    url: "/auth/assess-login-risk",
+    method: "post",
+    data: loginData,
+  });
 }
+
+// ==================== 安全验证相关 ====================
 
 /**
  * 发送安全验证码
  * @param type 验证类型
- * @param purpose 验证目的
+ * @param purpose 用途
+ * @returns Promise<ApiResponse<{ token: string }>>
  */
 export function sendSecurityCode(
   type: "email" | "sms",
-  purpose: "login" | "unlock" | "reset_password" | "change_security",
-): Promise<{
-  code: number;
-  msg: string;
-  data: SecurityToken;
-}> {
-  return request.post("/auth/send-security-code", { type, purpose });
+  purpose: "login" | "reset" | "change" | "verify",
+): Promise<ApiResponse<{ token: string }>> {
+  return request({
+    url: "/auth/send-security-code",
+    method: "post",
+    data: { type, purpose },
+  });
 }
 
 /**
  * 验证安全验证码
  * @param code 验证码
- * @param token 安全令牌
+ * @param token 令牌
+ * @returns Promise<ApiResponse<unknown>>
  */
-export function verifySecurityCode(
-  code: string,
-  token: string,
-): Promise<{
-  code: number;
-  msg: string;
-  data: {
-    verified: boolean;
-    remainingAttempts: number;
-  };
-}> {
-  return request.post("/auth/verify-security-code", { code, token });
-}
-
-/**
- * 设置密保问题
- * @param questions 密保问题和答案
- */
-export function setSecurityQuestions(
-  questions: Array<{
-    question: string;
-    answer: string;
-  }>,
-): Promise<{
-  code: number;
-  msg: string;
-}> {
-  return request.post("/auth/set-security-questions", { questions });
-}
-
-/**
- * 获取密保问题
- * @param username 用户名（用于找回密码时）
- */
-export function getSecurityQuestions(username?: string): Promise<{
-  code: number;
-  msg: string;
-  data: Array<{
-    id: number;
-    question: string;
-  }>;
-}> {
-  return request.get("/auth/security-questions", {
-    params: username ? { username } : {},
+export function verifySecurityCode(code: string, token: string): Promise<ApiResponse<unknown>> {
+  return request({
+    url: "/auth/verify-security-code",
+    method: "post",
+    data: { code, token },
   });
 }
 
 /**
- * 验证密保问题答案
- * @param answers 答案列表
+ * 设置安全问题
+ * @param questions 安全问题数组
+ * @returns Promise<ApiResponse<unknown>>
+ */
+export function setSecurityQuestions(questions: SecurityQuestion[]): Promise<ApiResponse<unknown>> {
+  return request({
+    url: "/auth/set-security-questions",
+    method: "post",
+    data: { questions },
+  });
+}
+
+/**
+ * 获取安全问题
+ * @param userId 用户ID
+ * @returns Promise<ApiResponse<SecurityQuestion[]>>
+ */
+export function getSecurityQuestions(userId: number): Promise<ApiResponse<SecurityQuestion[]>> {
+  return request({
+    url: "/auth/security-questions",
+    method: "get",
+    params: { userId },
+  });
+}
+
+/**
+ * 验证安全问题
+ * @param answers 答案数组
+ * @returns Promise<ApiResponse<{ token: string }>>
  */
 export function verifySecurityQuestions(
-  answers: Array<{
-    questionId: number;
-    answer: string;
-  }>,
-): Promise<{
-  code: number;
-  msg: string;
-  data: {
-    verified: boolean;
-    correctCount: number;
-    totalCount: number;
-  };
-}> {
-  return request.post("/auth/verify-security-questions", { answers });
-}
-
-/**
- * 获取设备信息
- */
-export function getDeviceInfo(): {
-  userAgent: string;
-  platform: string;
-  browser: string;
-  version: string;
-  isMobile: boolean;
-  fingerprint: string;
-} {
-  const ua = navigator.userAgent;
-  const platform = navigator.platform;
-
-  // 简单的浏览器检测
-  let browser = "Unknown";
-  let version = "";
-
-  if (ua.indexOf("Chrome") > -1) {
-    browser = "Chrome";
-    version = ua.match(/Chrome\/(\d+)/)?.[1] || "";
-  } else if (ua.indexOf("Firefox") > -1) {
-    browser = "Firefox";
-    version = ua.match(/Firefox\/(\d+)/)?.[1] || "";
-  } else if (ua.indexOf("Safari") > -1) {
-    browser = "Safari";
-    version = ua.match(/Version\/(\d+)/)?.[1] || "";
-  } else if (ua.indexOf("Edge") > -1) {
-    browser = "Edge";
-    version = ua.match(/Edge\/(\d+)/)?.[1] || "";
-  }
-
-  // 移动设备检测
-  const isMobile =
-    /Mobile|Android|iP(hone|od)|IEMobile|BlackBerry|Kindle|Silk-Accelerated|(hpw|web)OS|Opera M(obi|ini)/.test(ua);
-
-  // 生成设备指纹（简化版）
-  const fingerprint = btoa(`${ua}${platform}${screen.width}${screen.height}${new Date().getTimezoneOffset()}`);
-
-  return {
-    userAgent: ua,
-    platform,
-    browser,
-    version,
-    isMobile,
-    fingerprint,
-  };
-}
-
-/**
- * 获取地理位置（如果用户允许）
- */
-export function getCurrentLocation(): Promise<{
-  latitude?: number;
-  longitude?: number;
-  city?: string;
-  country?: string;
-  error?: string;
-}> {
-  return new Promise((resolve) => {
-    if (!navigator.geolocation) {
-      resolve({ error: "Geolocation not supported" });
-      return;
-    }
-
-    navigator.geolocation.getCurrentPosition(
-      (position) => {
-        resolve({
-          latitude: position.coords.latitude,
-          longitude: position.coords.longitude,
-        });
-      },
-      (error) => {
-        resolve({ error: error.message });
-      },
-      {
-        timeout: 10000,
-        enableHighAccuracy: false,
-      },
-    );
+  answers: { questionId: number; answer: string }[],
+): Promise<ApiResponse<{ token: string }>> {
+  return request({
+    url: "/auth/verify-security-questions",
+    method: "post",
+    data: { answers },
   });
 }
+
+// ==================== 安全日志相关 ====================
 
 /**
  * 记录安全事件
  * @param event 安全事件
+ * @returns Promise<ApiResponse<unknown>>
  */
-export function logSecurityEvent(event: {
-  type: "login_attempt" | "password_change" | "account_unlock" | "suspicious_activity";
-  details: Record<string, unknown>;
-  riskLevel?: "low" | "medium" | "high";
-}): Promise<{
-  code: number;
-  msg: string;
-}> {
-  return request.post("/auth/log-security-event", {
-    ...event,
-    timestamp: new Date().toISOString(),
-    deviceInfo: getDeviceInfo(),
+export function logSecurityEvent(event: SecurityEvent): Promise<ApiResponse<unknown>> {
+  return request({
+    url: "/auth/log-security-event",
+    method: "post",
+    data: event,
   });
 }

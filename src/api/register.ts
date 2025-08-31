@@ -1,4 +1,4 @@
-import { request } from "@/utils/request/index.ts";
+import request from "@/utils/request";
 import type { RegisterRequest, RegisterResponse } from "@/types/auth";
 
 /**
@@ -8,11 +8,13 @@ import type { RegisterRequest, RegisterResponse } from "@/types/auth";
  * @returns Promise<RegisterResponse>
  */
 export function register(data: RegisterRequest): Promise<RegisterResponse> {
-  return request.post("/register", data, {
-    withToken: false,
-    showErrorMessage: true,
-    showLoading: true,
-    loadingText: "注册中...",
+  return request({
+    url: "/register",
+    method: "post",
+    data: data,
+    headers: {
+      isToken: false,
+    },
   });
 }
 

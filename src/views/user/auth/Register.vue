@@ -1,293 +1,159 @@
 <template>
-  <div class="register-container">
-    <el-card class="register-card">
-      <template #header>
-        <div class="card-header">
-          <span>用户注册</span>
+  <div class="register">
+    <el-form ref="registerFormRef" :model="registerForm" :rules="registerRules" class="register-form">
+      <h3 class="title">蓝岸管理系统</h3>
+      <el-form-item prop="username">
+        <el-input v-model="registerForm.username" type="text" size="large" auto-complete="off" placeholder="账号">
+          <template #prefix
+            ><el-icon class="el-input__icon"><User /></el-icon
+          ></template>
+        </el-input>
+      </el-form-item>
+      <el-form-item prop="password">
+        <el-input
+          v-model="registerForm.password"
+          type="password"
+          size="large"
+          auto-complete="off"
+          placeholder="密码"
+          @keyup.enter="handleRegister">
+          <template #prefix
+            ><el-icon class="el-input__icon"><Lock /></el-icon
+          ></template>
+        </el-input>
+      </el-form-item>
+      <el-form-item prop="confirmPassword">
+        <el-input
+          v-model="registerForm.confirmPassword"
+          type="password"
+          size="large"
+          auto-complete="off"
+          placeholder="确认密码"
+          @keyup.enter="handleRegister">
+          <template #prefix
+            ><el-icon class="el-input__icon"><Lock /></el-icon
+          ></template>
+        </el-input>
+      </el-form-item>
+      <el-form-item prop="code">
+        <el-input
+          size="large"
+          v-model="registerForm.code"
+          auto-complete="off"
+          placeholder="验证码"
+          style="width: 63%"
+          @keyup.enter="handleRegister">
+          <template #prefix
+            ><el-icon class="el-input__icon"><Key /></el-icon
+          ></template>
+        </el-input>
+        <div class="register-code">
+          <img :src="codeUrl" @click="getCode" class="register-code-img" />
         </div>
-      </template>
-      <el-form
-        :model="registerForm"
-        :rules="registerRules"
-        ref="registerFormRef"
-        label-width="80px"
-        class="register-form">
-        <el-form-item label="用户名" prop="username">
-          <el-input v-model="registerForm.username" placeholder="请输入用户名（字母或数字）" @blur="validateUsername" />
-          <div v-if="usernameCheckStatus" class="username-status">
-            <span v-if="usernameCheckStatus === 'checking'" class="checking">
-              <el-icon class="is-loading"><Loading /></el-icon>
-              检查中...
-            </span>
-            <span v-else-if="usernameCheckStatus === 'available'" class="available">
-              <el-icon><SuccessFilled /></el-icon>
-              用户名可用
-            </span>
-            <span v-else-if="usernameCheckStatus === 'taken'" class="taken">
-              <el-icon><CircleCloseFilled /></el-icon>
-              用户名已被注册
-            </span>
-          </div>
-        </el-form-item>
-
-        <el-form-item v-if="showCaptcha" label="安全验证" prop="code" class="captcha-form-item">
-          <DragCaptcha
-            ref="dragCaptchaRef"
-            :width="300"
-            :height="150"
-            :disabled="!captchaEnabled"
-            @verified="onCaptchaVerified"
-            @refresh="onCaptchaRefresh" />
-        </el-form-item>
-
-        <el-form-item label="手机号" prop="phone">
-          <el-input v-model="registerForm.phone" placeholder="请输入手机号" @blur="handlePhoneBlur" />
-          <div v-if="phoneCheckStatus" class="phone-status">
-            <span v-if="phoneCheckStatus === 'checking'" class="checking">
-              <el-icon class="is-loading"><Loading /></el-icon>
-              检查中...
-            </span>
-            <span v-else-if="phoneCheckStatus === 'available'" class="available">
-              <el-icon><SuccessFilled /></el-icon>
-              手机号可用
-            </span>
-            <span v-else-if="phoneCheckStatus === 'taken'" class="taken">
-              <el-icon><CircleCloseFilled /></el-icon>
-              手机号已被注册
-            </span>
-          </div>
-        </el-form-item>
-
-        <!-- 注释掉手机号验证码功能 -->
-        <!-- <el-form-item label="验证码" prop="code">
-          <el-row :gutter="8">
-            <el-col :span="16">
-              <el-input v-model="registerForm.code" placeholder="请输入手机验证码" />
-            </el-col>
-            <el-col :span="8">
-              <el-button
-                type="primary"
-                :disabled="!canSendCode || sendingCode"
-                :loading="sendingCode"
-                @click="sendVerificationCode"
-                class="send-code-btn">
-                {{ codeButtonText }}
-              </el-button>
-            </el-col>
-          </el-row>
-        </el-form-item> -->
-
-        <el-form-item label="昵称" prop="nickname">
-          <el-input v-model="registerForm.nickname" placeholder="请输入昵称" />
-        </el-form-item>
-
-        <el-form-item label="邮箱" prop="email">
-          <el-input v-model="registerForm.email" placeholder="请输入邮箱地址" />
-        </el-form-item>
-
-        <el-form-item label="密码" prop="password">
-          <el-input v-model="registerForm.password" type="password" placeholder="请输入密码" show-password />
-        </el-form-item>
-
-        <el-form-item label="确认密码" prop="confirmPassword">
-          <el-input v-model="registerForm.confirmPassword" type="password" placeholder="请再次输入密码" show-password />
-        </el-form-item>
-
-        <el-form-item>
-          <!-- 注册按钮居中 -->
-          <div class="button-container">
-            <el-button type="primary" size="large" class="register-btn" @click="handleRegister" :loading="loading">
-              注册
-            </el-button>
-          </div>
-        </el-form-item>
-        <el-form-item>
-          <!-- 返回登录链接，右对齐 -->
-          <div class="register-link-container">
-            <el-button type="info" link @click="goToLogin">返回登录</el-button>
-          </div>
-        </el-form-item>
-      </el-form>
-    </el-card>
+      </el-form-item>
+      <el-form-item style="width: 100%">
+        <el-button :loading="loading" size="large" type="primary" style="width: 100%" @click.prevent="handleRegister">
+          <span v-if="!loading">注 册</span>
+          <span v-else>注 册 中...</span>
+        </el-button>
+        <div style="float: right">
+          <el-button type="text" @click="goToLogin">使用已有账户登录</el-button>
+        </div>
+      </el-form-item>
+    </el-form>
+    <!--  底部  -->
+    <div class="el-register-footer">
+      <span>Copyright © 2025 蓝岸管理系统 All Rights Reserved.</span>
+    </div>
   </div>
 </template>
 
 <script setup lang="ts">
-import { ref, reactive, watch, onMounted, onUnmounted } from "vue";
+import { ref, reactive } from "vue";
 import { useRouter } from "vue-router";
-import { ElMessage } from "element-plus";
-import { Loading, SuccessFilled, CircleCloseFilled } from "@element-plus/icons-vue";
+import { ElMessage, ElMessageBox } from "element-plus";
+import { User, Lock, Key } from "@element-plus/icons-vue";
 import type { FormInstance, FormRules } from "element-plus";
 // 导入用户store和类型定义
 import { useUserStore } from "@/stores/user";
 import type { RegisterRequest } from "@/types/auth";
-import { debounce } from "@/utils/debounce";
-// 导入拖动验证码组件
-import DragCaptcha from "@/components/DragCaptcha.vue";
-
-// 注册表单接口
-interface RegisterForm extends RegisterRequest {
-  confirmPassword: string;
-}
 
 const router = useRouter();
 const userStore = useUserStore();
 const registerFormRef = ref<FormInstance>();
-const loading = ref(false);
 
-// 表单数据
-const registerForm = reactive<RegisterForm>({
+const registerForm = ref({
   username: "",
   password: "",
   confirmPassword: "",
-  nickname: "",
-  email: "",
-  phone: "",
   code: "",
   uuid: "",
 });
 
-// 用户名检查状态
-const usernameCheckStatus = ref<"checking" | "available" | "taken" | null>(null);
-// 手机号检查状态
-const phoneCheckStatus = ref<"checking" | "available" | "taken" | null>(null);
-// 注释掉验证码相关功能
-// const sendingCode = ref(false);
-// const codeCountdown = ref(0);
-// const countdownTimer = ref<number | null>(null);
-// 是否显示验证码
-const showCaptcha = ref(false);
-// 验证码是否启用
-const captchaEnabled = ref(false);
-// 拖动验证码组件引用
-const dragCaptchaRef = ref<InstanceType<typeof DragCaptcha>>();
-// 验证码验证token
-const captchaToken = ref<string>("");
-// 验证码错误次数
-const captchaCount = ref(0);
+const equalToPassword = (rule, value, callback) => {
+  if (registerForm.value.password !== value) {
+    callback(new Error("两次输入的密码不一致"));
+  } else {
+    callback();
+  }
+};
 
-// 注释掉验证码相关的计算属性
-// 计算属性：是否可以发送验证码
-// const canSendCode = computed(() => {
-//   const phonePattern = /^1[3-9]\d{9}$/;
-//   return (
-//     registerForm.phone &&
-//     phonePattern.test(registerForm.phone) &&
-//     phoneCheckStatus.value === "available" &&
-//     codeCountdown.value === 0
-//   );
-// });
+const registerRules = {
+  username: [
+    { required: true, trigger: "blur", message: "请输入您的账号" },
+    { min: 2, max: 20, message: "用户账号长度必须介于 2 和 20 之间", trigger: "blur" },
+  ],
+  password: [
+    { required: true, trigger: "blur", message: "请输入您的密码" },
+    { min: 5, max: 20, message: "用户密码长度必须介于 5 和 20 之间", trigger: "blur" },
+  ],
+  confirmPassword: [
+    { required: true, trigger: "blur", message: "请再次输入您的密码" },
+    { required: true, validator: equalToPassword, trigger: "blur" },
+  ],
+  code: [{ required: true, trigger: "change", message: "请输入验证码" }],
+};
 
-// 计算属性：验证码按钮文本
-// const codeButtonText = computed(() => {
-//   if (sendingCode.value) return "发送中...";
-//   if (codeCountdown.value > 0) return `${codeCountdown.value}秒后重发`;
-//   return "获取验证码";
-// });
+const codeUrl = ref("");
+const loading = ref(false);
 
-// 监听用户名变化，验证格式并控制验证码显示
-watch(
-  () => registerForm.username,
-  () => {
-    validateUsername();
-  },
-);
-
-// 防抖的用户名检查函数
-const debouncedUsernameCheck = debounce(async (username: string) => {
-  const usernamePattern = /^[a-zA-Z\d]{6,20}$/;
-  if (usernamePattern.test(username)) {
-    usernameCheckStatus.value = "checking";
-    try {
-      const available = await userStore.checkUsernameAvailability(username);
-      usernameCheckStatus.value = available ? "available" : "taken";
-    } catch {
-      usernameCheckStatus.value = null;
+function handleRegister() {
+  registerFormRef.value?.validate((valid) => {
+    if (valid) {
+      loading.value = true;
+      userStore
+        .register(registerForm.value)
+        .then((res) => {
+          const username = registerForm.value.username;
+          ElMessageBox.alert("<font color='red'>恭喜你，您的账号 " + username + " 注册成功！</font>", "系统提示", {
+            dangerouslyUseHTMLString: true,
+            type: "success",
+          })
+            .then(() => {
+              router.push("/login");
+            })
+            .catch(() => {});
+        })
+        .catch(() => {
+          loading.value = false;
+          getCode();
+        });
     }
-  } else {
-    usernameCheckStatus.value = null;
-  }
-}, 500);
+  });
+}
 
-// 防抖的手机号检查函数
-const debouncedPhoneCheck = debounce(async (phone: string) => {
-  const phonePattern = /^1[3-9]\d{9}$/;
-  if (phonePattern.test(phone)) {
-    phoneCheckStatus.value = "checking";
-    try {
-      // 注意：用户名和手机号检查功能已简化，使用统一的检查方法
-      // 默认返回可用，实际检查在后端注册时进行
-      const available = await userStore.checkUsernameAvailability(phone);
-      phoneCheckStatus.value = available ? "available" : "taken";
-    } catch {
-      phoneCheckStatus.value = null;
-    }
-  } else {
-    phoneCheckStatus.value = null;
-  }
-}, 500);
+function getCode() {
+  userStore.getCaptcha().then((res) => {
+    codeUrl.value = "data:image/gif;base64," + res.img;
+    registerForm.value.uuid = res.uuid;
+  });
+}
 
-/**
- * 验证用户名格式
- * 根据用户名格式决定是否启用验证码
- */
-const validateUsername = () => {
-  // 用户名格式：6-20位，可以是纯字母、纯数字或字母+数字组合
-  const usernamePattern = /^[a-zA-Z\d]{6,20}$/;
-  const isValidUsername = usernamePattern.test(registerForm.username);
+function goToLogin() {
+  router.push("/login");
+}
 
-  if (isValidUsername) {
-    captchaEnabled.value = true;
-    showCaptcha.value = true;
-    debouncedUsernameCheck(registerForm.username);
-  } else {
-    captchaEnabled.value = false;
-    showCaptcha.value = false;
-    usernameCheckStatus.value = null;
-    // 清空验证码相关状态
-    captchaToken.value = "";
-  }
-};
-
-// 处理手机号失焦事件
-const handlePhoneBlur = () => {
-  const phonePattern = /^1[3-9]\d{9}$/;
-  if (registerForm.phone && phonePattern.test(registerForm.phone)) {
-    debouncedPhoneCheck(registerForm.phone);
-  } else {
-    phoneCheckStatus.value = null;
-  }
-};
-
-/**
- * 处理拖动验证码验证结果
- */
-const onCaptchaVerified = (success: boolean, token?: string) => {
-  if (success && token) {
-    captchaToken.value = token;
-    registerForm.uuid = token;
-  } else {
-    captchaToken.value = "";
-    registerForm.uuid = "";
-    captchaCount.value++;
-
-    // 验证失败3次后禁用验证码功能
-    if (captchaCount.value >= 3) {
-      captchaEnabled.value = false;
-      showCaptcha.value = false;
-      ElMessage.error("验证失败次数过多，请重新输入用户名");
-      registerForm.username = "";
-    }
-  }
-};
-
-/**
- * 处理验证码刷新
- */
-const onCaptchaRefresh = () => {
-  captchaToken.value = "";
-  registerForm.uuid = "";
-};
+getCode();
 
 // 注释掉发送验证码功能
 // 发送验证码
@@ -517,97 +383,65 @@ onUnmounted(() => {
 </script>
 
 <style scoped>
-.register-container {
+.register {
   display: flex;
   justify-content: center;
   align-items: center;
-  min-height: 100vh;
-  background-color: #f5f5f5;
+  height: 100%;
+  background-image: url("@/assets/images/login-background.jpg");
+  background-size: cover;
 }
-
-.register-card {
-  width: 100%;
-  max-width: 500px;
-}
-
-.card-header {
+.title {
+  margin: 0px auto 30px auto;
   text-align: center;
-  font-size: 18px;
-  font-weight: bold;
+  color: #707070;
 }
 
 .register-form {
-  padding: 20px 0;
-}
-
-.button-container {
-  display: flex;
-  justify-content: center;
-  width: 100%;
-}
-
-.register-link-container {
-  display: flex;
-  justify-content: flex-end;
-  width: 100%;
-}
-
-/* 手机号检查状态样式 */
-.phone-status {
-  margin-top: 5px;
-  font-size: 12px;
-}
-
-.phone-status .checking {
-  color: #909399;
-}
-
-.phone-status .available {
-  color: #67c23a;
-}
-
-.phone-status .taken {
-  color: #f56c6c;
-}
-
-/* 用户名检查状态样式 */
-.username-status {
-  margin-top: 5px;
-  font-size: 12px;
-}
-
-.username-status .checking {
-  color: #909399;
-}
-
-.username-status .available {
-  color: #67c23a;
-}
-
-.username-status .taken {
-  color: #f56c6c;
-}
-
-/* 拖动验证码表单项样式 */
-.captcha-form-item {
-  margin-bottom: 22px;
-}
-
-.captcha-form-item :deep(.el-form-item__content) {
-  line-height: normal;
-}
-
-/* 验证码按钮样式 */
-.send-code-btn {
-  width: 100%;
-  white-space: nowrap;
-}
-
-/* 响应式设计 */
-@media (max-width: 768px) {
-  .register-card {
-    width: 90%;
-    margin: 20px;
+  border-radius: 6px;
+  background: #ffffff;
+  width: 400px;
+  padding: 25px 25px 5px 25px;
+  .el-input {
+    height: 40px;
+    input {
+      height: 40px;
+    }
   }
+  .el-input__icon {
+    height: 39px;
+    width: 14px;
+    margin-left: 0px;
+  }
+}
+.register-tip {
+  font-size: 13px;
+  text-align: center;
+  color: #bfbfbf;
+}
+.register-code {
+  width: 33%;
+  height: 40px;
+  float: right;
+  img {
+    cursor: pointer;
+    vertical-align: middle;
+  }
+}
+.el-register-footer {
+  height: 40px;
+  line-height: 40px;
+  position: fixed;
+  bottom: 0;
+  width: 100%;
+  text-align: center;
+  color: #fff;
+  font-family: Arial;
+  font-size: 12px;
+  letter-spacing: 1px;
+}
+.register-code-img {
+  height: 40px;
+  padding-left: 12px;
 }
 </style>

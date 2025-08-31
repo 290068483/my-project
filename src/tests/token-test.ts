@@ -20,14 +20,14 @@ export function testTokenSetting() {
     console.log("从localStorage获取的token:", storedToken);
 
     if (storedToken === mockToken) {
-      console.log("✅ Token设置和获取测试通过");
+      console.log("�?Token设置和获取测试通过");
       return true;
     } else {
-      console.error("❌ Token设置和获取测试失败");
+      console.error("�?Token设置和获取测试失�?);
       return false;
     }
   } catch (error) {
-    console.error("Token测试过程中出现错误:", error);
+    console.error("Token测试过程中出现错�?", error);
     return false;
   }
 }

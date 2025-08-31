@@ -1,117 +1,105 @@
-/**
- * 系统岗位管理 API
- * 基于 RuoYi 架构设计，符合API接口文档规范
- */
-
-import { request } from "@/utils/request/index";
-import type { ApiResponse } from "@/types/api";
-import type {
-  PostQueryParams,
-  PostForm,
-  PostListResponse,
-  PostDetailResponse,
-  PostOptionResponse,
-  PostAuthResponse,
-} from "@/types/system/post";
-
-// ==================== 岗位数据类型定义 ====================
+import request from "@/utils/request";
+import type { SystemPost, SystemPostQueryParams } from "@/types/system/post";
 
 /**
- * 分页查询岗位列表
+ * 查询岗位列表
  * @param params 查询参数
+ * @returns Promise<any>
  */
-export function listPost(params?: PostQueryParams): Promise<PostListResponse> {
-  return request.get("/system/post/list", { params });
+export function listPost(params?: SystemPostQueryParams) {
+  return request({
+    url: "/system/post/list",
+    method: "get",
+    params,
+  });
 }
 
 /**
- * 查询岗位详细信息
+ * 查询岗位详细
  * @param postId 岗位ID
+ * @returns Promise<any>
  */
-export function getPost(postId: number): Promise<PostDetailResponse> {
-  return request.get(`/system/post/${postId}`);
+export function getPost(postId: number) {
+  return request({
+    url: `/system/post/${postId}`,
+    method: "get",
+  });
 }
 
 /**
  * 新增岗位
- * @param data 岗位信息
+ * @param data 岗位数据
+ * @returns Promise<any>
  */
-export function addPost(data: PostForm): Promise<ApiResponse> {
-  return request.post("/system/post", data);
+export function addPost(data: SystemPost) {
+  return request({
+    url: "/system/post",
+    method: "post",
+    data,
+  });
 }
+
 /**
  * 修改岗位
- * @param data 岗位信息
+ * @param data 岗位数据
+ * @returns Promise<any>
  */
-export function updatePost(data: PostForm): Promise<ApiResponse> {
-  return request.put("/system/post", data);
+export function updatePost(data: SystemPost) {
+  return request({
+    url: "/system/post",
+    method: "put",
+    data,
+  });
 }
 
 /**
  * 删除岗位
- * @param postIds 岗位ID列表
+ * @param postIds 岗位ID或IDs数组
+ * @returns Promise<any>
  */
-export function delPost(postIds: number | number[]): Promise<ApiResponse> {
-  const ids = Array.isArray(postIds) ? postIds.join(",") : postIds;
-  return request.delete(`/system/post/${ids}`);
+export function delPost(postIds: number | number[]) {
+  const idsStr = Array.isArray(postIds) ? postIds.join(",") : postIds;
+  return request({
+    url: `/system/post/${idsStr}`,
+    method: "delete",
+  });
 }
 
-// ==================== 辅助接口 ====================
+/**
+ * 导出岗位
+ * @param params 查询参数
+ * @returns Promise<any>
+ */
+export function exportPost(params?: SystemPostQueryParams) {
+  return request({
+    url: "/system/post/export",
+    method: "get",
+    params,
+  });
+}
 
 /**
  * 校验岗位名称唯一性
- * @param postName 岗位名称
- * @param postId 岗位ID（编辑时排除自身）
+ * @param params 查询参数
+ * @returns Promise<any>
  */
-export function checkPostNameUnique(postName: string, postId?: number): Promise<ApiResponse<boolean>> {
-  return request.get("/system/post/checkPostNameUnique", {
-    params: { postName, postId },
+export function checkPostNameUnique(params: { postName: string; postId?: number }) {
+  return request({
+    url: "/system/post/checkPostNameUnique",
+    method: "get",
+    params,
   });
 }
 
 /**
  * 校验岗位编码唯一性
- * @param postCode 岗位编码
- * @param postId 岗位ID（编辑时排除自身）
- */
-export function checkPostCodeUnique(postCode: string, postId?: number): Promise<ApiResponse<boolean>> {
-  return request.get("/system/post/checkPostCodeUnique", {
-    params: { postCode, postId },
-  });
-}
-
-// ==================== 权限相关接口 ====================
-
-/**
- * 获取岗位权限信息
- * @param postId 岗位ID
- */
-export function getPostAuth(postId: number): Promise<PostAuthResponse> {
-  return request.get(`/system/post/auth/${postId}`);
-}
-
-/**
- * 更新岗位权限
- * @param data 权限数据
- */
-export function updatePostAuth(data: { postId: number; permissionIds: number[] }): Promise<ApiResponse> {
-  return request.put("/system/post/auth", data);
-}
-
-// ==================== 辅助接口 ====================
-
-/**
- * 查询岗位选择框列表
- */
-export function getPostOptionSelect(): Promise<PostOptionResponse> {
-  return request.get("/system/post/optionselect");
-}
-
-/**
- * 导出岗位数据
  * @param params 查询参数
+ * @returns Promise<any>
  */
-export function exportPost(params?: PostQueryParams): Promise<void> {
-  const filename = `岗位列表_${new Date().getTime()}.xlsx`;
-  return request.download("/system/post/export", filename, { params });
+export function checkPostCodeUnique(params: { postCode: string; postId?: number }) {
+  return request({
+    url: "/system/post/checkPostCodeUnique",
+    method: "get",
+    params,
+  });
 }

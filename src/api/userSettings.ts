@@ -1,242 +1,180 @@
-/**
- * 用户设置管理 API
- * 用于个人资料管理、安全设置、数据导出等功能
- */
-
-import { request } from "@/utils/request/index";
-import type { UserInfo } from "@/types/auth";
+import request from "@/utils/request";
 
 /**
- * 用户个人资料更新接口
+ * 获取用户设置
+ * @returns Promise<any>
  */
-export interface UserProfileUpdateRequest {
-  name?: string;
-  nickname?: string;
-  email?: string;
-  phone?: string;
-  sex?: string;
-  birthday?: string;
-  address?: string;
-  personalSignature?: string;
-  emergencyContact?: string;
-  emergencyContactPhone?: string;
-  joinDate?: string;
-  employeeId?: string;
+export function getUserSettings() {
+  return request({
+    url: "/user/settings",
+    method: "get",
+  });
 }
 
 /**
- * 用户登录日志接口
+ * 更新用户设置
+ * @param settings 设置数据
+ * @returns Promise<any>
  */
-export interface LoginLog {
-  id: number;
-  loginTime: string;
-  loginIp: string;
-  loginLocation: string;
-  browser: string;
-  os: string;
-  status: "success" | "failure";
-  msg?: string;
-}
-
-/**
- * 通知设置接口
- */
-export interface NotificationSettings {
-  emailNotification: boolean;
-  smsNotification: boolean;
-  systemNotification: boolean;
-  marketingEmails: boolean;
-  securityAlerts: boolean;
-}
-
-/**
- * 隐私设置接口
- */
-export interface PrivacySettings {
-  profileVisibility: "public" | "friends" | "private";
-  showEmail: boolean;
-  showPhone: boolean;
-  showBirthday: boolean;
-  showAddress: boolean;
-  allowSearch: boolean;
-  dataCollection: boolean;
-}
-
-/**
- * 更新用户个人资料
- * @param data 用户资料数据
- */
-export function updateUserProfile(data: UserProfileUpdateRequest): Promise<{
-  code: number;
-  msg: string;
-  data?: unknown;
-}> {
-  return request.put("/user/profile", data);
-}
-
-/**
- * 获取用户登录日志
- * @param pageNum 页码
- * @param pageSize 每页数量
- */
-export function getUserLoginLogs(
-  pageNum = 1,
-  pageSize = 10,
-): Promise<{
-  code: number;
-  msg: string;
-  data: {
-    total: number;
-    list: LoginLog[];
-  };
-}> {
-  return request.get("/user/loginLogs", {
-    params: { pageNum, pageSize },
+export function updateUserSettings(settings: any) {
+  return request({
+    url: "/user/settings",
+    method: "put",
+    data: settings,
   });
 }
 
 /**
  * 获取通知设置
+ * @returns Promise<any>
  */
-export function getNotificationSettings(): Promise<{
-  code: number;
-  msg: string;
-  data: NotificationSettings;
-}> {
-  return request.get("/user/notification-settings");
+export function getNotificationSettings() {
+  return request({
+    url: "/user/settings/notifications",
+    method: "get",
+  });
 }
 
 /**
  * 更新通知设置
- * @param settings 通知设置
+ * @param settings 通知设置数据
+ * @returns Promise<any>
  */
-export function updateNotificationSettings(settings: NotificationSettings): Promise<{
-  code: number;
-  msg: string;
-}> {
-  return request.put("/user/notification-settings", settings);
+export function updateNotificationSettings(settings: any) {
+  return request({
+    url: "/user/settings/notifications",
+    method: "put",
+    data: settings,
+  });
 }
 
 /**
  * 获取隐私设置
+ * @returns Promise<any>
  */
-export function getPrivacySettings(): Promise<{
-  code: number;
-  msg: string;
-  data: PrivacySettings;
-}> {
-  return request.get("/user/privacy-settings");
+export function getPrivacySettings() {
+  return request({
+    url: "/user/settings/privacy",
+    method: "get",
+  });
 }
 
 /**
  * 更新隐私设置
- * @param settings 隐私设置
+ * @param settings 隐私设置数据
+ * @returns Promise<any>
  */
-export function updatePrivacySettings(settings: PrivacySettings): Promise<{
-  code: number;
-  msg: string;
-}> {
-  return request.put("/user/privacy-settings", settings);
+export function updatePrivacySettings(settings: any) {
+  return request({
+    url: "/user/settings/privacy",
+    method: "put",
+    data: settings,
+  });
 }
 
 /**
- * 导出用户数据
- * @param type 导出类型：profile(个人资料) | activity(活动记录) | all(全部数据)
+ * 更新个人资料
+ * @param data 个人资料数据
+ * @returns Promise<any>
  */
-export function exportUserData(type: "profile" | "activity" | "all" = "all"): Promise<{
-  code: number;
-  msg: string;
-  data: {
-    downloadUrl: string;
-    filename: string;
-    expiresAt: string;
-  };
-}> {
-  return request.post("/user/export-data", { type });
+export function updateProfile(data: any) {
+  return request({
+    url: "/user/profile",
+    method: "put",
+    data,
+  });
 }
 
 /**
- * 账户注销申请
- * @param reason 注销原因
- * @param password 确认密码
+ * 获取登录日志
+ * @param params 查询参数
+ * @returns Promise<any>
  */
-export function requestAccountDeletion(
-  reason: string,
-  password: string,
-): Promise<{
-  code: number;
-  msg: string;
-  data?: {
-    deletionRequestId: string;
-    scheduledDeletionDate: string;
-    cancelUrl: string;
-  };
-}> {
-  return request.post("/user/request-deletion", { reason, password });
+export function getLoginLogs(params: any) {
+  return request({
+    url: "/user/loginLogs",
+    method: "get",
+    params,
+  });
 }
 
 /**
- * 取消账户注销
- * @param requestId 注销请求ID
+ * 导出数据
+ * @param type 导出类型
+ * @returns Promise<any>
  */
-export function cancelAccountDeletion(requestId: string): Promise<{
-  code: number;
-  msg: string;
-}> {
-  return request.post("/user/cancel-deletion", { requestId });
+export function exportData(type: string) {
+  return request({
+    url: "/user/export-data",
+    method: "post",
+    data: { type },
+  });
 }
 
 /**
- * 验证当前密码
- * @param password 当前密码
+ * 申请删除账户
+ * @param reason 删除原因
+ * @param password 密码
+ * @returns Promise<any>
  */
-export function verifyCurrentPassword(password: string): Promise<{
-  code: number;
-  msg: string;
-  data: {
-    verified: boolean;
-  };
-}> {
-  return request.post("/user/verify-password", { password });
+export function requestDeletion(reason: string, password: string) {
+  return request({
+    url: "/user/request-deletion",
+    method: "post",
+    data: { reason, password },
+  });
 }
 
 /**
- * 设置双重认证
- * @param method 认证方式：sms | email | app
+ * 取消删除账户申请
+ * @param requestId 申请ID
+ * @returns Promise<any>
+ */
+export function cancelDeletion(requestId: string) {
+  return request({
+    url: "/user/cancel-deletion",
+    method: "post",
+    data: { requestId },
+  });
+}
+
+/**
+ * 验证密码
+ * @param password 密码
+ * @returns Promise<any>
+ */
+export function verifyPassword(password: string) {
+  return request({
+    url: "/user/verify-password",
+    method: "post",
+    data: { password },
+  });
+}
+
+/**
+ * 设置两步验证
+ * @param method 验证方法
  * @param enable 是否启用
+ * @returns Promise<any>
  */
-export function setupTwoFactorAuth(
-  method: "sms" | "email" | "app",
-  enable: boolean,
-): Promise<{
-  code: number;
-  msg: string;
-  data?: {
-    qrCode?: string; // APP方式需要的二维码
-    secret?: string; // APP方式需要的密钥
-    backupCodes?: string[]; // 备用码
-  };
-}> {
-  return request.post("/user/two-factor-auth", { method, enable });
+export function setTwoFactorAuth(method: string, enable: boolean) {
+  return request({
+    url: "/user/two-factor-auth",
+    method: "post",
+    data: { method, enable },
+  });
 }
 
 /**
- * 验证双重认证代码
+ * 验证两步验证码
  * @param code 验证码
- * @param method 认证方式
+ * @param method 验证方法
+ * @returns Promise<any>
  */
-export function verifyTwoFactorCode(
-  code: string,
-  method: "sms" | "email" | "app",
-): Promise<{
-  code: number;
-  msg: string;
-  data: {
-    verified: boolean;
-  };
-}> {
-  return request.post("/user/verify-two-factor", { code, method });
+export function verifyTwoFactor(code: string, method: string) {
+  return request({
+    url: "/user/verify-two-factor",
+    method: "post",
+    data: { code, method },
+  });
 }
-
-// 导出类型定义
-export type { UserProfileUpdateRequest, LoginLog, NotificationSettings, PrivacySettings };

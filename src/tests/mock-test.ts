@@ -1,53 +1,77 @@
-import { request } from "@/utils/request/index";
+import request from "@/utils/request";
 
 /**
- * 测试Mock功能
+ * Mock测试示例
+ * 演示如何使用Mock拦截器进行API测试
  */
-export async function testMock() {
+export async function mockTest() {
   try {
-    console.log("开始测试Mock功能...");
-
-    // 检查环境配置
-    console.log("环境模式:", import.meta.env.MODE);
-    console.log("VITE_USE_MOCK:", import.meta.env.VITE_USE_MOCK);
-
-    // 发起一个测试请求
-    console.log("发起getInfo测试请求...");
-    const response = await request.get("/getInfo", undefined, {
-      timeout: 5000,
+    // 测试GET请求
+    const response = await request({
+      url: "/getInfo",
+      method: "get",
     });
 
-    console.log("Mock测试请求响应:", response);
+    console.log("Mock GET请求响应:", response);
     return response;
   } catch (error) {
     console.error("Mock测试失败:", error);
-
-    // 详细错误信息
-    if (error instanceof Error) {
-      console.error("错误名称:", error.name);
-      console.error("错误消息:", error.message);
-      console.error("错误堆栈:", error.stack);
-    }
-
-    // 检查是否有响应数据
-    if ((error as any).response) {
-      console.error("响应数据:", (error as any).response);
-    }
-
-    // 检查是否有请求数据
-    if ((error as any).request) {
-      console.error("请求数据:", (error as any).request);
-    }
-
     throw error;
   }
 }
 
-// 直接调用测试
-if (typeof window !== "undefined") {
-  // 在浏览器环境中运行测试
-  (window as any).testMock = testMock;
+/**
+ * Mock POST测试示例
+ */
+export async function mockPostTest(data: any) {
+  try {
+    const response = await request({
+      url: "/test/post",
+      method: "post",
+      data,
+    });
+
+    console.log("Mock POST请求响应:", response);
+    return response;
+  } catch (error) {
+    console.error("Mock POST测试失败:", error);
+    throw error;
+  }
 }
 
-// 默认导出测试函数
-export default testMock;
+/**
+ * Mock PUT测试示例
+ */
+export async function mockPutTest(data: any) {
+  try {
+    const response = await request({
+      url: "/test/put",
+      method: "put",
+      data,
+    });
+
+    console.log("Mock PUT请求响应:", response);
+    return response;
+  } catch (error) {
+    console.error("Mock PUT测试失败:", error);
+    throw error;
+  }
+}
+
+/**
+ * Mock DELETE测试示例
+ */
+export async function mockDeleteTest(id: number) {
+  try {
+    const response = await request({
+      url: `/test/delete/${id}`,
+      method: "delete",
+    });
+
+    console.log("Mock DELETE请求响应:", response);
+    return response;
+  } catch (error) {
+    console.error("Mock DELETE测试失败:", error);
+    throw error;
+  }
+}

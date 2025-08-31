@@ -1,93 +1,101 @@
-/**
- * 字典类型管理 API
- * 基于 RuoYi 架构设计，符合API接口文档规范
- */
-
-import { request } from "@/utils/request/index";
-import type { ApiResponse } from "@/types/api";
-import type {
-  DictTypeQueryParams,
-  DictTypeForm,
-  DictTypeListResponse,
-  DictTypeDetailResponse,
-  DictTypeOptionResponse,
-} from "@/types/system/dict";
-
-// ==================== 基本字典类型管理接口 ====================
+import request from "@/utils/request";
+import type { SystemDictType, SystemDictTypeQueryParams } from "@/types/system/dict";
 
 /**
- * 分页查询字典类型列表
+ * 查询字典类型列表
  * @param params 查询参数
+ * @returns Promise<any>
  */
-export function listDictType(params?: DictTypeQueryParams): Promise<DictTypeListResponse> {
-  return request.get("/system/dict/type/list", { params });
-}
-
-/**
- * 查询字典类型详细信息
- * @param dictId 字典ID
- */
-export function getDictType(dictId: number): Promise<DictTypeDetailResponse> {
-  return request.get(`/system/dict/type/${dictId}`);
-}
-
-/**
- * 新增字典类型
- * @param data 字典类型信息
- */
-export function addDictType(data: DictTypeForm): Promise<ApiResponse> {
-  return request.post("/system/dict/type", data);
-}
-
-/**
- * 修改字典类型
- * @param data 字典类型信息
- */
-export function updateDictType(data: DictTypeForm): Promise<ApiResponse> {
-  return request.put("/system/dict/type", data);
-}
-
-/**
- * 删除字典类型
- * @param dictIds 字典ID列表
- */
-export function delDictType(dictIds: number | number[]): Promise<ApiResponse> {
-  const ids = Array.isArray(dictIds) ? dictIds.join(",") : dictIds;
-  return request.delete(`/system/dict/type/${ids}`);
-}
-
-// ==================== 辅助接口 ====================
-
-/**
- * 校验字典类型是否唯一
- * @param dictType 字典类型
- * @param dictId 字典ID（编辑时排除自身）
- */
-export function checkDictTypeUnique(dictType: string, dictId?: number): Promise<ApiResponse<boolean>> {
-  return request.get("/system/dict/type/checkDictTypeUnique", {
-    params: { dictType, dictId },
+export function listType(params?: SystemDictTypeQueryParams) {
+  return request({
+    url: "/system/dict/type/list",
+    method: "get",
+    params,
   });
 }
 
 /**
- * 查询字典类型选择框列表
+ * 查询字典类型详细
+ * @param dictId 字典类型ID
+ * @returns Promise<any>
  */
-export function getDictTypeOptionSelect(): Promise<DictTypeOptionResponse> {
-  return request.get("/system/dict/type/optionselect");
+export function getType(dictId: number) {
+  return request({
+    url: `/system/dict/type/${dictId}`,
+    method: "get",
+  });
 }
 
 /**
- * 导出字典类型数据
- * @param params 查询参数
+ * 新增字典类型
+ * @param data 字典类型数据
+ * @returns Promise<any>
  */
-export function exportDictType(params?: DictTypeQueryParams): Promise<void> {
-  const filename = `字典类型_${new Date().getTime()}.xlsx`;
-  return request.download("/system/dict/type/export", filename, { params });
+export function addType(data: SystemDictType) {
+  return request({
+    url: "/system/dict/type",
+    method: "post",
+    data,
+  });
+}
+
+/**
+ * 修改字典类型
+ * @param data 字典类型数据
+ * @returns Promise<any>
+ */
+export function updateType(data: SystemDictType) {
+  return request({
+    url: "/system/dict/type",
+    method: "put",
+    data,
+  });
+}
+
+/**
+ * 删除字典类型
+ * @param dictIds 字典类型ID或IDs数组
+ * @returns Promise<any>
+ */
+export function delType(dictIds: number | number[]) {
+  const idsStr = Array.isArray(dictIds) ? dictIds.join(",") : dictIds;
+  return request({
+    url: `/system/dict/type/${idsStr}`,
+    method: "delete",
+  });
+}
+
+/**
+ * 导出字典类型
+ * @param params 查询参数
+ * @returns Promise<any>
+ */
+export function exportType(params?: SystemDictTypeQueryParams) {
+  return request({
+    url: "/system/dict/type/export",
+    method: "get",
+    params,
+  });
 }
 
 /**
  * 刷新字典缓存
+ * @returns Promise<any>
  */
-export function refreshDictCache(): Promise<ApiResponse> {
-  return request.delete("/system/dict/type/refreshCache");
+export function refreshCache() {
+  return request({
+    url: "/system/dict/type/refreshCache",
+    method: "delete",
+  });
+}
+
+/**
+ * 获取字典选择框列表
+ * @returns Promise<any>
+ */
+export function optionselect() {
+  return request({
+    url: "/system/dict/type/optionselect",
+    method: "get",
+  });
 }

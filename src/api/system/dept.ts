@@ -1,148 +1,101 @@
-/**
- * 系统部门管理 API
- * 基于 RuoYi 架构设计，符合API接口文档规范
- */
-
-import { request } from "@/utils/request/index";
-import type {
-  DeptQueryParams,
-  DeptForm,
-  DeptListResponse,
-  DeptDetailResponse,
-  DeptTreeResponse,
-  DeptAuthResponse,
-} from "@/types/system/dept";
-import type { ApiResponse } from "@/types/api";
-
-// ==================== 部门管理接口 ====================
+import request from "@/utils/request";
+import type { SystemDept, SystemDeptQueryParams } from "@/types/system/dept";
 
 /**
  * 查询部门列表
  * @param params 查询参数
+ * @returns Promise<any>
  */
-export function listDept(params?: DeptQueryParams): Promise<DeptListResponse> {
-  return request.get("/system/dept/list", { params });
+export function listDept(params?: SystemDeptQueryParams) {
+  return request({
+    url: "/system/dept/list",
+    method: "get",
+    params,
+  });
 }
 
 /**
- * 查询部门详细信息
+ * 查询部门详细
  * @param deptId 部门ID
+ * @returns Promise<any>
  */
-export function getDept(deptId: number): Promise<DeptDetailResponse> {
-  return request.get(`/system/dept/${deptId}`);
+export function getDept(deptId: number) {
+  return request({
+    url: `/system/dept/${deptId}`,
+    method: "get",
+  });
 }
 
 /**
  * 新增部门
- * @param data 部门信息
+ * @param data 部门数据
+ * @returns Promise<any>
  */
-export function addDept(data: DeptForm): Promise<ApiResponse> {
-  return request.post("/system/dept", data);
+export function addDept(data: SystemDept) {
+  return request({
+    url: "/system/dept",
+    method: "post",
+    data,
+  });
 }
 
 /**
  * 修改部门
- * @param data 部门信息
+ * @param data 部门数据
+ * @returns Promise<any>
  */
-export function updateDept(data: DeptForm): Promise<ApiResponse> {
-  return request.put("/system/dept", data);
+export function updateDept(data: SystemDept) {
+  return request({
+    url: "/system/dept",
+    method: "put",
+    data,
+  });
 }
 
 /**
  * 删除部门
  * @param deptId 部门ID
+ * @returns Promise<any>
  */
-export function delDept(deptId: number): Promise<ApiResponse> {
-  return request.delete(`/system/dept/${deptId}`);
+export function delDept(deptId: number) {
+  return request({
+    url: `/system/dept/${deptId}`,
+    method: "delete",
+  });
 }
 
 /**
  * 查询部门下拉树结构
+ * @returns Promise<any>
  */
-export function deptTreeSelect(): Promise<DeptTreeResponse> {
-  return request.get("/system/dept/treeselect");
+export function treeselect() {
+  return request({
+    url: "/system/dept/treeselect",
+    method: "get",
+  });
 }
 
 /**
  * 根据角色ID查询部门树结构
  * @param roleId 角色ID
+ * @returns Promise<any>
  */
-export function roleDeptTreeSelect(roleId: number): Promise<DeptTreeResponse> {
-  return request.get(`/system/dept/roleDeptTreeselect/${roleId}`);
-}
-
-/**
- * 校验部门名称
- * @param params 校验参数
- */
-export function checkDeptNameUnique(params: {
-  deptName: string;
-  deptId?: number;
-  parentId?: number;
-}): Promise<ApiResponse<boolean>> {
-  return request.get("/system/dept/checkDeptNameUnique", { params });
-}
-
-/**
- * 查询部门列表（排除节点）
- * @param deptId 要排除的部门ID
- */
-export function listDeptExcludeChild(deptId: number): Promise<DeptTreeResponse> {
-  return request.get(`/system/dept/list/exclude/${deptId}`);
-}
-
-// ==================== 权限相关接口 ====================
-
-/**
- * 获取部门权限信息
- * @param deptId 部门ID
- */
-export function getDeptAuth(deptId: number): Promise<DeptAuthResponse> {
-  return request.get(`/system/dept/auth/${deptId}`);
-}
-
-/**
- * 更新部门权限
- * @param data 权限数据
- */
-export function updateDeptAuth(data: { deptId: number; roleIds: number[] }): Promise<ApiResponse> {
-  return request.put("/system/dept/auth", data);
-}
-
-// ==================== 新增接口（符合API文档） ====================
-
-/**
- * 获取部门树选择（标准接口名）
- */
-export function getDeptTreeSelect(): Promise<DeptTreeResponse> {
-  return deptTreeSelect();
-}
-
-/**
- * 获取角色部门树选择（标准接口名）
- * @param roleId 角色ID
- */
-export function getRoleDeptTreeSelect(roleId: number): Promise<DeptTreeResponse> {
-  return roleDeptTreeSelect(roleId);
-}
-
-/**
- * 批量修改部门状态
- * @param deptIds 部门ID列表
- * @param status 状态
- */
-export function batchChangeDeptStatus(deptIds: number[], status: string): Promise<ApiResponse> {
-  return request.put("/system/dept/changeStatus/batch", {
-    deptIds,
-    status,
+export function roleDeptTreeselect(roleId: number) {
+  return request({
+    url: `/system/dept/roleDeptTreeselect/${roleId}`,
+    method: "get",
   });
 }
 
 /**
- * 导出部门数据
+ * 校验部门名称唯一性
  * @param params 查询参数
+ * @returns Promise<any>
  */
-export function exportDept(params?: DeptQueryParams): Promise<void> {
-  const filename = `部门列表_${new Date().getTime()}.xlsx`;
-  return request.download("/system/dept/export", filename, { params });
+export function checkDeptNameUnique(params: { deptName: string; parentId?: number; deptId?: number }) {
+  return request({
+    url: "/system/dept/checkDeptNameUnique",
+    method: "get",
+    params,
+  });
 }

@@ -2,10 +2,23 @@ import { useUserStore } from "@/stores/user";
 import MessageUtils from "./message";
 import router from "@/router";
 import type { UserInfo, LoginRequest } from "@/types/auth";
+import Cookies from "js-cookie";
 
-/**
- * 通用认证工具类
- */
+const TokenKey = "Admin-Token";
+
+export function getToken() {
+  return Cookies.get(TokenKey);
+}
+
+export function setToken(token: string) {
+  return Cookies.set(TokenKey, token);
+}
+
+export function removeToken() {
+  return Cookies.remove(TokenKey);
+}
+
+// 权限检查工具类
 export class AuthUtils {
   /**
    * 退出登录
@@ -51,69 +64,57 @@ export class AuthUtils {
   }
 
   /**
-   * 检查用户是否有指定权限
-   * @param permission 权限代码
-   * @returns boolean
+   * 验证用户是否具备某权限
+   * @param permission 权限字符串
+   * @returns 用户是否具备该权限
    */
   static hasPermission(permission: string): boolean {
-    const user = this.getCurrentUser();
-    return user?.permissions?.includes(permission) || false;
+    const allPermissions = localStorage.getItem("permissions");
+    if (!allPermissions) return false;
+
+    try {
+      const permissions = JSON.parse(allPermissions);
+      return permissions.includes(permission);
+    } catch (e) {
+      console.error("权限解析失败", e);
+      return false;
+    }
   }
 
   /**
-   * 检查用户是否有指定角色
-   * @param role 角色代码
-   * @returns boolean
+   * 验证用户是否具备某角色
+   * @param role 角色字符串
+   * @returns 用户是否具备该角色
    */
   static hasRole(role: string): boolean {
-    const user = this.getCurrentUser();
-    return user?.roles?.includes(role) || user?.role === role;
+    const allRoles = localStorage.getItem("roles");
+    if (!allRoles) return false;
+
+    try {
+      const roles = JSON.parse(allRoles);
+      return roles.includes(role);
+    } catch (e) {
+      console.error("角色解析失败", e);
+      return false;
+    }
   }
 
   /**
-   * 检查用户是否有多个权限中的任意一个（或关系）
-   * @param permissions 权限代码数组
-   * @returns boolean
+   * 验证用户是否具备任意一个权限
+   * @param permissions 权限字符串数组
+   * @returns 用户是否具备任意一个权限
    */
-  static hasPermission(permissions: string[]): boolean {
-    const user = this.getCurrentUser();
-    if (!user?.permissions) return false;
-    return permissions.some((permission) => user.permissions.includes(permission));
+  static hasAnyPermission(permissions: string[]): boolean {
+    return permissions.some((permission) => this.hasPermission(permission));
   }
 
   /**
-   * 检查用户是否有所有指定权限（且关系）
-   * @param permissions 权限代码数组
-   * @returns boolean
+   * 验证用户是否具备任意一个角色
+   * @param roles 角色字符串数组
+   * @returns 用户是否具备任意一个角色
    */
-  static hasAllPermissions(permissions: string[]): boolean {
-    const user = this.getCurrentUser();
-    if (!user?.permissions) return false;
-    return permissions.every((permission) => user.permissions.includes(permission));
-  }
-
-  /**
-   * 检查用户是否有多个角色中的任意一个（或关系）
-   * @param roles 角色代码数组
-   * @returns boolean
-   */
-  static hasRole(roles: string[]): boolean {
-    const user = this.getCurrentUser();
-    if (!user) return false;
-    const userRoles = user.roles || [user.role];
-    return roles.some((role) => userRoles.includes(role));
-  }
-
-  /**
-   * 检查用户是否有所有指定角色（且关系）
-   * @param roles 角色代码数组
-   * @returns boolean
-   */
-  static hasAllRoles(roles: string[]): boolean {
-    const user = this.getCurrentUser();
-    if (!user) return false;
-    const userRoles = user.roles || [user.role];
-    return roles.every((role) => userRoles.includes(role));
+  static hasAnyRole(roles: string[]): boolean {
+    return roles.some((role) => this.hasRole(role));
   }
 
   /**

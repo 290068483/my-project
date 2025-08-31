@@ -8,10 +8,9 @@ export async function testGetInfo() {
   try {
     console.log("开始测试getInfo接口...");
 
-    // 检查用户store状态
-    const userStore = useUserStore();
+    // 检查用户store状�?    const userStore = useUserStore();
     console.log("当前token:", userStore.token);
-    console.log("是否已登录:", userStore.isLoggedIn);
+    console.log("是否已登�?", userStore.isLoggedIn);
 
     // 检查localStorage中的token
     const localStorageToken = localStorage.getItem("token");
@@ -21,8 +20,7 @@ export async function testGetInfo() {
     const sessionStorageToken = sessionStorage.getItem("token");
     console.log("sessionStorage中的token:", sessionStorageToken);
 
-    // 检查环境变量
-    console.log("VITE_API_BASE_URL:", import.meta.env.VITE_API_BASE_URL);
+    // 检查环境变�?    console.log("VITE_API_BASE_URL:", import.meta.env.VITE_API_BASE_URL);
     console.log("VITE_USE_MOCK:", import.meta.env.VITE_USE_MOCK);
 
     // 调用getInfo接口
@@ -57,8 +55,7 @@ export async function testGetInfo() {
 
 // 直接调用测试
 if (typeof window !== "undefined") {
-  // 在浏览器环境中运行测试
-  window.testGetInfo = testGetInfo;
+  // 在浏览器环境中运行测�?  window.testGetInfo = testGetInfo;
 
   // 添加到全局作用域以便在控制台中调用
   (window as any).testGetInfo = testGetInfo;

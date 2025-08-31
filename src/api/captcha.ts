@@ -1,242 +1,182 @@
-/**
- * 验证码相关API
- * 基于RuoYi-Vue标准实现，支持多种验证码类型
- */
+import request from "@/utils/request";
+import type { ApiResponse } from "@/types/api";
+import type { CaptchaConfig, SlideCaptchaData } from "@/types/captcha";
 
-import { request } from "@/utils/request/index";
-import type { CaptchaResponse } from "@/types/auth";
-
-// ==================== 图形验证码 ====================
+// ==================== 图形验证码相关 ====================
 
 /**
  * 获取图形验证码
- * RuoYi标准接口：/captchaImage
- * @returns Promise<CaptchaResponse>
+ * @returns Promise<ApiResponse<{ uuid: string; img: string }>>
  */
-export function getCodeImg(): Promise<CaptchaResponse> {
-  return request.get("/captchaImage", undefined, {
-    withToken: false,
+export function getCaptchaImage(): Promise<ApiResponse<{ uuid: string; img: string }>> {
+  return request({
+    url: "/captchaImage",
+    method: "get",
+    headers: {
+      isToken: false,
+    },
     timeout: 20000,
-    silentError: false, // 验证码获取失败需要显示错误
   });
 }
 
 /**
- * 获取图形验证码（兼容命名）
- * @returns Promise<CaptchaResponse>
- */
-export function getCaptchaImage(): Promise<CaptchaResponse> {
-  return getCodeImg();
-}
-
-/**
- * 刷新验证码
- * @returns Promise<CaptchaResponse>
- */
-export function refreshCaptcha(): Promise<CaptchaResponse> {
-  return getCodeImg();
-}
-
-/**
  * 验证图形验证码
- * @param code 验证码
- * @param uuid 验证码唯一标识
- * @returns Promise<{ code: number; msg: string; data: { valid: boolean } }>
+ * @param uuid 验证码UUID
+ * @param code 用户输入的验证码
+ * @returns Promise<ApiResponse<unknown>>
  */
-export function validateCaptcha(
-  code: string,
-  uuid: string,
-): Promise<{
-  code: number;
-  msg: string;
-  data: { valid: boolean };
-}> {
-  return request.post(
-    "/validate-captcha",
-    { code, uuid },
-    {
-      withToken: false,
-      timeout: 10000,
-    },
-  );
+export function verifyCaptcha(uuid: string, code: string): Promise<ApiResponse<unknown>> {
+  return request({
+    url: "/auth/captcha/verify",
+    method: "post",
+    data: { uuid, code },
+  });
 }
 
-// ==================== 短信验证码 ====================
+/**
+ * 刷新图形验证码
+ * @returns Promise<ApiResponse<{ uuid: string; img: string }>>
+ */
+export function refreshCaptcha(): Promise<ApiResponse<{ uuid: string; img: string }>> {
+  return request({
+    url: "/auth/captcha/refresh",
+    method: "post",
+  });
+}
+
+// ==================== 短信验证码相关 ====================
 
 /**
  * 发送短信验证码
  * @param phone 手机号
- * @param type 验证码类型：login(登录) | register(注册) | reset(密码重置)
- * @returns Promise<{ code: number; msg: string; data: { success: boolean } }>
+ * @param type 验证码类型
+ * @returns Promise<ApiResponse<unknown>>
  */
-export function sendSmsCode(
-  phone: string,
-  type: "login" | "register" | "reset" = "login",
-): Promise<{
-  code: number;
-  msg: string;
-  data: { success: boolean };
-}> {
-  return request.post(
-    "/auth/sms/send",
-    { phone, type },
-    {
-      withToken: false,
-      showLoading: true,
-      loadingText: "发送中...",
-      timeout: 30000,
-    },
-  );
+export function sendSmsCode(phone: string, type: string): Promise<ApiResponse<unknown>> {
+  return request({
+    url: "/auth/sms/send",
+    method: "post",
+    data: { phone, type },
+  });
 }
 
 /**
  * 验证短信验证码
  * @param phone 手机号
  * @param code 验证码
- * @param type 验证码类型
- * @returns Promise<{ code: number; msg: string; data: { valid: boolean } }>
+ * @returns Promise<ApiResponse<unknown>>
  */
-export function verifySmsCode(
-  phone: string,
-  code: string,
-  type: "login" | "register" | "reset" = "login",
-): Promise<{
-  code: number;
-  msg: string;
-  data: { valid: boolean };
-}> {
-  return request.post(
-    "/auth/sms/verify",
-    { phone, code, type },
-    {
-      withToken: false,
-      timeout: 15000,
-    },
-  );
+export function verifySmsCode(phone: string, code: string): Promise<ApiResponse<unknown>> {
+  return request({
+    url: "/auth/sms/verify",
+    method: "post",
+    data: { phone, code },
+  });
 }
 
-// ==================== 邮箱验证码 ====================
+// ==================== 邮箱验证码相关 ====================
 
 /**
  * 发送邮箱验证码
  * @param email 邮箱地址
- * @param type 验证码类型：login(登录) | register(注册) | reset(密码重置)
- * @returns Promise<{ code: number; msg: string; data: { success: boolean } }>
+ * @param type 验证码类型
+ * @returns Promise<ApiResponse<unknown>>
  */
-export function sendEmailCode(
-  email: string,
-  type: "login" | "register" | "reset" = "login",
-): Promise<{
-  code: number;
-  msg: string;
-  data: { success: boolean };
-}> {
-  return request.post(
-    "/auth/email/send",
-    { email, type },
-    {
-      withToken: false,
-      showLoading: true,
-      loadingText: "发送中...",
-      timeout: 30000,
-    },
-  );
+export function sendEmailCode(email: string, type: string): Promise<ApiResponse<unknown>> {
+  return request({
+    url: "/auth/email/send",
+    method: "post",
+    data: { email, type },
+  });
 }
 
 /**
  * 验证邮箱验证码
  * @param email 邮箱地址
  * @param code 验证码
- * @param type 验证码类型
- * @returns Promise<{ code: number; msg: string; data: { valid: boolean } }>
+ * @returns Promise<ApiResponse<unknown>>
  */
-export function verifyEmailCode(
-  email: string,
-  code: string,
-  type: "login" | "register" | "reset" = "login",
-): Promise<{
-  code: number;
-  msg: string;
-  data: { valid: boolean };
-}> {
-  return request.post(
-    "/auth/email/verify",
-    { email, code, type },
-    {
-      withToken: false,
-      timeout: 15000,
-    },
-  );
-}
-
-// ==================== 验证码配置 ====================
-
-/**
- * 获取验证码配置
- * @returns Promise<{ code: number; msg: string; data: CaptchaConfig }>
- */
-export function getCaptchaConfig(): Promise<{
-  code: number;
-  msg: string;
-  data: {
-    enabled: boolean;
-    type: "image" | "slide" | "click";
-    length: number;
-    expireTime: number;
-  };
-}> {
-  return request.get("/auth/captcha/config", undefined, {
-    withToken: false,
-    timeout: 10000,
-    silentError: true,
+export function verifyEmailCode(email: string, code: string): Promise<ApiResponse<unknown>> {
+  return request({
+    url: "/auth/email/verify",
+    method: "post",
+    data: { email, code },
   });
 }
 
-// ==================== 滚动验证码 (可选) ====================
+// ==================== 滑动验证码相关 ====================
 
 /**
- * 获取滚动验证码
- * @returns Promise<{ code: number; msg: string; data: unknown }>
+ * 获取滑动验证码配置
+ * @returns Promise<ApiResponse<CaptchaConfig>>
  */
-export function getSlideCaptcha(): Promise<{
-  code: number;
-  msg: string;
-  data: {
-    originalImageBase64: string;
-    jigsawImageBase64: string;
-    token: string;
-    secretKey: string;
-  };
-}> {
-  return request.get("/auth/captcha/slide", undefined, {
-    withToken: false,
-    timeout: 15000,
+export function getCaptchaConfig(): Promise<ApiResponse<CaptchaConfig>> {
+  return request({
+    url: "/auth/captcha/config",
+    method: "get",
   });
 }
 
 /**
- * 验证滚动验证码
- * @param token 验证码token
- * @param pointJson 滚动轨迹数据
- * @returns Promise<{ code: number; msg: string; data: { success: boolean } }>
+ * 获取滑动验证码数据
+ * @returns Promise<ApiResponse<SlideCaptchaData>>
  */
-export function verifySlideCaptcha(
-  token: string,
-  pointJson: string,
-): Promise<{
-  code: number;
-  msg: string;
-  data: { success: boolean };
-}> {
-  return request.post(
-    "/auth/captcha/slide/verify",
-    { token, pointJson },
-    {
-      withToken: false,
-      timeout: 10000,
-    },
-  );
+export function getSlideCaptcha(): Promise<ApiResponse<SlideCaptchaData>> {
+  return request({
+    url: "/auth/captcha/slide",
+    method: "get",
+  });
 }
 
-// 导出类型定义
-export type { CaptchaResponse } from "@/types/auth";
+/**
+ * 验证滑动验证码
+ * @param data 验证数据
+ * @returns Promise<ApiResponse<unknown>>
+ */
+export function verifySlideCaptcha(data: {
+  captchaId: string;
+  track: number[];
+  distance: number;
+}): Promise<ApiResponse<unknown>> {
+  return request({
+    url: "/auth/captcha/slide/verify",
+    method: "post",
+    data,
+  });
+}
+
+// ==================== 通用验证码相关 ====================
+
+/**
+ * 发送通用验证码
+ * @param target 目标（手机号或邮箱）
+ * @param type 目标类型
+ * @param purpose 用途
+ * @returns Promise<ApiResponse<unknown>>
+ */
+export function sendCode(
+  target: string,
+  type: "phone" | "email",
+  purpose: "register" | "login" | "reset" | "change",
+): Promise<ApiResponse<unknown>> {
+  return request({
+    url: "/auth/code/send",
+    method: "post",
+    data: { target, type, purpose },
+  });
+}
+
+/**
+ * 验证通用验证码
+ * @param target 目标（手机号或邮箱）
+ * @param type 目标类型
+ * @param code 验证码
+ * @returns Promise<ApiResponse<unknown>>
+ */
+export function verifyCode(target: string, type: "phone" | "email", code: string): Promise<ApiResponse<unknown>> {
+  return request({
+    url: "/auth/code/verify",
+    method: "post",
+    data: { target, type, code },
+  });
+}

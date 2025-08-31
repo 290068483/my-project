@@ -8,10 +8,9 @@ export async function testGetInfo() {
   try {
     console.log("开始测试getInfo接口...");
 
-    // 检查用户store状态
-    const userStore = useUserStore();
+    // 检查用户store状�?    const userStore = useUserStore();
     console.log("当前token:", userStore.token);
-    console.log("是否已登录:", userStore.isLoggedIn);
+    console.log("是否已登�?", userStore.isLoggedIn);
 
     // 调用getInfo接口
     const response = await getInfo();

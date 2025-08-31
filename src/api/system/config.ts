@@ -1,106 +1,125 @@
-/**
- * 系统配置管理 API
- * 基于 RuoYi 架构设计，符合API接口文档规范
- */
-
-import { request } from "@/utils/request/index";
-import type {
-  SystemConfig,
-  ConfigQueryParams,
-  ConfigForm,
-  ConfigListResponse,
-  ConfigDetailResponse,
-} from "@/types/system/config";
-import type { ApiResponse } from "@/types/api";
-
-// ==================== 基本配置管理接口 ====================
+import request from "@/utils/request";
+import type { SystemConfig, SystemConfigQueryParams } from "@/types/system/config";
 
 /**
- * 分页查询参数配置列表
+ * 查询参数配置列表
  * @param params 查询参数
+ * @returns Promise<any>
  */
-export function listConfig(params?: ConfigQueryParams): Promise<ConfigListResponse> {
-  return request.get("/system/config/list", { params });
+export function listConfig(params?: SystemConfigQueryParams) {
+  return request({
+    url: "/system/config/list",
+    method: "get",
+    params,
+  });
 }
 
 /**
- * 查询参数配置详细信息
- * @param configId 参数ID
+ * 查询参数配置详细
+ * @param configId 参数配置ID
+ * @returns Promise<any>
  */
-export function getConfig(configId: number): Promise<ConfigDetailResponse> {
-  return request.get(`/system/config/${configId}`);
+export function getConfig(configId: number) {
+  return request({
+    url: `/system/config/${configId}`,
+    method: "get",
+  });
 }
 
 /**
  * 新增参数配置
- * @param data 配置信息
+ * @param data 参数配置数据
+ * @returns Promise<any>
  */
-export function addConfig(data: ConfigForm): Promise<ApiResponse> {
-  return request.post("/system/config", data);
+export function addConfig(data: SystemConfig) {
+  return request({
+    url: "/system/config",
+    method: "post",
+    data,
+  });
 }
 
 /**
  * 修改参数配置
- * @param data 配置信息
+ * @param data 参数配置数据
+ * @returns Promise<any>
  */
-export function updateConfig(data: ConfigForm): Promise<ApiResponse> {
-  return request.put("/system/config", data);
+export function updateConfig(data: SystemConfig) {
+  return request({
+    url: "/system/config",
+    method: "put",
+    data,
+  });
 }
 
 /**
  * 删除参数配置
- * @param configIds 配置ID列表
+ * @param ids 参数配置ID或IDs数组
+ * @returns Promise<any>
  */
-export function delConfig(configIds: number | number[]): Promise<ApiResponse> {
-  const ids = Array.isArray(configIds) ? configIds.join(",") : configIds;
-  return request.delete(`/system/config/${ids}`);
-}
-
-/**
- * 导出参数配置数据
- * @param params 查询参数
- */
-export function exportConfig(params?: ConfigQueryParams): Promise<void> {
-  const filename = `参数配置_${new Date().getTime()}.xlsx`;
-  return request.download("/system/config/export", filename, { params });
+export function delConfig(ids: number | number[]) {
+  const idsStr = Array.isArray(ids) ? ids.join(",") : ids;
+  return request({
+    url: `/system/config/${idsStr}`,
+    method: "delete",
+  });
 }
 
 /**
  * 刷新参数缓存
+ * @returns Promise<any>
  */
-export function refreshConfigCache(): Promise<ApiResponse> {
-  return request.delete("/system/config/refreshCache");
+export function refreshCache() {
+  return request({
+    url: "/system/config/refreshCache",
+    method: "delete",
+  });
 }
 
 /**
  * 清空参数缓存
+ * @returns Promise<any>
  */
-export function clearConfigCache(): Promise<ApiResponse> {
-  return request.delete("/system/config/clearCache");
+export function clearCache() {
+  return request({
+    url: "/system/config/clearCache",
+    method: "delete",
+  });
 }
-
-// ==================== 配置获取接口 ====================
 
 /**
  * 根据参数键名查询参数值
  * @param configKey 参数键名
+ * @returns Promise<any>
  */
-export function getConfigKey(configKey: string): Promise<ApiResponse<string>> {
-  return request.get(`/system/config/configKey/${configKey}`);
+export function getConfigKey(configKey: string) {
+  return request({
+    url: `/system/config/configKey/${configKey}`,
+    method: "get",
+  });
 }
 
 /**
- * 根据参数键名查询参数信息
+ * 根据参数键名查询参数值
  * @param configKey 参数键名
+ * @returns Promise<any>
  */
-export function getConfigByKey(configKey: string): Promise<ConfigDetailResponse> {
-  return request.get(`/system/config/getByKey/${configKey}`);
+export function getByKey(configKey: string) {
+  return request({
+    url: `/system/config/getByKey/${configKey}`,
+    method: "get",
+  });
 }
 
 /**
- * 批量获取配置值
- * @param configKeys 参数键名列表
+ * 批量查询参数值
+ * @param configKeys 参数键名数组
+ * @returns Promise<any>
  */
-export function getBatchConfigKeys(configKeys: string[]): Promise<ApiResponse<Record<string, string>>> {
-  return request.post("/system/config/getBatchKeys", { configKeys });
+export function getBatchKeys(configKeys: string[]) {
+  return request({
+    url: "/system/config/getBatchKeys",
+    method: "post",
+    data: { configKeys },
+  });
 }

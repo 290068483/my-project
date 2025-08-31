@@ -1,102 +1,99 @@
-/**
- * 系统菜单管理 API
- * 基于 RuoYi 架构设计，符合API接口文档规范
- */
-
-import { request } from "@/utils/request/index";
-import type {
-  MenuQueryParams,
-  MenuForm,
-  MenuListResponse,
-  MenuDetailResponse,
-  MenuTreeSelectResponse,
-  RoleMenuTreeSelectResponse,
-  MenuAuthResponse,
-} from "@/types/system/menu";
-import type { ApiResponse } from "@/types/api";
-
-// ==================== 基本菜单管理接口 ====================
+import request from "@/utils/request";
+import type { SystemMenu, SystemMenuQueryParams } from "@/types/system/menu";
 
 /**
  * 查询菜单列表
  * @param params 查询参数
+ * @returns Promise<any>
  */
-export function listMenu(params?: MenuQueryParams): Promise<MenuListResponse> {
-  return request.get("/system/menu/list", { params });
+export function listMenu(params?: SystemMenuQueryParams) {
+  return request({
+    url: "/system/menu/list",
+    method: "get",
+    params,
+  });
 }
 
 /**
- * 查询菜单详细信息
+ * 查询菜单详细
  * @param menuId 菜单ID
+ * @returns Promise<any>
  */
-export function getMenu(menuId: number): Promise<MenuDetailResponse> {
-  return request.get(`/system/menu/${menuId}`);
+export function getMenu(menuId: number) {
+  return request({
+    url: `/system/menu/${menuId}`,
+    method: "get",
+  });
 }
 
 /**
  * 新增菜单
- * @param data 菜单信息
+ * @param data 菜单数据
+ * @returns Promise<any>
  */
-export function addMenu(data: MenuForm): Promise<ApiResponse> {
-  return request.post("/system/menu", data);
+export function addMenu(data: SystemMenu) {
+  return request({
+    url: "/system/menu",
+    method: "post",
+    data,
+  });
 }
 
 /**
  * 修改菜单
- * @param data 菜单信息
+ * @param data 菜单数据
+ * @returns Promise<any>
  */
-export function updateMenu(data: MenuForm): Promise<ApiResponse> {
-  return request.put("/system/menu", data);
+export function updateMenu(data: SystemMenu) {
+  return request({
+    url: "/system/menu",
+    method: "put",
+    data,
+  });
 }
 
 /**
  * 删除菜单
  * @param menuId 菜单ID
+ * @returns Promise<any>
  */
-export function delMenu(menuId: number): Promise<ApiResponse> {
-  return request.delete(`/system/menu/${menuId}`);
-}
-
-// ==================== 权限相关接口 ====================
-
-/**
- * 获取菜单权限信息
- * @param menuId 菜单ID
- */
-export function getMenuAuth(menuId: number): Promise<MenuAuthResponse> {
-  return request.get(`/system/menu/auth/${menuId}`);
+export function delMenu(menuId: number) {
+  return request({
+    url: `/system/menu/${menuId}`,
+    method: "delete",
+  });
 }
 
 /**
- * 更新菜单权限
- * @param data 权限数据
+ * 查询菜单下拉树结构
+ * @returns Promise<any>
  */
-export function updateMenuAuth(data: { menuId: number; roleIds: number[] }): Promise<ApiResponse> {
-  return request.put("/system/menu/auth", data);
-}
-
-// ==================== 菜单树形选择接口 ====================
-
-/**
- * 查询菜单下拉树列表
- */
-export function getMenuTreeSelect(): Promise<MenuTreeSelectResponse> {
-  return request.get("/system/menu/treeselect");
+export function treeselect() {
+  return request({
+    url: "/system/menu/treeselect",
+    method: "get",
+  });
 }
 
 /**
- * 加载对应角色菜单列表树
+ * 根据角色ID查询菜单下拉树结构
  * @param roleId 角色ID
+ * @returns Promise<any>
  */
-export function getRoleMenuTreeSelect(roleId: number): Promise<RoleMenuTreeSelectResponse> {
-  return request.get(`/system/menu/roleMenuTreeselect/${roleId}`);
+export function roleMenuTreeselect(roleId: number) {
+  return request({
+    url: `/system/menu/roleMenuTreeselect/${roleId}`,
+    method: "get",
+  });
 }
 
-// ==================== 路由接口 ====================
-
 /**
- * 获取路由信息（用于动态路由生成）
+ * 获取路由
+ * @returns Promise<any>
  */
-export function getMenuRouters(): Promise<ApiResponse> {
-  return request.get("/system/menu/getRouters");
+export function getRouters() {
+  return request({
+    url: "/system/menu/getRouters",
+    method: "get",
+  });
 }

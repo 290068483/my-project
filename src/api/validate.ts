@@ -3,7 +3,7 @@
  * 基于API测试指南中提到的接口规范
  */
 
-import { request } from "@/utils/request/index";
+import request from "@/utils/request";
 import type { ApiResponse } from "@/types/api";
 
 // ==================== 验证请求参数类型定义 ====================
@@ -70,8 +70,13 @@ export interface SendCodeResponse extends ApiResponse<null> {
  * @param data 用户名检查参数
  */
 export function checkUsername(data: CheckUsernameRequest): Promise<CheckResponse> {
-  return request.post("/check-username", data, {
-    withToken: false,
+  return request({
+    url: "/check-username",
+    method: "post",
+    data,
+    headers: {
+      isToken: false,
+    },
   });
 }
 
@@ -80,8 +85,13 @@ export function checkUsername(data: CheckUsernameRequest): Promise<CheckResponse
  * @param data 手机号检查参数
  */
 export function checkPhone(data: CheckPhoneRequest): Promise<CheckResponse> {
-  return request.post("/check-phone", data, {
-    withToken: false,
+  return request({
+    url: "/check-phone",
+    method: "post",
+    data,
+    headers: {
+      isToken: false,
+    },
   });
 }
 
@@ -90,8 +100,13 @@ export function checkPhone(data: CheckPhoneRequest): Promise<CheckResponse> {
  * @param data 邮箱检查参数
  */
 export function checkEmail(data: CheckEmailRequest): Promise<CheckResponse> {
-  return request.post("/check-email", data, {
-    withToken: false,
+  return request({
+    url: "/check-email",
+    method: "post",
+    data,
+    headers: {
+      isToken: false,
+    },
   });
 }
 
@@ -100,8 +115,13 @@ export function checkEmail(data: CheckEmailRequest): Promise<CheckResponse> {
  * @param data 手机号参数
  */
 export function sendRegisterCode(data: SendPhoneCodeRequest): Promise<SendCodeResponse> {
-  return request.post("/send-register-code", data, {
-    withToken: false,
+  return request({
+    url: "/send-register-code",
+    method: "post",
+    data,
+    headers: {
+      isToken: false,
+    },
   });
 }
 
@@ -110,7 +130,12 @@ export function sendRegisterCode(data: SendPhoneCodeRequest): Promise<SendCodeRe
  * @param data 邮箱参数
  */
 export function sendRegisterEmailCode(data: SendEmailCodeRequest): Promise<SendCodeResponse> {
-  return request.post("/send-register-email-code", data, {
-    withToken: false,
+  return request({
+    url: "/send-register-email-code",
+    method: "post",
+    data,
+    headers: {
+      isToken: false,
+    },
   });
 }
