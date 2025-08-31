@@ -56,6 +56,74 @@
   </div>
 </template>
 
+<style scoped>
+.login {
+  display: flex;
+  justify-content: center;
+  align-items: center;
+  height: 100%;
+  background-image: url("@/assets/images/login-background.jpg");
+  background-size: cover;
+}
+.title {
+  margin: 0px auto 30px auto;
+  text-align: center;
+  color: #707070;
+}
+
+.login-form {
+  border-radius: 6px;
+  background: #ffffff;
+  width: 400px;
+  padding: 25px 25px 5px 25px;
+}
+.login-form .el-input {
+  height: 40px;
+}
+.login-form .el-input input {
+  height: 40px;
+}
+.login-form .el-input__icon {
+  height: 39px;
+  width: 14px;
+  margin-left: 0px;
+}
+.login-tip {
+  font-size: 13px;
+  text-align: center;
+  color: #bfbfbf;
+}
+.login-code {
+  width: 33%;
+  height: 40px;
+  float: right;
+}
+.login-code img {
+  cursor: pointer;
+  vertical-align: middle;
+}
+.el-login-footer {
+  height: 40px;
+  line-height: 40px;
+  position: fixed;
+  bottom: 0;
+  width: 100%;
+  text-align: center;
+  color: #fff;
+  font-family: Arial;
+  font-size: 12px;
+  letter-spacing: 1px;
+}
+.login-code-img {
+  height: 40px;
+  padding-left: 12px;
+}
+.link-type {
+  text-decoration: none;
+  color: #337ab7;
+}
+</style>
+
 <script setup lang="ts">
 // 导入Vue相关API
 import { ref, reactive, onMounted, watch } from "vue";
@@ -117,23 +185,29 @@ watch(
 function refreshQrcode() {
   userStore
     .getCaptcha()
-    .then((res: CaptchaResponse) => {
+    .then((res: any) => {
+      // 修改类型为any
+      // 由于响应拦截器返回的是完整响应对象，我们需要获取res.data
+      const responseData = res.data || res; // 兼容两种格式
+
+      console.log("获取验证码响应:", responseData); // 添加调试日志
+
       // 检查验证码数据是否有效
-      if (res && res.data && res.data.img && res.data.uuid) {
+      if (responseData && responseData.data && responseData.data.img && responseData.data.uuid) {
         // 根据后端返回的 captchaEnabled 状态控制验证码显示/隐藏
-        captchaEnabled.value = res.data.captchaEnabled !== false; // 默认启用，除非明确禁用
-        codeUrl.value = "data:image/gif;base64," + res.data.img;
-        loginForm.uuid = res.data.uuid;
-      } else if (res && res.img && res.uuid) {
+        captchaEnabled.value = responseData.data.captchaEnabled !== false; // 默认启用，除非明确禁用
+        codeUrl.value = "data:image/gif;base64," + responseData.data.img;
+        loginForm.uuid = responseData.data.uuid;
+      } else if (responseData && responseData.img && responseData.uuid) {
         // 处理另一种可能的数据格式（后端直接返回扁平结构）
-        captchaEnabled.value = res.captchaEnabled !== false;
-        codeUrl.value = "data:image/gif;base64," + res.img;
-        loginForm.uuid = res.uuid;
+        captchaEnabled.value = responseData.captchaEnabled !== false;
+        codeUrl.value = "data:image/gif;base64," + responseData.img;
+        loginForm.uuid = responseData.uuid;
       } else {
         // 数据无效时的处理
         captchaEnabled.value = false;
         ElMessage.error("验证码加载失败：返回数据格式不正确");
-        console.error("验证码返回数据格式:", res);
+        console.error("验证码返回数据格式:", responseData);
       }
     })
     .catch((error) => {
@@ -215,7 +289,13 @@ function handleLogin() {
         .then(() => {
           // 登录成功后显示提示信息
           ElMessage.success("登录成功");
-          console.log("登录成功");
+          console.log("登录成功，用户token:", userStore.token);
+
+          // 检查token是否正确设置
+          if (!userStore.token) {
+            console.error("警告：登录成功但token未正确设置");
+          }
+
           // 登录成功后跳转到首页，让路由守卫处理用户信息获取和动态路由生成
           const query = route.query;
           const otherQueryParams: Record<string, string> = {};
@@ -224,11 +304,19 @@ function handleLogin() {
               otherQueryParams[cur] = query[cur] as string;
             }
           });
-          router.push({ path: redirect.value || "/home", query: otherQueryParams });
+
+          // 确保跳转路径正确
+          const redirectPath = redirect.value || "/home";
+          console.log("准备跳转到:", redirectPath, "参数:", otherQueryParams);
+          router.push({ path: redirectPath, query: otherQueryParams }).catch((err) => {
+            console.error("路由跳转失败:", err);
+            // 如果跳转失败，尝试直接跳转到首页
+            router.push("/home");
+          });
         })
         .catch((error) => {
           console.error("登录流程出错:", error);
-          ElMessage.error("登录失败，请检查用户名、密码和验证码");
+          ElMessage.error(error.message || "登录失败，请检查用户名、密码和验证码");
           loading.value = false;
           // 重新获取验证码
           if (captchaEnabled.value) {
@@ -239,71 +327,3 @@ function handleLogin() {
   });
 }
 </script>
-
-<style scoped>
-.login {
-  display: flex;
-  justify-content: center;
-  align-items: center;
-  height: 100%;
-  background-image: url("@/assets/images/login-background.jpg");
-  background-size: cover;
-}
-.title {
-  margin: 0px auto 30px auto;
-  text-align: center;
-  color: #707070;
-}
-
-.login-form {
-  border-radius: 6px;
-  background: #ffffff;
-  width: 400px;
-  padding: 25px 25px 5px 25px;
-}
-.login-form .el-input {
-  height: 40px;
-}
-.login-form .el-input input {
-  height: 40px;
-}
-.login-form .el-input__icon {
-  height: 39px;
-  width: 14px;
-  margin-left: 0px;
-}
-.login-tip {
-  font-size: 13px;
-  text-align: center;
-  color: #bfbfbf;
-}
-.login-code {
-  width: 33%;
-  height: 40px;
-  float: right;
-}
-.login-code img {
-  cursor: pointer;
-  vertical-align: middle;
-}
-.el-login-footer {
-  height: 40px;
-  line-height: 40px;
-  position: fixed;
-  bottom: 0;
-  width: 100%;
-  text-align: center;
-  color: #fff;
-  font-family: Arial;
-  font-size: 12px;
-  letter-spacing: 1px;
-}
-.login-code-img {
-  height: 40px;
-  padding-left: 12px;
-}
-.link-type {
-  text-decoration: none;
-  color: #337ab7;
-}
-</style>

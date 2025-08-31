@@ -40,7 +40,9 @@ export interface RouterInfo {
 export interface RoutersResponse {
   code: number;
   msg: string;
-  data: RouterInfo[];
+  data?: RouterInfo[]; // 可选，因为有些接口直接返回数据
+  // 有些接口直接返回数据，不包含data包装
+  [key: string]: any; // 允许其他属性
 }
 
 /**
@@ -63,6 +65,8 @@ export interface LoginResponse {
   data?: {
     token: string;
   };
+  // 有些接口直接返回数据，不包含data包装
+  [key: string]: any; // 允许其他属性
 }
 
 /**
@@ -79,6 +83,8 @@ export interface CaptchaResponse {
     img: string;
     captchaEnabled?: boolean;
   };
+  // 有些接口直接返回数据，不包含data包装
+  [key: string]: any; // 允许其他属性
 }
 
 /**
@@ -87,11 +93,16 @@ export interface CaptchaResponse {
 export interface UserInfoResponse {
   code: number;
   msg: string;
-  data: {
+  data?: {
     user: UserInfo;
     roles: string[];
     permissions: string[];
   };
+  user?: UserInfo;
+  roles?: string[];
+  permissions?: string[];
+  // 有些接口直接返回数据，不包含data包装
+  [key: string]: any; // 允许其他属性
 }
 
 /**
@@ -100,6 +111,9 @@ export interface UserInfoResponse {
 export interface LogoutResponse {
   code: number;
   msg: string;
+  data?: null;
+  // 有些接口直接返回数据，不包含data包装
+  [key: string]: any; // 允许其他属性
 }
 
 /**
@@ -122,6 +136,8 @@ export interface RegisterResponse {
   code: number;
   msg: string;
   data?: null;
+  // 有些接口直接返回数据，不包含data包装
+  [key: string]: any; // 允许其他属性
 }
 
 /**

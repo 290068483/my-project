@@ -4,6 +4,7 @@ import router from "@/router";
 import { login, getCaptchaImage, getInfo, getRouters, logout } from "@/api/login";
 import { register } from "@/api/register";
 import { getToken, setToken, removeToken } from "@/utils/auth";
+
 import type {
   UserInfo,
   LoginRequest,
@@ -60,24 +61,46 @@ export const useUserStore = defineStore("user", {
       const uuid = userInfo.uuid;
       return new Promise<void>((resolve, reject) => {
         login({ username, password, code, uuid })
-          .then((res: LoginResponse) => {
-            // RuoYi-Vue3标准：直接从res.data中获取token
-            // 但根据实际返回的数据格式，token直接在res中
-            if (res.code === 200) {
-              // 检查token是在res中还是在res.data中
-              const token = res.token || (res.data && res.data.token);
-              if (token) {
-                setToken(token);
-                this.token = token;
-                resolve();
-              } else {
-                reject(new Error("登录响应中未找到token"));
-              }
+          .then((res: any) => {
+            // 修改类型为any，因为响应拦截器返回的是完整响应
+            console.log("登录接口响应:", res); // 添加调试日志
+
+            // 由于响应拦截器返回的是完整响应对象，我们需要获取res.data
+            const responseData = res.data || res; // 兼容两种格式
+
+            // 特别处理登录接口的响应格式
+            // 登录接口返回的token在响应外层
+            let token = null;
+
+            // 首先检查responseData.token（外层）
+            if (responseData.token) {
+              token = responseData.token;
+            }
+            // 然后检查responseData.data.token（内层）
+            else if (responseData.data && responseData.data.token) {
+              token = responseData.data.token;
+            }
+
+            console.log("提取到的token:", token); // 添加调试日志
+
+            // 检查响应是否成功
+            if (responseData.code === 200 && token) {
+              setToken(token);
+              this.token = token;
+              resolve();
+            } else if (responseData.code === 200 && !token) {
+              // 如果code是200但没有token，检查是否有错误消息
+              const errorMsg = responseData.msg || "登录响应中未找到token";
+              console.error("登录失败:", errorMsg, "响应数据:", responseData);
+              reject(new Error(errorMsg));
             } else {
-              reject(new Error(res.msg || "登录失败"));
+              const errorMsg = responseData.msg || "登录失败";
+              console.error("登录失败:", errorMsg, "响应数据:", responseData);
+              reject(new Error(errorMsg));
             }
           })
           .catch((error) => {
+            console.error("登录请求失败:", error);
             reject(error);
           });
       });
@@ -87,28 +110,52 @@ export const useUserStore = defineStore("user", {
     getInfo() {
       return new Promise((resolve, reject) => {
         getInfo()
-          .then((res: UserInfoResponse) => {
-            // RuoYi-Vue3标准：直接从res中获取user、roles和permissions
-            if (res.code === 200 && res.data) {
-              const user = res.data.user;
-              const avatar =
-                user.avatar == "" || user.avatar == null ? "" : import.meta.env.VITE_APP_BASE_API + user.avatar;
+          .then((res: any) => {
+            // 修改类型为any
+            // 由于响应拦截器返回的是完整响应对象，我们需要获取res.data
+            const responseData = res.data || res; // 兼容两种格式
 
-              if (res.data.roles && res.data.roles.length > 0) {
-                // 验证返回的roles是否是一个非空数组
-                this.roles = res.data.roles;
-                this.permissions = res.data.permissions;
+            console.log("获取用户信息响应:", responseData); // 添加调试日志
+
+            // RuoYi-Vue3标准：直接从res中获取user、roles和permissions
+            if (responseData.code === 200) {
+              // 检查是否有data字段
+              const userData = responseData.data || responseData;
+
+              // 添加额外的安全检查
+              if (!userData.user) {
+                reject(new Error("用户数据格式不正确：缺少user字段"));
+                return;
+              }
+
+              const user = userData.user;
+              // 安全检查avatar字段
+              const avatar = user.avatar
+                ? user.avatar == "" || user.avatar == null
+                  ? ""
+                  : import.meta.env.VITE_APP_BASE_API + user.avatar
+                : "";
+
+              // 安全检查roles和permissions字段
+              if (userData.roles && Array.isArray(userData.roles) && userData.roles.length > 0) {
+                this.roles = [...userData.roles]; // 创建副本避免引用问题
               } else {
                 this.roles = ["ROLE_DEFAULT"];
               }
+
+              this.permissions =
+                userData.permissions && Array.isArray(userData.permissions) ? [...userData.permissions] : [];
+
               this.name = user.userName || user.nickName || "";
               this.avatar = avatar;
-              resolve(res);
+              resolve(responseData);
             } else {
-              reject(new Error(res.msg || "获取用户信息失败"));
+              const errorMsg = responseData.msg || "获取用户信息失败";
+              reject(new Error(errorMsg));
             }
           })
           .catch((error) => {
+            console.error("获取用户信息异常:", error);
             reject(error);
           });
       });
@@ -118,16 +165,21 @@ export const useUserStore = defineStore("user", {
     logout() {
       return new Promise<void>((resolve, reject) => {
         logout()
-          .then((res: LogoutResponse) => {
+          .then((res: any) => {
+            // 修改类型为any
+            // 由于响应拦截器返回的是完整响应对象，我们需要获取res.data
+            const responseData = res.data || res; // 兼容两种格式
+
             // RuoYi-Vue3标准：检查响应状态码
-            if (res.code === 200) {
+            if (responseData.code === 200) {
               this.token = "";
               this.roles = [];
               this.permissions = [];
               removeToken();
               resolve();
             } else {
-              reject(new Error(res.msg || "退出登录失败"));
+              const errorMsg = responseData.msg || "退出登录失败";
+              reject(new Error(errorMsg));
             }
           })
           .catch((error) => {
@@ -146,25 +198,59 @@ export const useUserStore = defineStore("user", {
       return new Promise((resolve, reject) => {
         getCaptchaImage()
           .then((res: any) => {
+            // 修改类型为any
+            // 由于响应拦截器返回的是完整响应对象，我们需要获取res.data
+            const responseData = res.data || res; // 兼容两种格式
+
             // 成功获取验证码数据，直接返回响应
             // 根据实际返回的数据结构调整处理逻辑
-            if (res && typeof res === "object" && res.code === 200 && res.uuid && res.img) {
+            if (
+              responseData &&
+              typeof responseData === "object" &&
+              responseData.code === 200 &&
+              responseData.data &&
+              responseData.data.uuid &&
+              responseData.data.img
+            ) {
               // 后端直接返回扁平结构，需要适配我们的类型定义
+              const captchaData = responseData.data;
               const captchaResponse: CaptchaResponse = {
-                code: res.code,
-                msg: res.msg,
-                uuid: res.uuid,
-                img: res.img,
-                captchaEnabled: res.captchaEnabled,
+                code: responseData.code,
+                msg: responseData.msg,
+                uuid: captchaData.uuid,
+                img: captchaData.img,
+                captchaEnabled: captchaData.captchaEnabled,
                 data: {
-                  uuid: res.uuid,
-                  img: res.img,
-                  captchaEnabled: res.captchaEnabled,
+                  uuid: captchaData.uuid,
+                  img: captchaData.img,
+                  captchaEnabled: captchaData.captchaEnabled,
+                },
+              };
+              resolve(captchaResponse);
+            } else if (
+              responseData &&
+              typeof responseData === "object" &&
+              responseData.code === 200 &&
+              responseData.uuid &&
+              responseData.img
+            ) {
+              // 处理另一种可能的数据格式（后端直接返回扁平结构）
+              const captchaResponse: CaptchaResponse = {
+                code: responseData.code,
+                msg: responseData.msg,
+                uuid: responseData.uuid,
+                img: responseData.img,
+                captchaEnabled: responseData.captchaEnabled,
+                data: {
+                  uuid: responseData.uuid,
+                  img: responseData.img,
+                  captchaEnabled: responseData.captchaEnabled,
                 },
               };
               resolve(captchaResponse);
             } else {
-              console.error("验证码接口返回数据格式不正确:", res);
+              // 数据无效时的处理
+              console.error("验证码接口返回数据格式不正确:", responseData);
               reject(new Error("验证码接口返回数据格式不正确"));
             }
           })
@@ -179,12 +265,17 @@ export const useUserStore = defineStore("user", {
     register(registerInfo: RegisterRequest) {
       return new Promise((resolve, reject) => {
         register(registerInfo)
-          .then((res: RegisterResponse) => {
+          .then((res: any) => {
+            // 修改类型为any
+            // 由于响应拦截器返回的是完整响应对象，我们需要获取res.data
+            const responseData = res.data || res; // 兼容两种格式
+
             // RuoYi-Vue3标准：检查响应状态码
-            if (res.code === 200) {
-              resolve(res);
+            if (responseData.code === 200) {
+              resolve(responseData);
             } else {
-              reject(new Error(res.msg || "注册失败"));
+              const errorMsg = responseData.msg || "注册失败";
+              reject(new Error(errorMsg));
             }
           })
           .catch((error) => {

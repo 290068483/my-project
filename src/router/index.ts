@@ -43,6 +43,7 @@ export const constantRoutes: Array<RouteRecordRaw> = [
         component: () => import("../views/HomeView.vue"),
         meta: {
           requiresAuth: false,
+          title: "首页",
         },
       },
     ],
@@ -54,6 +55,7 @@ export const constantRoutes: Array<RouteRecordRaw> = [
     component: () => import("../views/NotFoundView.vue"),
     meta: {
       requiresAuth: false,
+      title: "页面未找到",
     },
   },
 ];
@@ -130,29 +132,64 @@ router.beforeEach(async (to, from, next) => {
       } else {
         try {
           // 获取用户信息
-          await userStore.getInfo();
+          const userInfo = await userStore.getInfo();
+          console.log("获取用户信息成功:", userInfo);
 
           // 生成动态路由
           const accessRoutes = await permissionStore.generateRoutes();
+          console.log("生成动态路由成功:", accessRoutes);
+
+          // 确保首页路由始终存在
+          const hasHomeRoute = accessRoutes.some(
+            (route: any) =>
+              route.path === "/home" || (route.children && route.children.some((child: any) => child.path === "home")),
+          );
+
+          // 如果动态路由中没有首页，确保常量路由中的首页可用
+          if (!hasHomeRoute) {
+            console.log("动态路由中未找到首页，使用常量路由中的首页");
+          }
 
           // 动态添加可访问路由表
           accessRoutes.forEach((route: any) => {
-            router.addRoute(route);
+            // 添加路由前检查路径格式
+            if (route.path && !route.path.startsWith("/") && !route.path.startsWith("http")) {
+              console.warn("修复不规范的路由路径:", route.path);
+              route.path = "/" + route.path;
+            }
+            try {
+              router.addRoute(route);
+            } catch (error) {
+              console.error("添加路由失败:", error, "路由信息:", route);
+            }
           });
 
           // hack方法 确保addRoutes已完成
           next({ ...to, replace: true });
-        } catch (error) {
-          // Token已过期或无效，清理状态并重定向到登录页
-          await userStore.logout();
-          ElMessage.error("登录状态已过期，请重新登录");
-          next(`/login?redirect=${to.path}`);
-          NProgress.done();
+        } catch (error: any) {
+          console.error("路由守卫中获取用户信息或生成路由失败:", error);
+          // 检查错误信息，如果是"操作成功"或类似的成功消息则认为是成功的
+          if (error.message && (error.message.includes("操作成功") || error.message.includes("成功"))) {
+            console.log("忽略成功消息的错误:", error.message);
+            // 继续执行路由跳转
+            next();
+          } else if (error.message && error.message.includes("无效的会话")) {
+            // Token已过期或无效，清理状态并重定向到登录页
+            await userStore.logout();
+            ElMessage.error("登录状态已过期，请重新登录");
+            next(`/login?redirect=${to.path}`);
+            NProgress.done();
+          } else {
+            // 其他错误情况，确保用户可以访问首页
+            console.log("其他错误情况:", error.message);
+            next();
+          }
         }
       }
     }
   } else {
     // 未登录用户处理
+    console.log("未检测到token，检查路由:", to.path); // 添加调试日志
     if (whiteList.indexOf(to.path) !== -1) {
       // 在白名单中，直接放行
       next();

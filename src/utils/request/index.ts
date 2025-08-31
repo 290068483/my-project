@@ -117,9 +117,10 @@ service.interceptors.response.use(
       return Promise.reject(new Error(msg));
     } else if (code !== 200) {
       ElNotification.error({ title: msg });
-      return Promise.reject("error");
+      return Promise.reject(new Error(msg)); // 使用msg而不是"error"
     } else {
-      return Promise.resolve(res.data);
+      // 返回完整的响应数据，让调用方决定如何处理data
+      return Promise.resolve(res);
     }
   },
   (error: AxiosError) => {
