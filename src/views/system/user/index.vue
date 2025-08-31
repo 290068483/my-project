@@ -408,10 +408,24 @@ function handleRowCommand(command: string, row: SystemUser) {
 async function handleExport() {
   try {
     ElMessage.info("正在导出数据，请稍候...");
-    // TODO: 实现导出功能
-    // await exportUser(queryParams)
-    ElMessage.success("导出成功");
-  } catch {
+    // 实现导出功能
+    const response = await userStore.exportUser(queryParams.value);
+
+    if (response.code === 200) {
+      // 创建下载链接
+      const blob = new Blob([response.data]);
+      const url = window.URL.createObjectURL(blob);
+      const link = document.createElement("a");
+      link.href = url;
+      link.download = "用户数据.xlsx";
+      link.click();
+      window.URL.revokeObjectURL(url);
+      ElMessage.success("导出成功");
+    } else {
+      ElMessage.error(response.msg || "导出失败");
+    }
+  } catch (error) {
+    console.error("导出失败:", error);
     ElMessage.error("导出失败");
   }
 }
@@ -422,10 +436,24 @@ async function handleExport() {
 async function handleDownloadTemplate() {
   try {
     ElMessage.info("正在下载模板，请稍候...");
-    // TODO: 实现下载模板功能
-    // await importTemplate()
-    ElMessage.success("下载成功");
-  } catch {
+    // 实现下载模板功能
+    const response = await userStore.importTemplate();
+
+    if (response.code === 200) {
+      // 创建下载链接
+      const blob = new Blob([response.data]);
+      const url = window.URL.createObjectURL(blob);
+      const link = document.createElement("a");
+      link.href = url;
+      link.download = "用户导入模板.xlsx";
+      link.click();
+      window.URL.revokeObjectURL(url);
+      ElMessage.success("下载成功");
+    } else {
+      ElMessage.error(response.msg || "下载失败");
+    }
+  } catch (error) {
+    console.error("下载模板失败:", error);
     ElMessage.error("下载失败");
   }
 }

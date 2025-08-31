@@ -4,65 +4,55 @@
     v-model="dialogVisible"
     width="600px"
     append-to-body
-    :before-close="handleClose">
+    :close-on-click-modal="false"
+    @close="handleClose">
     <el-form
-      ref="formRef"
+      ref="userFormRef"
       :model="formData"
       :rules="rules"
-      label-width="80px">
+      label-width="80px"
+      :disabled="formLoading">
       <el-row :gutter="20">
         <el-col :span="12">
           <el-form-item label="用户昵称" prop="nickName">
-            <el-input
-              v-model="formData.nickName"
-              placeholder="请输入用户昵称"
-              maxlength="30" />
+            <el-input v-model="formData.nickName" placeholder="请输入用户昵称" maxlength="30" />
           </el-form-item>
         </el-col>
         <el-col :span="12">
           <el-form-item label="归属部门" prop="deptId">
             <el-tree-select
               v-model="formData.deptId"
-              :data="deptOptions"
+              :data="deptTree"
               :props="{ value: 'deptId', label: 'deptName', children: 'children' }"
               value-key="deptId"
               placeholder="请选择归属部门"
-              clearable
-              check-strictly />
+              check-strictly
+              style="width: 100%" />
           </el-form-item>
         </el-col>
       </el-row>
-      
+
       <el-row :gutter="20">
         <el-col :span="12">
           <el-form-item label="手机号码" prop="phonenumber">
-            <el-input
-              v-model="formData.phonenumber"
-              placeholder="请输入手机号码"
-              maxlength="11" />
+            <el-input v-model="formData.phonenumber" placeholder="请输入手机号码" maxlength="11" />
           </el-form-item>
         </el-col>
         <el-col :span="12">
           <el-form-item label="邮箱" prop="email">
-            <el-input
-              v-model="formData.email"
-              placeholder="请输入邮箱"
-              maxlength="50" />
+            <el-input v-model="formData.email" placeholder="请输入邮箱" maxlength="50" />
           </el-form-item>
         </el-col>
       </el-row>
-      
+
       <el-row :gutter="20">
         <el-col :span="12">
-          <el-form-item v-if="!formData.userId" label="用户名称" prop="userName">
-            <el-input
-              v-model="formData.userName"
-              placeholder="请输入用户名称"
-              maxlength="30" />
+          <el-form-item v-if="type === 'add'" label="用户名称" prop="userName">
+            <el-input v-model="formData.userName" placeholder="请输入用户名称" maxlength="30" />
           </el-form-item>
         </el-col>
         <el-col :span="12">
-          <el-form-item v-if="!formData.userId" label="用户密码" prop="password">
+          <el-form-item v-if="type === 'add'" label="用户密码" prop="password">
             <el-input
               v-model="formData.password"
               placeholder="请输入用户密码"
@@ -72,13 +62,13 @@
           </el-form-item>
         </el-col>
       </el-row>
-      
+
       <el-row :gutter="20">
         <el-col :span="12">
           <el-form-item label="用户性别">
-            <el-select v-model="formData.sex" placeholder="请选择">
+            <el-select v-model="formData.sex" placeholder="请选择性别">
               <el-option
-                v-for="item in sexOptions"
+                v-for="item in USER_GENDER_OPTIONS"
                 :key="item.value"
                 :label="item.label"
                 :value="item.value" />
@@ -89,7 +79,7 @@
           <el-form-item label="状态">
             <el-radio-group v-model="formData.status">
               <el-radio
-                v-for="item in statusOptions"
+                v-for="item in USER_STATUS_OPTIONS"
                 :key="item.value"
                 :label="item.value">
                 {{ item.label }}
@@ -98,227 +88,232 @@
           </el-form-item>
         </el-col>
       </el-row>
-      
+
       <el-row :gutter="20">
         <el-col :span="12">
           <el-form-item label="岗位">
-            <el-select
-              v-model="formData.postIds"
-              multiple
-              placeholder="请选择">
+            <el-select v-model="formData.postIds" multiple placeholder="请选择岗位" style="width: 100%">
               <el-option
-                v-for="item in postOptions"
+                v-for="item in postList"
                 :key="item.postId"
                 :label="item.postName"
                 :value="item.postId"
-                :disabled="item.status == 1" />
+                :disabled="item.status === '1'" />
             </el-select>
           </el-form-item>
         </el-col>
         <el-col :span="12">
           <el-form-item label="角色">
-            <el-select
-              v-model="formData.roleIds"
-              multiple
-              placeholder="请选择">
+            <el-select v-model="formData.roleIds" multiple placeholder="请选择角色" style="width: 100%">
               <el-option
-                v-for="item in roleOptions"
+                v-for="item in roleList"
                 :key="item.roleId"
                 :label="item.roleName"
                 :value="item.roleId"
-                :disabled="item.status == 1" />
+                :disabled="item.status === '1'" />
             </el-select>
           </el-form-item>
         </el-col>
       </el-row>
-      
+
       <el-row :gutter="20">
         <el-col :span="24">
           <el-form-item label="备注">
             <el-input
               v-model="formData.remark"
               type="textarea"
-              placeholder="请输入内容" />
+              placeholder="请输入备注"
+              :rows="3"
+              maxlength="500"
+              show-word-limit />
           </el-form-item>
         </el-col>
       </el-row>
     </el-form>
-    
+
     <template #footer>
       <div class="dialog-footer">
-        <el-button type="primary" @click="submitForm">确 定</el-button>
-        <el-button @click="cancel">取 消</el-button>
+        <el-button @click="handleClose">取 消</el-button>
+        <el-button type="primary" @click="handleSubmit" :loading="formLoading">确 定</el-button>
       </div>
     </template>
   </el-dialog>
 </template>
 
 <script setup lang="ts">
-import { ref, reactive, computed, watch, defineEmits, defineProps } from 'vue'
-import { ElMessage, ElForm } from 'element-plus'
-import type { FormInstance, FormRules } from 'element-plus'
-import type { UserForm, DeptInfo, RoleInfo, PostInfo } from '@/types/system/user'
+import { ref, computed, watch, reactive } from "vue";
+import { ElMessage } from "element-plus";
+import type { FormInstance, FormRules } from "element-plus";
+import type { SystemUser, UserForm } from "@/types/system/user";
+import { USER_STATUS_OPTIONS, USER_GENDER_OPTIONS } from "@/types/system/user";
+import { useUserManageStore } from "@/stores/system/userManage";
 
-// 定义属性
-const props = defineProps({
-  modelValue: {
-    type: Boolean,
-    required: true
-  },
-  title: {
-    type: String,
-    required: true
-  },
-  type: {
-    type: String as () => 'add' | 'edit',
-    required: true
-  },
-  userData: {
-    type: Object as () => Partial<UserForm>,
-    default: () => ({})
-  },
-  deptTree: {
-    type: Array as () => DeptInfo[],
-    default: () => []
-  },
-  roleList: {
-    type: Array as () => RoleInfo[],
-    default: () => []
-  },
-  postList: {
-    type: Array as () => PostInfo[],
-    default: () => []
-  }
-})
+// 定义组件属性
+interface Props {
+  modelValue: boolean;
+  title: string;
+  type: "add" | "edit";
+  userData?: SystemUser | null;
+  roleList: SystemRole[];
+  postList: SystemPost[];
+  deptTree: SystemDept[];
+}
 
 // 定义事件
-const emit = defineEmits(['update:modelValue', 'success'])
+interface Emits {
+  (e: "update:modelValue", value: boolean): void;
+  (e: "success"): void;
+}
+
+const props = withDefaults(defineProps<Props>(), {
+  modelValue: false,
+  title: "操作用户",
+  type: "add",
+  userData: null,
+  roleList: () => [],
+  postList: () => [],
+  deptTree: () => [],
+});
+
+const emit = defineEmits<Emits>();
+
+// 使用 store
+const userStore = useUserManageStore();
 
 // 表单引用
-const formRef = ref<FormInstance>()
+const userFormRef = ref<FormInstance>();
 
-// 表单数据
-const formData = reactive<UserForm>({
-  userId: undefined,
-  userName: '',
-  nickName: '',
-  deptId: undefined,
-  phonenumber: '',
-  email: '',
-  password: '',
-  sex: '0',
-  status: '0',
-  postIds: [],
-  roleIds: [],
-  remark: ''
-})
+// 表单加载状态
+const formLoading = ref(false);
 
-// 表单规则
-const rules = reactive<FormRules>({
-  userName: [
-    { required: true, message: '用户名称不能为空', trigger: 'blur' },
-    { min: 2, max: 20, message: '用户名称长度必须介于 2 和 20 之间', trigger: 'blur' }
-  ],
-  nickName: [
-    { required: true, message: '用户昵称不能为空', trigger: 'blur' }
-  ],
-  deptId: [
-    { required: true, message: '归属部门不能为空', trigger: 'change' }
-  ],
-  password: [
-    { required: true, message: '用户密码不能为空', trigger: 'blur' },
-    { min: 5, max: 20, message: '用户密码长度必须介于 5 和 20 之间', trigger: 'blur' }
-  ],
-  email: [
-    { type: 'email', message: '请输入正确的邮箱地址', trigger: ['blur', 'change'] }
-  ],
-  phonenumber: [
-    { pattern: /^1[3|4|5|6|7|8|9][0-9]\d{8}$/, message: '请输入正确的手机号码', trigger: 'blur' }
-  ]
-})
-
-// 性别选项
-const sexOptions = [
-  { value: '0', label: '男' },
-  { value: '1', label: '女' },
-  { value: '2', label: '未知' }
-]
-
-// 状态选项
-const statusOptions = [
-  { value: '0', label: '正常' },
-  { value: '1', label: '停用' }
-]
-
-// 部门选项
-const deptOptions = computed(() => props.deptTree)
-
-// 角色选项
-const roleOptions = computed(() => props.roleList)
-
-// 岗位选项
-const postOptions = computed(() => props.postList)
-
-// 对话框可见性
+// 对话框显示状态
 const dialogVisible = computed({
   get: () => props.modelValue,
-  set: (value) => emit('update:modelValue', value)
-})
+  set: (value) => emit("update:modelValue", value),
+});
+
+// 表单数据
+const formData = ref<UserForm>({
+  userId: undefined,
+  deptId: undefined,
+  userName: "",
+  nickName: "",
+  email: "",
+  phonenumber: "",
+  sex: "0",
+  status: "0",
+  roleIds: [],
+  postIds: [],
+  remark: "",
+});
+
+// 表单验证规则
+const rules = reactive<FormRules>({
+  userName: [
+    { required: true, message: "用户名称不能为空", trigger: "blur" },
+    { min: 2, max: 20, message: "用户名称长度必须介于 2 和 20 之间", trigger: "blur" },
+  ],
+  nickName: [
+    { required: true, message: "用户昵称不能为空", trigger: "blur" },
+    { min: 2, max: 30, message: "用户昵称长度必须介于 2 和 30 之间", trigger: "blur" },
+  ],
+  password: [
+    { required: true, message: "用户密码不能为空", trigger: "blur" },
+    { min: 5, max: 20, message: "用户密码长度必须介于 5 和 20 之间", trigger: "blur" },
+  ],
+  email: [
+    { type: "email", message: "请输入正确的邮箱地址", trigger: ["blur", "change"] },
+  ],
+  phonenumber: [
+    { pattern: /^1[3|4|5|6|7|8|9][0-9]\d{8}$/, message: "请输入正确的手机号码", trigger: "blur" },
+  ],
+});
 
 // 监听用户数据变化
-watch(() => props.userData, (newVal) => {
-  if (newVal) {
-    Object.assign(formData, newVal)
-  }
-}, { immediate: true, deep: true })
-
-// 提交表单
-const submitForm = async () => {
-  if (!formRef.value) return
-  
-  await formRef.value.validate((valid) => {
-    if (valid) {
-      emit('success', formData)
-      ElMessage.success(`${props.title}成功`)
-      dialogVisible.value = false
+watch(
+  () => props.userData,
+  (newVal) => {
+    if (newVal && props.type === "edit") {
+      // 编辑模式下，初始化表单数据
+      formData.value = {
+        userId: newVal.userId,
+        deptId: newVal.deptId,
+        userName: newVal.userName,
+        nickName: newVal.nickName,
+        email: newVal.email || "",
+        phonenumber: newVal.phonenumber || "",
+        sex: newVal.sex || "0",
+        status: newVal.status,
+        roleIds: newVal.roleIds || [],
+        postIds: newVal.postIds || [],
+        remark: newVal.remark || "",
+      };
+    } else if (props.type === "add") {
+      // 新增模式下，重置表单数据
+      formData.value = {
+        userId: undefined,
+        deptId: undefined,
+        userName: "",
+        nickName: "",
+        email: "",
+        phonenumber: "",
+        sex: "0",
+        status: "0",
+        roleIds: [],
+        postIds: [],
+        remark: "",
+      };
     }
-  })
+  },
+  { immediate: true },
+);
+
+/**
+ * 关闭对话框
+ */
+function handleClose() {
+  dialogVisible.value = false;
+  // 重置表单
+  userFormRef.value?.resetFields();
 }
 
-// 取消操作
-const cancel = () => {
-  dialogVisible.value = false
-  resetForm()
-}
+/**
+ * 提交表单
+ */
+async function handleSubmit() {
+  if (!userFormRef.value) return;
 
-// 关闭对话框前的处理
-const handleClose = () => {
-  dialogVisible.value = false
-  resetForm()
-}
+  try {
+    // 表单验证
+    await userFormRef.value.validate();
 
-// 重置表单
-const resetForm = () => {
-  formRef.value?.resetFields()
-  Object.assign(formData, {
-    userId: undefined,
-    userName: '',
-    nickName: '',
-    deptId: undefined,
-    phonenumber: '',
-    email: '',
-    password: '',
-    sex: '0',
-    status: '0',
-    postIds: [],
-    roleIds: [],
-    remark: ''
-  })
+    formLoading.value = true;
+
+    // 根据操作类型调用不同方法
+    let success = false;
+    if (props.type === "add") {
+      success = await userStore.addUserData(formData.value);
+    } else {
+      success = await userStore.updateUserData(formData.value);
+    }
+
+    if (success) {
+      ElMessage.success(props.type === "add" ? "新增用户成功" : "修改用户成功");
+      handleClose();
+      emit("success");
+    }
+  } catch (error) {
+    console.error("表单提交失败:", error);
+  } finally {
+    formLoading.value = false;
+  }
 }
 </script>
 
-<style scoped>
+<style scoped lang="scss">
 .dialog-footer {
-  text-align: right;
+  display: flex;
+  justify-content: flex-end;
+  gap: 10px;
 }
 </style>

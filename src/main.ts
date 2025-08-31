@@ -22,7 +22,8 @@ app.directive("popconfirm", PopconfirmDirective);
 setupDirectives(app);
 
 // 配置Pinia
-app.use(createPinia());
+const pinia = createPinia();
+app.use(pinia);
 
 // 配置路由
 app.use(router);

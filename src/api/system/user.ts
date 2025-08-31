@@ -222,3 +222,28 @@ export function batchChangeUserStatus(userIds: number[], status: string) {
     data,
   });
 }
+
+/**
+ * 查询用户角色权限
+ * @param userId 用户ID
+ * @returns Promise<any>
+ */
+export function getAuthRole(userId: number) {
+  return request({
+    url: `/system/user/authRole/${userId}`,
+    method: "get",
+  });
+}
+
+/**
+ * 更新用户角色权限
+ * @param data 用户ID和角色ID列表
+ * @returns Promise<any>
+ */
+export function updateAuthRole(data: { userId: number | undefined; roleIds: number[] }) {
+  return request({
+    url: "/system/user/authRole",
+    method: "put",
+    data,
+  });
+}

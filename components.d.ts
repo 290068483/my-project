@@ -9,6 +9,7 @@ export {}
 declare module 'vue' {
   export interface GlobalComponents {
     ActionButtons: typeof import('./src/components/ActionButtons/ActionButtons.vue')['default']
+    CardTopNav: typeof import('./src/components/CardTopNav.vue')['default']
     CustomerContent: typeof import('./src/components/CustomerContent.vue')['default']
     CustomHeader: typeof import('./src/components/CustomHeader.vue')['default']
     DictTag: typeof import('./src/components/DictTag/DictTag.vue')['default']
@@ -32,6 +33,8 @@ declare module 'vue' {
     ElFormItem: typeof import('element-plus/es')['ElFormItem']
     ElIcon: typeof import('element-plus/es')['ElIcon']
     ElInput: typeof import('element-plus/es')['ElInput']
+    ElMenu: typeof import('element-plus/es')['ElMenu']
+    ElMenuItem: typeof import('element-plus/es')['ElMenuItem']
     ElOption: typeof import('element-plus/es')['ElOption']
     ElPagination: typeof import('element-plus/es')['ElPagination']
     ElRadioButton: typeof import('element-plus/es')['ElRadioButton']
@@ -39,6 +42,7 @@ declare module 'vue' {
     ElResult: typeof import('element-plus/es')['ElResult']
     ElSelect: typeof import('element-plus/es')['ElSelect']
     ElSkeleton: typeof import('element-plus/es')['ElSkeleton']
+    ElSubMenu: typeof import('element-plus/es')['ElSubMenu']
     ElTable: typeof import('element-plus/es')['ElTable']
     ElTableColumn: typeof import('element-plus/es')['ElTableColumn']
     ElTabPane: typeof import('element-plus/es')['ElTabPane']
@@ -58,7 +62,9 @@ declare module 'vue' {
     RouterLink: typeof import('vue-router')['RouterLink']
     RouterView: typeof import('vue-router')['RouterView']
     SecurityQuestionsSetup: typeof import('./src/components/SecurityQuestionsSetup.vue')['default']
+    SettingsButton: typeof import('./src/components/SettingsButton.vue')['default']
     SettingsDemo: typeof import('./src/components/SettingsDemo.vue')['default']
+    TopNav: typeof import('./src/components/TopNav.vue')['default']
     UserCenterLayout: typeof import('./src/components/UserCenterLayout.vue')['default']
     UserCenterNavigation: typeof import('./src/components/UserCenterNavigation.vue')['default']
   }

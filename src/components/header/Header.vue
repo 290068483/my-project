@@ -1,10 +1,15 @@
-<template name="AppHeader">
+<template>
   <nav class="header-container bg-white border-b border-gray-200 shadow-sm sticky top-0 z-50">
     <!-- 顶部导航栏 -->
     <div
-      class="nav-bar flex flex-col sm:flex-row items-center justify-between px-4 sm:px-6 py-2 bg-gradient-to-r from-blue-500 to-blue-600 shadow-md">
-      <!-- 头部导航菜单 -->
+      class="nav-bar flex flex-col sm:flex-row items-center justify-between px-4 sm:px-6 py-3 bg-gradient-to-r from-blue-600 to-indigo-700 shadow-lg rounded-b-lg">
+      <!-- 恢复为原来的顶部菜单导航 -->
+      <div v-if="settingsStore.topNav" class="w-full">
+        <TopNav />
+      </div>
+
       <div
+        v-else
         class="nav-menu flex space-x-1 gap-1 justify-start overflow-x-auto hide-scrollbar sm:space-x-4 lg:overflow-visible w-full sm:w-auto"
         role="navigation"
         aria-label="主导航">
@@ -148,11 +153,14 @@
 <script setup lang="ts">
 import { ref, onMounted, computed, reactive } from "vue";
 import { useUserStore } from "@/stores/user";
+import { useSettingsStore } from "@/stores/settings";
 import router from "@/router";
 import { ArrowDown } from "@element-plus/icons-vue";
 import type { FormInstance, FormRules } from "element-plus";
 import { ElMessage, ElMessageBox } from "element-plus";
 import { AuthUtils } from "@/utils/auth";
+import TopNav from "@/components/TopNav.vue";
+// 移除CardTopNav的导入
 
 export interface UserInfo {
   name?: string;
@@ -162,12 +170,10 @@ export interface UserInfo {
 }
 
 const userStore = useUserStore();
-
-// 计算属性获取用户登录状态
-const isLoggedIn = computed(() => userStore.isLoggedIn);
+const settingsStore = useSettingsStore();
 
 // 计算属性获取用户信息
-const userInfo = computed(() => userStore.userInfo);
+const userInfo = computed(() => userStore.getUserInfo);
 
 // 修改密码相关数据
 const pwdDialogVisible = ref(false);
@@ -406,5 +412,45 @@ onMounted(() => {
 :deep(.el-dropdown-menu__item.is-disabled) {
   height: 40px;
   line-height: 40px;
+}
+
+/* 响应式调整 */
+@media (max-width: 768px) {
+  .nav-bar {
+    padding: 0.5rem;
+  }
+
+  .search-box {
+    margin-right: 0.5rem;
+  }
+
+  .user-menu {
+    gap: 0.25rem;
+  }
+
+  .user-menu el-button {
+    padding: 0 0.5rem;
+    font-size: 0.75rem;
+  }
+}
+
+@media (max-width: 640px) {
+  .search-box {
+    width: 100%;
+    margin-right: 0;
+    margin-bottom: 0.5rem;
+  }
+
+  .right-section {
+    flex-direction: column;
+    width: 100%;
+  }
+
+  .user-menu {
+    margin-right: 0;
+    margin-bottom: 0.5rem;
+    width: 100%;
+    justify-content: center;
+  }
 }
 </style>

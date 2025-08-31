@@ -103,6 +103,11 @@ export const usePermissionStore = defineStore("permission", {
           });
       });
     },
+    // 根据父路径设置侧边栏路由
+    setSidebarRoutersByParentPath(parentPath: string) {
+      // 这里可以根据需要实现动态设置侧边栏路由的逻辑
+      console.log("设置侧边栏路由，父路径:", parentPath);
+    },
   },
 });
 

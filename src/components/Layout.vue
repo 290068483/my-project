@@ -1,6 +1,7 @@
 <template>
   <div class="layout home-container min-h-screen min-w-full flex flex-col font-sans">
     <Header ref="headerRef" />
+    <SettingsButton />
     <div v-if="skeletonScreen" class="skeleton-screen fixed inset-0 z-50 flex flex-col bg-white">
       <div class="skeleton-header h-16 sm:h-32 bg-gray-100 animate-pulse"></div>
       <div class="skeleton-content flex-1 p-6 space-y-4">
@@ -11,7 +12,7 @@
       </div>
     </div>
     <main ref="mainRef" class="flex-1 p-4 sm:p-6 transition-all duration-300" :style="{ marginTop: mainMarginTop }">
-      <Home />
+      <RouterView />
     </main>
   </div>
 </template>
@@ -19,9 +20,10 @@
 <script setup lang="ts">
 // 组件逻辑
 import Header from "@/components/header/Header.vue";
-import Home from "@/views/HomeView.vue";
+import SettingsButton from "@/components/SettingsButton.vue";
 import { RouterView } from "vue-router";
 import { ref, onMounted, nextTick, onUnmounted, watch } from "vue";
+
 const loading = ref(false); // 默认设置为false，避免骨架屏影响
 const mainRef = ref<HTMLDivElement | null>(null);
 const headerRef = ref<InstanceType<typeof Header>>();
@@ -86,6 +88,7 @@ onUnmounted(() => {
   window.removeEventListener("resize", updateMainMarginTop);
 });
 </script>
+
 <style scoped>
 /* 骨架屏动画 */
 @keyframes pulse {

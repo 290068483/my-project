@@ -21,6 +21,10 @@ import {
   checkPhoneUnique,
   checkEmailUnique,
   batchChangeUserStatus,
+  exportUser as exportUserApi,
+  importTemplate as importTemplateApi,
+  getAuthRole,
+  updateAuthRole,
 } from "@/api/system/user";
 import type {
   SystemUser,
@@ -348,6 +352,72 @@ export const useUserManageStore = defineStore("userManage", () => {
   }
 
   /**
+   * 导出用户数据
+   */
+  async function exportUser(params?: UserQueryParams) {
+    try {
+      const response = await exportUserApi(params);
+      return response;
+    } catch (error) {
+      console.error("导出用户数据失败:", error);
+      throw error;
+    }
+  }
+
+  /**
+   * 下载导入模板
+   */
+  async function importTemplate() {
+    try {
+      const response = await importTemplateApi();
+      return response;
+    } catch (error) {
+      console.error("下载导入模板失败:", error);
+      throw error;
+    }
+  }
+
+  /**
+   * 获取用户角色权限
+   */
+  async function getUserAuthRole(userId: number): Promise<any> {
+    try {
+      const response = await getAuthRole(userId);
+
+      if (response.code === 200) {
+        return response.data;
+      }
+
+      return null;
+    } catch (error) {
+      console.error("获取用户角色权限失败:", error);
+      ElMessage.error("获取用户角色权限失败");
+      return null;
+    }
+  }
+
+  /**
+   * 更新用户角色权限
+   */
+  async function updateUserAuthRole(userId: number, roleIds: number[]): Promise<boolean> {
+    try {
+      const response = await updateAuthRole({ userId, roleIds });
+
+      if (response.code === 200) {
+        ElMessage.success("分配角色成功");
+        return true;
+      } else {
+        ElMessage.error(response.msg || response.message || "分配角色失败");
+        return false;
+      }
+    } catch (error) {
+      console.error("分配角色失败:", error);
+      ElMessage.error("分配角色失败");
+      return false;
+    }
+  }
+
+  /**
    * 获取字典数据
    */
   async function getDictData(): Promise<void> {
@@ -509,6 +579,10 @@ export const useUserManageStore = defineStore("userManage", () => {
     toggleUserStatus,
     batchDeleteUsers,
     batchToggleUserStatus,
+    exportUser,
+    importTemplate,
+    getUserAuthRole,
+    updateUserAuthRole,
     getDictData,
     validateUserName,
     validatePhone,
