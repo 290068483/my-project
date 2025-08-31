@@ -216,10 +216,7 @@ function handleLogin() {
           // 登录成功后显示提示信息
           ElMessage.success("登录成功");
           console.log("登录成功");
-          // 登录成功后获取用户信息
-          return userStore.getInfo();
-        })
-        .then(() => {
+          // 登录成功后跳转到首页，让路由守卫处理用户信息获取和动态路由生成
           const query = route.query;
           const otherQueryParams: Record<string, string> = {};
           Object.keys(query).forEach((cur) => {
@@ -227,9 +224,10 @@ function handleLogin() {
               otherQueryParams[cur] = query[cur] as string;
             }
           });
-          router.push({ path: redirect.value || "/", query: otherQueryParams });
+          router.push({ path: redirect.value || "/home", query: otherQueryParams });
         })
-        .catch(() => {
+        .catch((error) => {
+          console.error("登录流程出错:", error);
           ElMessage.error("登录失败，请检查用户名、密码和验证码");
           loading.value = false;
           // 重新获取验证码

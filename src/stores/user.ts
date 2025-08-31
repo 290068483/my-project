@@ -34,6 +34,23 @@ export const useUserStore = defineStore("user", {
     permissions: [],
   }),
 
+  getters: {
+    getIsLoggedIn: (state) => {
+      return !!state.token;
+    },
+    getUserInfo: (state) => {
+      return {
+        name: state.name,
+        avatar: state.avatar,
+        roles: state.roles,
+        permissions: state.permissions,
+      };
+    },
+    getUserRole: (state) => {
+      return state.roles && state.roles.length > 0 ? state.roles[0] : null;
+    },
+  },
+
   actions: {
     // 登录
     login(userInfo: LoginRequest) {
@@ -71,7 +88,6 @@ export const useUserStore = defineStore("user", {
       return new Promise((resolve, reject) => {
         getInfo()
           .then((res: UserInfoResponse) => {
-            console.log("获取用户信息响应:", res);
             // RuoYi-Vue3标准：直接从res中获取user、roles和permissions
             if (res.code === 200 && res.data) {
               const user = res.data.user;
@@ -87,14 +103,12 @@ export const useUserStore = defineStore("user", {
               }
               this.name = user.userName || user.nickName || "";
               this.avatar = avatar;
-              console.log("设置用户信息完成 - roles:", this.roles, "permissions:", this.permissions);
               resolve(res);
             } else {
               reject(new Error(res.msg || "获取用户信息失败"));
             }
           })
           .catch((error) => {
-            console.error("获取用户信息失败:", error);
             reject(error);
           });
       });

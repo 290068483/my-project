@@ -66,73 +66,39 @@ export class AuthUtils {
   /**
    * 验证用户是否具备某权限
    * @param permission 权限字符串
-   * @returns 用户是否具备该权限
+   * @returns boolean
    */
   static hasPermission(permission: string): boolean {
-    const allPermissions = localStorage.getItem("permissions");
-    if (!allPermissions) return false;
+    const userStore = useUserStore();
+    const allPermissions = userStore.permissions;
 
-    try {
-      const permissions = JSON.parse(allPermissions);
-      return permissions.includes(permission);
-    } catch (e) {
-      console.error("权限解析失败", e);
-      return false;
-    }
+    // 如果没有权限数据，返回false
+    if (!allPermissions || allPermissions.length === 0) return false;
+
+    // 检查是否拥有所有权限标识
+    const allPermission = "*:*:*";
+    return allPermissions.some((perm) => {
+      return allPermission === perm || perm === permission;
+    });
   }
 
   /**
    * 验证用户是否具备某角色
    * @param role 角色字符串
-   * @returns 用户是否具备该角色
-   */
-  static hasRole(role: string): boolean {
-    const allRoles = localStorage.getItem("roles");
-    if (!allRoles) return false;
-
-    try {
-      const roles = JSON.parse(allRoles);
-      return roles.includes(role);
-    } catch (e) {
-      console.error("角色解析失败", e);
-      return false;
-    }
-  }
-
-  /**
-   * 验证用户是否具备任意一个权限
-   * @param permissions 权限字符串数组
-   * @returns 用户是否具备任意一个权限
-   */
-  static hasAnyPermission(permissions: string[]): boolean {
-    return permissions.some((permission) => this.hasPermission(permission));
-  }
-
-  /**
-   * 验证用户是否具备任意一个角色
-   * @param roles 角色字符串数组
-   * @returns 用户是否具备任意一个角色
-   */
-  static hasAnyRole(roles: string[]): boolean {
-    return roles.some((role) => this.hasRole(role));
-  }
-
-  /**
-   * 综合权限检查（支持角色和权限的组合检查）
-   * @param options 权限检查选项
    * @returns boolean
    */
-  static checkPermission(options: { roles?: string[]; permissions?: string[]; mode?: "and" | "or" }): boolean {
-    const { roles, permissions, mode = "and" } = options;
+  static hasRole(role: string): boolean {
+    const userStore = useUserStore();
+    const allRoles = userStore.roles;
 
-    const hasRoleAccess = roles ? this.hasRole(roles) : true;
-    const hasPermissionAccess = permissions ? this.hasPermission(permissions) : true;
+    // 如果没有角色数据，返回false
+    if (!allRoles || allRoles.length === 0) return false;
 
-    if (mode === "or") {
-      return hasRoleAccess || hasPermissionAccess;
-    } else {
-      return hasRoleAccess && hasPermissionAccess;
-    }
+    // 检查是否拥有超级管理员角色
+    const superAdmin = "admin";
+    return allRoles.some((r) => {
+      return superAdmin === r || r === role;
+    });
   }
 
   /**

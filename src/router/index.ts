@@ -114,37 +114,26 @@ router.beforeEach(async (to, from, next) => {
   const permissionStore = usePermissionStore(); // 获取权限Store实例
   const hasToken = userStore.token;
 
-  console.log("路由守卫 - hasToken:", hasToken);
-  console.log("路由守卫 - to.path:", to.path);
-
   if (hasToken) {
     // 已登录用户处理
     if (to.path === "/login") {
       // 已登录用户访问登录页，重定向到首页
-      console.log("已登录用户访问登录页，重定向到首页");
       next({ path: "/home" });
       NProgress.done();
     } else {
       // 检查用户信息是否存在
       const hasRoles = userStore.roles && userStore.roles.length > 0;
-      console.log("路由守卫 - hasRoles:", hasRoles);
-      console.log("路由守卫 - userStore.roles:", userStore.roles);
 
       if (hasRoles) {
         // 用户信息已存在，直接放行
-        console.log("用户信息已存在，直接放行");
         next();
       } else {
         try {
           // 获取用户信息
-          console.log("开始获取用户信息");
           await userStore.getInfo();
-          console.log("获取用户信息完成 - userStore.roles:", userStore.roles);
 
           // 生成动态路由
-          console.log("开始生成动态路由");
           const accessRoutes = await permissionStore.generateRoutes();
-          console.log("生成动态路由完成 - accessRoutes:", accessRoutes);
 
           // 动态添加可访问路由表
           accessRoutes.forEach((route: any) => {
@@ -154,7 +143,6 @@ router.beforeEach(async (to, from, next) => {
           // hack方法 确保addRoutes已完成
           next({ ...to, replace: true });
         } catch (error) {
-          console.error("路由守卫错误:", error);
           // Token已过期或无效，清理状态并重定向到登录页
           await userStore.logout();
           ElMessage.error("登录状态已过期，请重新登录");
@@ -165,14 +153,11 @@ router.beforeEach(async (to, from, next) => {
     }
   } else {
     // 未登录用户处理
-    console.log("未登录用户处理 - to.path:", to.path);
     if (whiteList.indexOf(to.path) !== -1) {
       // 在白名单中，直接放行
-      console.log("在白名单中，直接放行");
       next();
     } else {
       // 不在白名单中，重定向到登录页
-      console.log("不在白名单中，重定向到登录页");
       next(`/login?redirect=${to.path}`);
       NProgress.done();
     }
